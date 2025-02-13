@@ -23,17 +23,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Docs
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/documents \
-            -w /documents \
-            asciidoctor/docker-asciidoctor:latest \
-            asciidoctor \
-            -D asciidocs/docs \
-            asciidocs/docs/pflichtenheft.adoc \
-            asciidocs/docs/projektauftrag.adoc
-
       - name: Build Presentation
         run: |
           docker run --rm \
