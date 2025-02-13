@@ -3,3 +3,7 @@
 == Links
 
 https://discordapp.com/channels/@me/1331888928462078002/1339513935640137749[YouTrack^]
+
+== ERD
+
+image::../images/erd.png[]
