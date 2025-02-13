@@ -1,0 +1,62 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - asciidocs/**
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - asciidocs/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docs
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/documents \
+            -w /documents \
+            asciidoctor/docker-asciidoctor:latest \
+            asciidoctor \
+            -D asciidocs/docs \
+            asciidocs/docs/pflichtenheft.adoc \
+            asciidocs/docs/projektauftrag.adoc
+
+      - name: Build Presentation
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/documents \
+            -w /documents \
+            asciidoctor/docker-asciidoctor:latest \
+            asciidoctor-revealjs \
+            -r asciidoctor-diagram \
+            -r asciidoctor-revealjs \
+            -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@4.5.0 \
+            -a revealjs_theme=white \
+            -a revealjs_history=true \
+            -a revealjs_plugin_highlight=enabled \
+            -a source-highlighter=highlight.js \
+            -a allow-uri-read \
+            -D asciidocs/slides \
+            -o ../index.html \
+            asciidocs/slides/presentation.adoc
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./asciidocs
+          publish_branch: gh-pages
+          keep_files: true
