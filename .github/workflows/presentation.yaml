@@ -40,7 +40,7 @@ jobs:
             -a allow-uri-read \
             -D asciidocs/slides \
             -o ../index.html \
-            asciidocs/slides/presentation.adoc
+            docs/slides/presentation.adoc
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
