@@ -5,12 +5,12 @@ on:
     branches:
       - 'main'
     paths:
-      - asciidocs/**
+      - docs/**
   pull_request:
     branches:
       - 'main'
     paths:
-      - asciidocs/**
+      - docs/**
   workflow_dispatch:
 
 permissions:
@@ -46,6 +46,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./asciidocs
+          publish_dir: ./docs
           publish_branch: gh-pages
           keep_files: true
