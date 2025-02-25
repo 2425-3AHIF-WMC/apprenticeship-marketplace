@@ -1,8 +1,20 @@
 = apprenticeship marketplace
-
+:revnumber: 1.0
+:revdate: {docdate}
+:encoding: utf-8
+:lang: de
+:doctype: article
+:icons: font
+:iconfont-remote!:
+ifdef::env-ide[]
+endif::[]
+ifndef::env-ide[]
+endif::[]
+:title-slide-transition: zoom
+:title-slide-transition-speed: fast
 == Links
 
-https://discordapp.com/channels/@me/1331888928462078002/1339513935640137749[YouTrack^]
+https://vm81.htl-leonding.ac.at/projects/4db746d5-f92c-4124-a958-33f725902547[YouTrack^]
 
 == ERD
 
