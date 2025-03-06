@@ -10,6 +10,9 @@ ifdef::env-ide[]
 endif::[]
 ifndef::env-ide[]
 endif::[]
+ifdef::env-ide[]
+:imagesdir: ../images
+endif::[]
 :title-slide-transition: zoom
 :title-slide-transition-speed: fast
 
@@ -20,4 +23,4 @@ https://vm81.htl-leonding.ac.at/projects/4db746d5-f92c-4124-a958-33f725902547[Yo
 
 == ERD
 
-image::../images/erd.png[]
+image::erd.png[]
