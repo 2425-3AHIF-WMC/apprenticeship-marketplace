@@ -45,7 +45,7 @@ const Hero = () => {
                                 {/* Input and icon in same relative container */}
                                 <FadeIn delay={400}>
                                     <div
-                                        className="w-full sm:w-80 md:w-96 rounded-lg border border-white/20 bg-black/10 backdrop-blur-md px-3 py-2.5">
+                                        className="w-full sm:w-80 md:w-96 rounded-lg border border-white/20 bg-black/30 px-3 py-2.5">
                                         <div className="relative">
                                             <div
                                                 className="absolute inset-y-0 left-0 pl-0.5 pb-0.5 flex items-center pointer-events-none">
@@ -64,7 +64,7 @@ const Hero = () => {
 
                             {/* Button stays outside animation */}
                             <FadeIn delay={400}>
-                                <Button asChild className="bg-[#004494] hover:bg-[#004494]/90 text-white">
+                                <Button asChild variant="default">
                                     <Link to="/internships">
                                         Alle Praktika durchsuchen
                                         <ArrowRight className="ml-2 h-4 w-4"/>
