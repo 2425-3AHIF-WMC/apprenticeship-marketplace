@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     
-    --primary: 220 100% 29%;  /* HTL Blau */
+    --primary: 212 100% 29%;  /* HTL Blau */
     --primary-foreground: 210 40% 98%;
     
     --secondary: 210 40% 96.1%;
@@ -23,7 +23,7 @@
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
     
-    --accent: 220 100% 29%;  /* HTL Blau */
+    --accent: 212 100% 29%;  /* HTL Blau */
     --accent-foreground: 240 5.9% 10%;
     
     --destructive: 0 84.2% 60.2%;

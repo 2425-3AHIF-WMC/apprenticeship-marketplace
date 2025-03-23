@@ -64,7 +64,7 @@ const Hero = () => {
 
                             {/* Button stays outside animation */}
                             <FadeIn delay={400}>
-                                <Button asChild className="bg-[#004494] hover:bg-[#004494]/90 text-white">
+                                <Button asChild variant="default">
                                     <Link to="/internships">
                                         Alle Praktika durchsuchen
                                         <ArrowRight className="ml-2 h-4 w-4"/>
