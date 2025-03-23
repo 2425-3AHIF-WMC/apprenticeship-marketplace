@@ -1,68 +1,188 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    --primary: 220 100% 29%;  /* HTL Blau */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 240 5.9% 10%;
+    
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    --accent: 220 100% 29%;  /* HTL Blau */
+    --accent-foreground: 240 5.9% 10%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    
+    --radius: 0.5rem;
   }
-  a:hover {
-    color: #747bff;
+ 
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 0 0% 95%;
+    
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@layer base {
+  * {
+    @apply border-border;
   }
+  
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* HTL-Styling */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-glass border border-white/20 shadow-subtle dark:bg-black/60 dark:border-white/5;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .heading-lg {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+  
+  .heading-md {
+    @apply text-2xl md:text-3xl font-bold tracking-tight;
+  }
+
+  .heading-sm {
+    @apply text-xl md:text-2xl font-bold tracking-tight;
+  }
+  
+  .heading-xs {
+    @apply text-lg md:text-xl font-semibold tracking-tight;
+  }
+  
+  .container-xl {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* HTL Leonding specific styles */
+  .htl-header {
+    @apply text-2xl md:text-3xl font-bold tracking-tight uppercase border-b-2 border-htl-informatik pb-2 mb-6;
+  }
+
+  .htl-subheader {
+    @apply text-xl md:text-2xl font-semibold tracking-tight uppercase text-htl-informatik mb-4;
+  }
+
+  .info-card {
+    @apply p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-md h-full flex flex-col;
+  }
+}
+
+/* Category tag colors - Light mode */
+.tag-Informatik {
+  @apply bg-htl-informatik/10 text-htl-informatik border border-htl-informatik/30;
+}
+
+.tag-Medientechnik {
+  @apply bg-htl-medientechnik/10 text-htl-medientechnik border border-htl-medientechnik/30;
+}
+
+.tag-Medizintechnik {
+  @apply bg-htl-medizintechnik/10 text-htl-medizintechnik border border-htl-medizintechnik/30;
+}
+
+.tag-Elektronik {
+  @apply bg-htl-elektronik/10 text-htl-elektronik border border-htl-elektronik/30;
+}
+
+/* Category tag colors - Dark mode - Improved visibility */
+.dark .tag-Informatik {
+  @apply bg-htl-informatik/20 text-blue-300 border border-blue-800/50;
+}
+
+.dark .tag-Medientechnik {
+  @apply bg-htl-medientechnik/20 text-blue-300 border border-blue-800/50;
+}
+
+.dark .tag-Medizintechnik {
+  @apply bg-htl-medizintechnik/20 text-yellow-300 border border-yellow-800/50;
+}
+
+.dark .tag-Elektronik {
+  @apply bg-htl-elektronik/20 text-red-300 border border-red-800/50;
+}
+
+/* Multiple categories support */
+.tag-multiple {
+  @apply bg-gradient-to-r from-htl-informatik/10 to-htl-medientechnik/10 text-primary border border-primary/30;
+}
+
+.dark .tag-multiple {
+  @apply bg-gradient-to-r from-htl-informatik/20 to-htl-medientechnik/20 text-blue-300 border border-blue-800/50;
 }
