@@ -12,7 +12,7 @@ const Hero = () => {
     ];
 
     return (
-        <div className="relative">
+        <div className="relative mt-16 md:mt-20">
             {/* Hero Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
