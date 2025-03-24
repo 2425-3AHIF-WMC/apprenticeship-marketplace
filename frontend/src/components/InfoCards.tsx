@@ -5,7 +5,7 @@ import { FileText, ExternalLink, School, BookOpen } from "lucide-react";
 
 const InfoCards = () => {
     return (
-        <section className="py-12 bg-muted/20 dark:bg-muted/10">
+        <section className="py-14 md:py-20 bg-muted/20 dark:bg-muted/10">
             <div className="container-xl">
                 <h2 className="htl-header mb-8 text-center">Wichtige Informationen</h2>
 
