@@ -1,7 +1,6 @@
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink, School, BookOpen } from "lucide-react";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {FileText, ExternalLink, School, BookOpen} from "lucide-react";
 
 const InfoCards = () => {
     return (
@@ -15,7 +14,7 @@ const InfoCards = () => {
                         <CardHeader>
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-2 rounded-full bg-htl-informatik/10 text-htl-informatik">
-                                    <FileText className="h-5 w-5" />
+                                    <FileText className="h-5 w-5"/>
                                 </div>
                                 <CardTitle>Unterlagen</CardTitle>
                             </div>
@@ -26,7 +25,7 @@ const InfoCards = () => {
                         <CardContent className="flex-grow">
                             <ul className="space-y-2">
                                 <li className="flex items-start">
-                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik" />
+                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik"/>
                                     <a
                                         href="/documents/formular-pflichtpraktikum-doppelbogen.pdf"
                                         className="text-foreground hover:text-htl-informatik transition-colors"
@@ -36,7 +35,7 @@ const InfoCards = () => {
                                     </a>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik" />
+                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik"/>
                                     <a
                                         href="https://leowiki.htl-leonding.ac.at/doku.php?id=org:forms"
                                         className="text-foreground hover:text-htl-informatik transition-colors"
@@ -46,7 +45,7 @@ const InfoCards = () => {
                                     </a>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik" />
+                                    <span className="inline-block w-2 h-2 mt-1.5 mr-2 rounded-full bg-htl-informatik"/>
                                     <a
                                         href="/documents/formular-schulbesuchsbestaetigung.pdf"
                                         className="text-foreground hover:text-htl-informatik transition-colors"
@@ -64,7 +63,7 @@ const InfoCards = () => {
                         <CardHeader>
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-2 rounded-full bg-htl-informatik/10 text-htl-informatik">
-                                    <School className="h-5 w-5" />
+                                    <School className="h-5 w-5"/>
                                 </div>
                                 <CardTitle>HTL Leonding</CardTitle>
                             </div>
@@ -78,14 +77,16 @@ const InfoCards = () => {
                                 />
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                Besuche die offizielle Website der HTL Leonding für mehr Informationen über die Schule, Ausbildungsschwerpunkte und aktuelle Neuigkeiten.
+                                Besuche die offizielle Website der HTL Leonding für mehr Informationen über die Schule,
+                                Ausbildungsschwerpunkte und aktuelle Neuigkeiten.
                             </p>
                         </CardContent>
                         <CardFooter>
                             <Button variant="outline" className="w-full" asChild>
-                                <a href="https://www.htl-leonding.at/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                                <a href="https://www.htl-leonding.at/" target="_blank" rel="noopener noreferrer"
+                                   className="flex items-center justify-center">
                                     Website besuchen
-                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                    <ExternalLink className="ml-2 h-4 w-4"/>
                                 </a>
                             </Button>
                         </CardFooter>
@@ -96,7 +97,7 @@ const InfoCards = () => {
                         <CardHeader>
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="p-2 rounded-full bg-htl-informatik/10 text-htl-informatik">
-                                    <BookOpen className="h-5 w-5" />
+                                    <BookOpen className="h-5 w-5"/>
                                 </div>
                                 <CardTitle>Praktikums-FAQs</CardTitle>
                             </div>
@@ -113,13 +114,15 @@ const InfoCards = () => {
                                     </p>
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-medium mb-1">Was passiert, wenn ich kein Praktikum finde?</h4>
+                                    <h4 className="text-sm font-medium mb-1">Was passiert, wenn ich kein Praktikum
+                                        finde?</h4>
                                     <p className="text-sm text-muted-foreground">
                                         Sprich frühzeitig mit deinem KV oder AV darüber.
                                     </p>
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-medium mb-1">Was ist wenn ich weniger als 8 Wochen Praktikum habe?</h4>
+                                    <h4 className="text-sm font-medium mb-1">Was ist wenn ich weniger als 8 Wochen
+                                        Praktikum habe?</h4>
                                     <p className="text-sm text-muted-foreground">
                                         Wenn du zur Matura nicht alle 8 Wochen hast, darfst du nicht Maturieren.
                                     </p>
