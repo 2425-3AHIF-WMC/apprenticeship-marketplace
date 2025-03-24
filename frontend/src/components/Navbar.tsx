@@ -5,12 +5,16 @@ import {Button} from "@/components/ui/button";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {Menu, X, User} from "lucide-react";
 
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "@/ThemeProvider";
+
 
 const Navbar = () => {
     const [, setIsScrolled] = useState(false);
     const {pathname} = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const isMobile = useIsMobile();
+    const { theme } = useTheme();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -34,7 +38,7 @@ const Navbar = () => {
 
     const navLinks = getNavLinks();
 
-    const logoSrc = "/assets/htllogo-big-black.png";
+    const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
 
     return (
         <header
@@ -75,7 +79,7 @@ const Navbar = () => {
                     </nav>
 
                     <div className="flex items-center gap-2">
-
+                        <ThemeToggle />
                         <Button asChild variant="default">
                             <Link to="/login" className="text-base font-bold">
                                 <User className="h-8 w-8 md:mr-2"/>
