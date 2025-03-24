@@ -21,7 +21,7 @@ const PartnerSection = () => {
                     </FadeIn>
                 </div>
                 <FadeIn delay={300}>
-                    <div className="bg-muted/30 rounded-2xl p-8 md:p-12 text-left">
+                    <div className="bg-muted/30 rounded-2xl p-8 md:p-12 lg:text-left text-center">
                         <div className="grid md:grid-cols-2 gap-8 items-center">
                             <div>
                                 <h3 className="heading-sm mb-4">Mitglied werden & Praktika posten</h3>
@@ -40,12 +40,12 @@ const PartnerSection = () => {
                                     <img
                                         src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
                                         alt="Business collaboration"
-                                        className="w-full h-64 md:h-80 object-cover"
+                                        className="w-full md:h-80 object-cover"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end text-left">
                                         <div className="p-6">
-                                            <span className="text-sm text-white font-bold">Exklusiver Zugang zu</span>
-                                            <div className="text-3xl font-bold text-white">gefragten Nachwuchstalenten</div>
+                                            <span className="md:text-sm text-xs text-white font-bold">Exklusiver Zugang zu</span>
+                                            <div className="lg:text-3xl text-2xl font-bold text-white">gefragten Nachwuchstalenten</div>
                                         </div>
                                     </div>
                                 </div>
