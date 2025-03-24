@@ -21,7 +21,7 @@ const PartnerSection = () => {
                     </FadeIn>
                 </div>
                 <FadeIn delay={300}>
-                    <div className="bg-muted/30 rounded-2xl p-8 md:p-12 lg:text-left text-center">
+                    <div className="bg-muted rounded-2xl p-8 md:p-12 lg:text-left text-center">
                         <div className="grid md:grid-cols-2 gap-8 items-center">
                             <div>
                                 <h3 className="heading-sm mb-4">Mitglied werden & Praktika posten</h3>
