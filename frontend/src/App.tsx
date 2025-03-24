@@ -1,6 +1,6 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
 import './App.css'
-import { useEffect } from "react";
+import {useEffect} from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 
@@ -18,7 +18,7 @@ function App() {
 
                 if (element) {
                     e.preventDefault();
-                    element.scrollIntoView({ behavior: 'smooth' });
+                    element.scrollIntoView({behavior: 'smooth'});
                 }
             }
         };
@@ -27,14 +27,14 @@ function App() {
         return () => document.removeEventListener('click', handleLinkClick);
     }, []);
 
-  return (
-      <BrowserRouter>
-          <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
-          </Routes>
-      </BrowserRouter>
-  )
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Index/>}/>
+                <Route path="*" element={<NotFound/>}/>
+            </Routes>
+        </BrowserRouter>
+    )
 }
 
 export default App
