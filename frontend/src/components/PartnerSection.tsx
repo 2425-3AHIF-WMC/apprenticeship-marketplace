@@ -28,6 +28,12 @@ const PartnerSection = () => {
                                 <p className="text-muted-foreground mb-8">
                                     Als Mitglied erhalten Sie exklusiven Zugang zu den <strong>Top-Schüler:innen der HTL</strong>, die in der Industrie stark nachgefragt sind. Profitieren Sie von hochmotivierten Talenten mit exzellenter technischer Ausbildung.
                                 </p>
+                                <Button asChild>
+                                    <Link to="https://www.absleo.at/allgemeines/mitgliedschaft/" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                                        Jetzt Mitglied werden
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>   
                             </div>
                             <div className="relative ml-auto">
                                 <div className="relative rounded-xl overflow-hidden shadow-elevated">
