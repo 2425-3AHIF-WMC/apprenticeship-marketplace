@@ -12,7 +12,9 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: .
+    build:
+      context: ./backend  # Stelle sicher, dass dies korrekt ist
+      dockerfile: Dockerfile
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
