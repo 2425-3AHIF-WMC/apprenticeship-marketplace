@@ -1,0 +1,27 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cruddb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cruddb
+      POSTGRES_HOST: postgres
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
