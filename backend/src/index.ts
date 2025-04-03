@@ -1,3 +1,5 @@
+import {Request, Response} from 'express';
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -15,21 +17,22 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 
+// NOTE: temporary code, so we can see how it will look like
 // CREATE
-app.post("/items", async (req, res) => {
+app.post("/items", async (req: Request, res: Response) => {
     const { name } = req.body;
     const result = await pool.query("INSERT INTO items (name) VALUES ($1) RETURNING *", [name]);
     res.json(result.rows[0]);
 });
 
 // READ
-app.get("/items", async (req, res) => {
+app.get("/items", async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM items");
     res.json(result.rows);
 });
 
 // UPDATE
-app.put("/items/:id", async (req, res) => {
+app.put("/items/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
     const result = await pool.query("UPDATE items SET name = $1 WHERE id = $2 RETURNING *", [name, id]);
@@ -37,7 +40,7 @@ app.put("/items/:id", async (req, res) => {
 });
 
 // DELETE
-app.delete("/items/:id", async (req, res) => {
+app.delete("/items/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     await pool.query("DELETE FROM items WHERE id = $1", [id]);
     res.json({ message: "Item deleted" });
