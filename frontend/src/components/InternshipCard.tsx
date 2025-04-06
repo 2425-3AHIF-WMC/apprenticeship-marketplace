@@ -8,13 +8,14 @@ export interface InternshipProps {
     id: string;
     title: string;
     company: string;
-    location: string;
+    location?: string;
     duration: string;
     deadline: string;
+    workMode: string;
     logo?: string;
     category: string[];
     schoolYear?: string;
-    companyWebsite: string;
+    companyLink: string;
 }
 
 interface InternshipCardProps {
@@ -42,7 +43,7 @@ const InternshipCard = ({internship, className}: InternshipCardProps) => {
         <div className="flex items-start justify-between mb-4 min-h-20">
             <div className="flex items-center">
                 {internship.logo ? <div
-                    className="h-10 w-10 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-800 dark:border-gray-700">
+                    className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50 ">
                     <img
                         src={internship.logo}
                         alt={`${internship.company} Logo`}
@@ -83,14 +84,19 @@ const InternshipCard = ({internship, className}: InternshipCardProps) => {
             {cat}
           </span>
                 ))}
-                <span
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-        {internship.location}
-      </span>
+                {internship.location && (
+                    <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+              {internship.location}
+            </span>
+                )}
                 {internship.schoolYear && <span
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
           {internship.schoolYear}
         </span>}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            {internship.workMode}
+          </span>
             </div>
         </div>
 
@@ -102,12 +108,12 @@ const InternshipCard = ({internship, className}: InternshipCardProps) => {
             </Button>
             <Button asChild size="sm">
                 <Link
-                    to={internship.companyWebsite}
-                    target={internship.companyWebsite ? "_blank" : undefined}
+                    to={internship.companyLink}
+                    target={internship.companyLink ? "_blank" : undefined}
                     className="flex items-center"
                 >
                     Bewerben
-                    {internship.companyWebsite ? <ExternalLink className="ml-1 h-3 w-3"/> :
+                    {internship.companyLink ? <ExternalLink className="ml-1 h-3 w-3"/> :
                         <ArrowUpRight className="ml-1 h-3 w-3"/>}
                 </Link>
             </Button>

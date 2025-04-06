@@ -56,7 +56,7 @@ export const FadeIn: React.FC<FadeInProps> = ({
         <div
             ref={ref}
             className={cn(
-                'transition-all duration-500 ease-apple will-change-transform',
+                'transition-opacity duration-500 ease-apple will-change-transform',
                 isVisible ? 'opacity-100 transform-none' : `opacity-0 ${getAnimationClass()}`,
                 className
             )}
