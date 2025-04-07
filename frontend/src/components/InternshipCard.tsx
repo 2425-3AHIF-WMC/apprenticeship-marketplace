@@ -35,7 +35,7 @@ const InternshipCard = ({internship, className}: InternshipCardProps) => {
     return <div
         className={cn(
             'group relative rounded-xl p-5 transition-all duration-300 ease-apple h-full flex flex-col',
-            'border border-border hover:border-primary/20 hover:shadow-card',
+            'border border-border hover:border-primary/20 hover:shadow-card min-h-80',
             isHovered ? 'scale-[1.01]' : 'scale-100',
             className
         )}
