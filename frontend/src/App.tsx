@@ -1,8 +1,10 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import './App.css'
+
 import {useEffect} from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
+import Internships from "@/pages/Internships";
 
 
 function App() {
@@ -31,6 +33,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Index/>}/>
+                <Route path="Internships" element={<Internships/>}/>
                 <Route path="*" element={<NotFound/>}/>
             </Routes>
         </BrowserRouter>
