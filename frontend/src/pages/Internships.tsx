@@ -14,7 +14,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'CarlaCo Enterprises',
         location: 'Wien',
         duration: 'variabel',
-        deadline: '15. Mai 2025',
+        deadline: '2025-05-15',
+        added: '2025-04-02',
+        clicks: 132,
         workMode: 'On-site',
         logo: '/assets/company-logos/CarlaCoEnterprises_Logo.png',
         category: ['Informatik'],
@@ -27,7 +29,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'LT-Studios',
         location: 'Graz',
         duration: '6 Wochen',
-        deadline: '30. April 2025',
+        deadline: '2025-04-30',
+        added: '2025-03-29',
+        clicks: 89,
         workMode: 'Hybrid',
         logo: '/assets/company-logos/LT-Studios_Logo.png',
         category: ['Medientechnik'],
@@ -39,7 +43,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         title: 'UX/UI Design Praktikum',
         company: 'ITMedia Solutions',
         duration: '4 Wochen',
-        deadline: '5. Mai 2025',
+        deadline: '2025-05-05',
+        added: '2025-04-01',
+        clicks: 205,
         workMode: 'Remote',
         logo: '/assets/company-logos/ITMediaSolutions_Logo.png',
         category: ['Medientechnik', 'Informatik', 'Medizintechnik', 'Elektronik'],
@@ -52,7 +58,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'Elektronic Design',
         location: 'Linz',
         duration: '8 Wochen',
-        deadline: '20. Mai 2025',
+        deadline: '2025-05-20',
+        added: '2025-03-27',
+        clicks: 97,
         workMode: 'On-site',
         logo: '/assets/company-logos/ElektronicDesign_Logo.png',
         category: ['Elektronik'],
@@ -65,7 +73,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'MeliCorp',
         location: 'Salzburg',
         duration: '6 Wochen',
-        deadline: '25. April 2025',
+        deadline: '2025-04-25',
+        added: '2025-04-03',
+        clicks: 178,
         workMode: 'Hybrid',
         logo: '/assets/company-logos/MeliCorp_Logo.png',
         category: ['Informatik'],
@@ -78,7 +88,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'TechMed Innovations',
         location: 'Innsbruck',
         duration: 'variabel',
-        deadline: '10. Mai 2025',
+        deadline: '2025-05-10',
+        added: '2025-04-01',
+        clicks: 122,
         workMode: 'On-site',
         logo: '/assets/company-logos/TechMed_Innovations_Logo.png',
         category: ['Medientechnik', 'Informatik', 'Medizintechnik', 'Elektronik'],
@@ -91,7 +103,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'Nexus Solutions',
         location: 'Wien',
         duration: '4 Wochen',
-        deadline: '22. Mai 2025',
+        deadline: '2025-05-22',
+        added: '2025-04-06',
+        clicks: 145,
         workMode: 'Hybrid',
         logo: '/assets/company-logos/NexusSolutions_Logo.png',
         category: ['Informatik'],
@@ -103,7 +117,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         title: 'Frontend-Entwicklung Praktikum',
         company: 'Elysee Industries',
         duration: '4 Wochen',
-        deadline: '12. Mai 2025',
+        deadline: '2025-05-12',
+        added: '2025-04-04',
+        clicks: 230,
         workMode: 'Remote',
         logo: '/assets/company-logos/ElyseeIndustries_Logo.png',
         category: ['Informatik'],
@@ -116,7 +132,9 @@ const ALL_INTERNSHIPS: InternshipProps[] = [
         company: 'LuminaTech',
         location: 'Graz',
         duration: '6 Wochen',
-        deadline: '28. April 2025',
+        deadline: '2025-04-28',
+        added: '2025-03-30',
+        clicks: 101,
         workMode: 'On-site',
         logo: '/assets/company-logos/LuminaTech_Logo.png',
         category: ['Medientechnik'],
@@ -136,6 +154,7 @@ const Internships = () => {
     const [selectedDuration, setSelectedDuration] = useState('Alle');
     const [selectedSchoolYear, setSelectedSchoolYear] = useState('Alle Schulstufen');
     const [filtersVisible, setFiltersVisible] = useState(false);
+    const [sortBy, setSortBy] = useState('Nichts');
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -153,6 +172,11 @@ const Internships = () => {
         selectedSchoolYear !== 'Alle Schulstufen';
 
     const filteredInternships = ALL_INTERNSHIPS.filter((internship) => {
+        const deadlineDate = new Date(internship.deadline);
+        const today = new Date();
+
+        if (isNaN(deadlineDate.getTime()) || deadlineDate < today) return false;
+
         const matchesSearch = searchTerm === '' ||
             internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             internship.company.toLowerCase().includes(searchTerm.toLowerCase());
@@ -177,6 +201,17 @@ const Internships = () => {
             matchesDuration &&
             matchesSchoolYear
         );
+    }).sort((a, b) => {
+        if (sortBy === 'Bewerbungsfrist') {
+            return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        }
+        if (sortBy === 'Neueste') {
+            return new Date(b.added).getTime() - new Date(a.added).getTime();
+        }
+        if (sortBy === 'Beliebteste') {
+            return b.clicks - a.clicks;
+        }
+        return 0;
     });
 
 
@@ -224,6 +259,20 @@ const Internships = () => {
                             <h2 className="text-xl font-semibold">
                                 {filteredInternships.length} {filteredInternships.length === 1 ? 'Praktikum' : 'Praktika'} gefunden
                             </h2>
+                            <div className="flex items-center">
+                                <span className="text-sm text-muted-foreground mr-2">Sortieren nach:</span>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="rounded-lg border border-input p-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none bg-background text-foreground"
+                                >
+                                    <option value="Nichts">Nichts</option>
+                                    <option value="Neueste">Neueste</option>
+                                    <option value="Bewerbungsfrist">Bewerbungsfrist</option>
+                                    <option value="Beliebteste">Beliebteste</option>
+                                </select>
+
+                            </div>
                         </div>
 
                         {filteredInternships.length > 0 ? (

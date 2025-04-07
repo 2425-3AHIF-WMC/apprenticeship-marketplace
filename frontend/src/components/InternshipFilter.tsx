@@ -77,7 +77,7 @@ const InternshipFilter: React.FC<Props> = ({
                         <div>
                             <label className="block text-sm font-medium mb-2">Abteilung</label>
                             <select
-                                className="w-full rounded-lg border border-input p-2 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none bg-background text-foreground"
+                                    className="w-full rounded-lg border border-input p-2 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none bg-background text-foreground"
                                 value={selectedCategory}
                                 onChange={(e) => setSelectedCategory(e.target.value)}
                             >
