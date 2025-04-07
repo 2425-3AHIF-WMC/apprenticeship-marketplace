@@ -16,6 +16,8 @@ export interface InternshipProps {
     category: string[];
     schoolYear?: string;
     companyLink: string;
+    added: string;
+    clicks: number;
 }
 
 interface InternshipCardProps {
@@ -69,7 +71,11 @@ const InternshipCard = ({internship, className}: InternshipCardProps) => {
             </div>
             <div className="flex items-center text-sm">
                 <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground"/>
-                <span>Bewerbungsfrist: {internship.deadline}</span>
+                <span>Bewerbungsfrist: {new Date(internship.deadline).toLocaleDateString('de-AT', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                })}</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3">
