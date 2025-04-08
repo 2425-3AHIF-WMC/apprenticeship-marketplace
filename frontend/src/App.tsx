@@ -3,6 +3,7 @@ import './App.css'
 import {useEffect} from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
+import InternshipDescription from "./pages/InternshipDescription";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Index/>}/>
+                <Route path="/internshipdescription" element={<InternshipDescription/>}/>
                 <Route path="*" element={<NotFound/>}/>
             </Routes>
         </BrowserRouter>
