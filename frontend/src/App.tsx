@@ -1,9 +1,11 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import './App.css'
+
 import {useEffect} from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import InternshipDescription from "./pages/InternshipDescription";
+import Internships from "@/pages/Internships";
 
 
 function App() {
@@ -32,8 +34,9 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Index/>}/>
-                <Route path="/internshipdescription" element={<InternshipDescription/>}/>
+                <Route path="Internships" element={<Internships/>}/>
                 <Route path="*" element={<NotFound/>}/>
+                <Route path="/Internshipdescription" element={<InternshipDescription/>}/>
             </Routes>
         </BrowserRouter>
     )

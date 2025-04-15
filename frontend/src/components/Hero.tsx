@@ -1,6 +1,7 @@
 import {Button} from '@/components/ui/button';
 import {Search, ArrowRight} from 'lucide-react';
-import {Link} from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FadeIn from './FadeIn';
 
 const Hero = () => {
@@ -11,9 +12,19 @@ const Hero = () => {
         {name: 'Medizintechnik', color: 'hover:text-htl-medizintechnik'},
     ];
 
+    const [query, setQuery] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearch = () => {
+        if (query.trim()) {
+            navigate(`/internships?search=${encodeURIComponent(query)}`);
+        } else {
+            navigate('/internships');
+        }
+    };
+
     return (
         <div className="relative mt-16 md:mt-20">
-            {/* Hero Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
                     src="/assets/img-of-htl-leonding.png"
@@ -42,7 +53,6 @@ const Hero = () => {
                         <div
                             className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <div className="relative w-full sm:w-auto">
-                                {/* Input and icon in same relative container */}
                                 <FadeIn delay={400}>
                                     <div
                                         className="w-full sm:w-80 md:w-96 rounded-lg border border-white/20 bg-black/30 px-3 py-2.5">
@@ -56,19 +66,18 @@ const Hero = () => {
                                                 type="text"
                                                 placeholder="Praktikum suchen..."
                                                 className="w-full pl-8 pr-2 bg-transparent text-white transition-all outline-none"
+                                                value={query}
+                                                onChange={(e) => setQuery(e.target.value)}
                                             />
                                         </div>
                                     </div>
                                 </FadeIn>
                             </div>
 
-                            {/* Button stays outside animation */}
                             <FadeIn delay={400}>
-                                <Button asChild variant="default">
-                                    <Link to="/internships">
+                                <Button variant="default" onClick={handleSearch}>
                                         Alle Praktika durchsuchen
                                         <ArrowRight className="ml-2 h-4 w-4"/>
-                                    </Link>
                                 </Button>
                             </FadeIn>
                         </div>
