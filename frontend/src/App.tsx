@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import './App.css'
 
-import {useEffect} from "react";
+import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
@@ -22,7 +22,7 @@ function App() {
 
                 if (element) {
                     e.preventDefault();
-                    element.scrollIntoView({behavior: 'smooth'});
+                    element.scrollIntoView({ behavior: 'smooth' });
                 }
             }
         };
@@ -33,18 +33,22 @@ function App() {
 
     return (
         <Routes>
-            <Route path="/" element={<Index/>}/>
-            <Route path="/internships" element={<Internships/>}/>
-            <Route path="/login" element={<Login/>}/>
-            <Route 
-                path="/schueler/dashboard" 
+            <Route path="/" element={<Index />} />
+            <Route path="/internships" element={
+                <ProtectedRoute>
+                    <Internships />
+                </ProtectedRoute>
+            } />
+            <Route path="/login" element={<Login />} />
+            <Route
+                path="/schueler/dashboard"
                 element={
                     <ProtectedRoute>
                         <StudentDashboard />
                     </ProtectedRoute>
                 }
             />
-            <Route path="*" element={<NotFound/>}/>
+            <Route path="*" element={<NotFound />} />
         </Routes>
     )
 }

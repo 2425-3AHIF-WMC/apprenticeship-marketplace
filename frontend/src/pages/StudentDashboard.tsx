@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 
 const StudentDashboard = () => {
-    const { username, logout } = useAuth();
+    const { studentUsername, logout } = useAuth();
 
     const handleLogout = async () => {
         await logout();
@@ -18,7 +18,7 @@ const StudentDashboard = () => {
             <main className="flex-1 pt-24 pb-16">
                 <div className="container-xl max-w-4xl">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="heading-md">Willkommen, {username}!</h1>
+                        <h1 className="heading-md">Willkommen, {studentUsername}!</h1>
                         <Button 
                             variant="outline" 
                             onClick={handleLogout}

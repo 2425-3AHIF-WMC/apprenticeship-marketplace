@@ -7,29 +7,23 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const { isAuthenticated, token } = useAuth();
+    const { studentIsAuthenticated, studentToken } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const location = useLocation();
 
     useEffect(() => {
-        console.log('ProtectedRoute - isAuthenticated:', isAuthenticated);
-        console.log('ProtectedRoute - token:', token ? 'present' : 'missing');
-        console.log('ProtectedRoute - current location:', location.pathname);
-        
-        // Add a small delay to allow for token refresh
         const timer = setTimeout(() => {
             setIsLoading(false);
         }, 100);
 
         return () => clearTimeout(timer);
-    }, [isAuthenticated, token, location]);
+    }, [studentIsAuthenticated, studentToken, location]);
 
     if (isLoading) {
-        return null; // or a loading spinner
+        return null;
     }
 
-    if (!isAuthenticated || !token) {
-        console.log('ProtectedRoute - Redirecting to login');
+    if (!studentIsAuthenticated || !studentToken) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 

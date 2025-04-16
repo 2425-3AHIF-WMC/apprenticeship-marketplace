@@ -2,9 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import keycloak from '@/lib/keycloak';
 
 interface AuthContextType {
-    isAuthenticated: boolean;
-    token: string | null;
-    username: string | null;
+    studentIsAuthenticated: boolean;
+    studentToken: string | null;
+    studentUsername: string | null;
     login: () => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -12,10 +12,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
-    const [username, setUsername] = useState<string | null>(null);
-    const [initialized, setInitialized] = useState(false);
+    const [studentIsAuthenticated, setStudentIsAuthenticated] = useState(false);
+    const [studentToken, setStudentToken] = useState<string | null>(null);
+    const [studentUsername, setStudentUsername] = useState<string | null>(null);
+    const [studentInitialized, setStudentInitialized] = useState(false);
 
     useEffect(() => {
         const initKeycloak = async () => {
@@ -30,17 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     flow: 'standard'
                 });
 
-                console.log('Keycloak initialized, authenticated:', authenticated);
-                console.log('Token:', keycloak.token);
-                console.log('Token parsed:', keycloak.tokenParsed);
-
                 if (authenticated) {
-                    setIsAuthenticated(true);
-                    setToken(keycloak.token || null);
-                    setUsername(keycloak.tokenParsed?.preferred_username || null);
+                    setStudentIsAuthenticated(true);
+                    setStudentToken(keycloak.token || null);
+                    setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                 }
 
-                setInitialized(true);
+                setStudentInitialized(true);
 
                 // Set up token refresh
                 keycloak.onTokenExpired = () => {
@@ -50,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             console.log('Token refresh result:', refreshed);
                             if (refreshed) {
                                 console.log('Token refreshed successfully');
-                                setToken(keycloak.token || null);
+                                setStudentToken(keycloak.token || null);
                             } else {
                                 console.log('Token refresh failed, forcing login');
                                 keycloak.login();
@@ -65,23 +61,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Set up auth success callback
                 keycloak.onAuthSuccess = () => {
                     console.log('Auth success');
-                    setIsAuthenticated(true);
-                    setToken(keycloak.token || null);
-                    setUsername(keycloak.tokenParsed?.preferred_username || null);
+                    setStudentIsAuthenticated(true);
+                    setStudentToken(keycloak.token || null);
+                    setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                 };
 
                 // Set up auth error callback
                 keycloak.onAuthError = (error) => {
                     console.error('Auth error:', error);
-                    setIsAuthenticated(false);
-                    setToken(null);
-                    setUsername(null);
+                    setStudentIsAuthenticated(false);
+                    setStudentToken(null);
+                    setStudentUsername(null);
                 };
 
                 // Set up auth refresh success callback
                 keycloak.onAuthRefreshSuccess = () => {
                     console.log('Auth refresh success');
-                    setToken(keycloak.token || null);
+                    setStudentToken(keycloak.token || null);
                 };
 
                 // Set up auth refresh error callback
@@ -92,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             } catch (error) {
                 console.error('Failed to initialize Keycloak:', error);
-                setInitialized(true);
+                setStudentInitialized(true);
             }
         };
 
@@ -112,21 +108,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             console.log('Attempting logout...');
             await keycloak.logout();
-            setIsAuthenticated(false);
-            setToken(null);
-            setUsername(null);
+            setStudentIsAuthenticated(false);
+            setStudentToken(null);
+            setStudentUsername(null);
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
     // Only render children when Keycloak is initialized
-    if (!initialized) {
-        return null; // or a loading spinner
+    if (!studentInitialized) {
+        return null;
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, token, username, login, logout }}>
+        <AuthContext.Provider value={{ 
+            studentIsAuthenticated, 
+            studentToken, 
+            studentUsername, 
+            login, 
+            logout 
+        }}>
             {children}
         </AuthContext.Provider>
     );

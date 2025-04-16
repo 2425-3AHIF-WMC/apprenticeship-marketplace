@@ -17,14 +17,13 @@ import { useAuth } from '@/context/AuthContext';
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, isAuthenticated } = useAuth();
+    const { login, studentIsAuthenticated } = useAuth();
 
-    // Redirect to dashboard if already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (studentIsAuthenticated) {
             navigate('/schueler/dashboard');
         }
-    }, [isAuthenticated, navigate]);
+    }, [studentIsAuthenticated, navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
