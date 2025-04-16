@@ -5,6 +5,7 @@ import {useEffect} from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
+import Login from "@/pages/Login";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Index/>}/>
                 <Route path="Internships" element={<Internships/>}/>
+                <Route path="Login" element={<Login/>}/>
                 <Route path="*" element={<NotFound/>}/>
             </Routes>
         </BrowserRouter>
