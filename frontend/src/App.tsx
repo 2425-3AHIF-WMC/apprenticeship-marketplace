@@ -1,11 +1,14 @@
-import {BrowserRouter, Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import './App.css'
 
-import {useEffect} from "react";
+import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
-
+import Login from "@/pages/Login";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import StudentDashboard from "@/pages/StudentDashboard";
+import AccessDenied from "@/pages/AccessDenied";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -20,7 +23,7 @@ function App() {
 
                 if (element) {
                     e.preventDefault();
-                    element.scrollIntoView({behavior: 'smooth'});
+                    element.scrollIntoView({ behavior: 'smooth' });
                 }
             }
         };
@@ -30,13 +33,25 @@ function App() {
     }, []);
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Index/>}/>
-                <Route path="Internships" element={<Internships/>}/>
-                <Route path="*" element={<NotFound/>}/>
-            </Routes>
-        </BrowserRouter>
+        <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/internships" element={
+                <ProtectedRoute>
+                    <Internships />
+                </ProtectedRoute>
+            } />
+            <Route path="/login" element={<Login />} />
+            <Route
+                path="/schueler/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <StudentDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route path="/access-denied" element={<AccessDenied />} />
+            <Route path="*" element={<NotFound />} />
+        </Routes>
     )
 }
 
