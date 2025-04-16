@@ -12,18 +12,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const location = useLocation();
 
     useEffect(() => {
+        // Wait for Keycloak to initialize and check authentication
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 100);
+        }, 500); // Increased timeout to ensure Keycloak has time to initialize
 
         return () => clearTimeout(timer);
     }, [studentIsAuthenticated, studentToken, location]);
 
+    // Show loading state while checking authentication
     if (isLoading) {
         return null;
     }
 
+    // Only redirect if we're sure the user is not authenticated
     if (!studentIsAuthenticated || !studentToken) {
+        console.log('Not authenticated, redirecting to access denied');
         return <Navigate to="/access-denied" state={{ from: location }} replace />;
     }
 

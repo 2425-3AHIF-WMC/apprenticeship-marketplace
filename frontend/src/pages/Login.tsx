@@ -21,7 +21,7 @@ const Login = () => {
 
     useEffect(() => {
         if (studentIsAuthenticated) {
-            navigate('/schueler/dashboard');
+            navigate('/student/dashboard');
         }
     }, [studentIsAuthenticated, navigate]);
 
@@ -29,7 +29,6 @@ const Login = () => {
         setIsLoading(true);
         try {
             await login();
-            // The redirect will happen automatically through the useEffect
         } catch (error) {
             console.error('Login failed:', error);
             setIsLoading(false);
