@@ -1,4 +1,4 @@
-import {BrowserRouter, Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import './App.css'
 
 import {useEffect} from "react";
@@ -6,7 +6,8 @@ import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
 import Login from "@/pages/Login";
-
+import ProtectedRoute from "@/components/ProtectedRoute";
+import StudentDashboard from "@/pages/StudentDashboard";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -31,14 +32,20 @@ function App() {
     }, []);
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Index/>}/>
-                <Route path="Internships" element={<Internships/>}/>
-                <Route path="Login" element={<Login/>}/>
-                <Route path="*" element={<NotFound/>}/>
-            </Routes>
-        </BrowserRouter>
+        <Routes>
+            <Route path="/" element={<Index/>}/>
+            <Route path="/internships" element={<Internships/>}/>
+            <Route path="/login" element={<Login/>}/>
+            <Route 
+                path="/schueler/dashboard" 
+                element={
+                    <ProtectedRoute>
+                        <StudentDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route path="*" element={<NotFound/>}/>
+        </Routes>
     )
 }
 

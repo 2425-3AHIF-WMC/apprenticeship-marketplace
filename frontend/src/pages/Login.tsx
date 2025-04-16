@@ -1,8 +1,6 @@
-import {useState} from 'react';
-import {useNavigate, Link} from 'react-router-dom';
-import {Input} from '@/components/ui/input';
+import {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
-import {Label} from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -11,33 +9,32 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {LockKeyhole, User} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import PasswordResetInfo from "@/components/PasswordResetInfo";
+import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login, isAuthenticated } = useAuth();
 
-    const [studentUsername, setStudentUsername] = useState('');
-    const [studentPassword, setStudentPassword] = useState('');
-    const [showResetInfo, setShowResetInfo] = useState(false);
-
-
-
-    const handleStudentLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-
-        setTimeout(() => {
-            localStorage.setItem('studentLoggedIn', 'true');
-            localStorage.setItem('studentName', studentUsername);
-
+    // Redirect to dashboard if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
             navigate('/schueler/dashboard');
+        }
+    }, [isAuthenticated, navigate]);
+
+    const handleLogin = async () => {
+        setIsLoading(true);
+        try {
+            await login();
+            // The redirect will happen automatically through the useEffect
+        } catch (error) {
+            console.error('Login failed:', error);
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -64,59 +61,13 @@ const Login = () => {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleStudentLogin}>
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="student-username">Benutzername</Label>
-                                            <div className="relative">
-                                                <div className="absolute left-3 top-3 text-muted-foreground">
-                                                    <User className="h-4 w-4"/>
-                                                </div>
-                                                <Input
-                                                    id="student-username"
-                                                    type="text"
-                                                    placeholder="if000000"
-                                                    className="pl-10"
-                                                    value={studentUsername}
-                                                    onChange={(e) => setStudentUsername(e.target.value)}
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <Label htmlFor="student-password">Passwort</Label>
-                                                <Link to="#"
-                                                      onClick={(e) => {
-                                                          e.preventDefault();
-                                                          setShowResetInfo(true);
-                                                      }}
-                                                      className="text-sm text-primary hover:underline">
-                                                    Passwort vergessen?
-                                                </Link>
-                                            </div>
-                                            <div className="relative">
-                                                <div className="absolute left-3 top-3 text-muted-foreground">
-                                                    <LockKeyhole className="h-4 w-4"/>
-                                                </div>
-                                                <Input
-                                                    id="student-password"
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    className="pl-10"
-                                                    value={studentPassword}
-                                                    onChange={(e) => setStudentPassword(e.target.value)}
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                                        {isLoading ? "Anmeldung läuft..." : "Anmelden"}
-                                    </Button>
-                                </form>
+                                <Button 
+                                    onClick={handleLogin} 
+                                    className="w-full" 
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? "Anmeldung läuft..." : "Mit Schulaccount anmelden"}
+                                </Button>
                             </CardContent>
                             <CardFooter className="flex justify-center border-t pt-6">
                                 <p className="text-sm text-muted-foreground">
@@ -129,10 +80,8 @@ const Login = () => {
             </main>
 
             <Footer/>
-            <PasswordResetInfo open={showResetInfo} onClose={() => setShowResetInfo(false)} />
         </div>
-
-);
+    );
 };
 
 export default Login;
