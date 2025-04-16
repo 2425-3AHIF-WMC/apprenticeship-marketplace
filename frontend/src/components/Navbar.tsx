@@ -101,7 +101,7 @@ const Navbar = () => {
 
                                     {studentIsAuthenticated && (
                                         <DropdownMenuItem asChild>
-                                            <Link to="/schueler/dashboard">Dashboard</Link>
+                                            <Link to="/student/dashboard">Dashboard</Link>
                                         </DropdownMenuItem>
                                     )}
                                     {studentIsAuthenticated && (
