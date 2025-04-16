@@ -8,6 +8,7 @@ import Internships from "@/pages/Internships";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
+import AccessDenied from "@/pages/AccessDenied";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -48,6 +49,7 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+            <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     )

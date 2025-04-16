@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
 
     if (!studentIsAuthenticated || !studentToken) {
-        return <Navigate to="/login" state={{ from: location }} replace />;
+        return <Navigate to="/access-denied" state={{ from: location }} replace />;
     }
 
     return <>{children}</>;
