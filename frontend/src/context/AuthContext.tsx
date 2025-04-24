@@ -101,8 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Set up auth refresh success callback
                 keycloak.onAuthRefreshSuccess = () => {
                     console.log('Auth refresh success');
+                    setStudentIsAuthenticated(true);
                     setStudentToken(keycloak.token || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
+                    setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                 };
 
                 // Set up auth refresh error callback
