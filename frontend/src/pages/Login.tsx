@@ -12,12 +12,13 @@ import {
 import FadeIn from '@/components/FadeIn';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useAuth } from '@/context/AuthContext';
+import {useAuth} from '@/context/AuthContext';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, studentIsAuthenticated } = useAuth();
+    const {login, studentIsAuthenticated} = useAuth();
 
     useEffect(() => {
         if (studentIsAuthenticated) {
@@ -51,28 +52,52 @@ const Login = () => {
                     </FadeIn>
 
                     <FadeIn delay={100}>
-                        <Card className="text-left">
-                            <CardHeader>
-                                <CardTitle>Schüleranmeldung</CardTitle>
-                                <CardDescription>
-                                    Melden Sie sich mit Ihrem Schulaccount an
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button 
-                                    onClick={handleLogin} 
-                                    className="w-full" 
-                                    disabled={isLoading}
+                        <Tabs defaultValue="student" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger
+                                    value="student"
+                                    className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm flex-1"
                                 >
-                                    {isLoading ? "Anmeldung läuft..." : "Mit Schulaccount anmelden"}
-                                </Button>
-                            </CardContent>
-                            <CardFooter className="flex justify-center border-t pt-6">
-                                <p className="text-sm text-muted-foreground">
-                                    Bei Fragen zum Login wenden Sie sich an Ihre Lehrkräfte.
-                                </p>
-                            </CardFooter>
-                        </Card>
+                                    Schüler
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="company"
+                                    className=".text-gray-600 inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm flex-1"
+                                >
+                                    Unternehmen
+                                </TabsTrigger>
+
+                            </TabsList>
+                            <TabsContent value="student">
+                                <Card className="text-left">
+                                    <CardHeader>
+                                        <CardTitle>Schüleranmeldung</CardTitle>
+                                        <CardDescription>
+                                            Melden Sie sich mit Ihrem Schulaccount an
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={handleLogin}
+                                            className="w-full"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? "Anmeldung läuft..." : "Mit Schulaccount anmelden"}
+                                        </Button>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-center border-t pt-6">
+                                        <p className="text-sm text-muted-foreground">
+                                            Bei Fragen zum Login wenden Sie sich an Ihre Lehrkräfte.
+                                        </p>
+                                    </CardFooter>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="company">
+                                <span>Test</span>
+                            </TabsContent>
+                        </Tabs>
+
+
                     </FadeIn>
                 </div>
             </main>
