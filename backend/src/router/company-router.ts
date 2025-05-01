@@ -11,8 +11,9 @@ const pool = new Pool({
     port: 5432,
 });
 
-companyRouter.get("/company/:id", async (req: Request, res: Response) => {
+companyRouter.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM company WHERE id = $1", [id]);
-    res.json(result.rows[0]);
+    res.json(result.rows);
 });
+

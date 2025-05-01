@@ -11,8 +11,18 @@ const pool = new Pool({
     port: 5432,
 });
 
-internshipRouter.get("/internship/:id", async (req: Request, res: Response) => {
+internshipRouter.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM internship WHERE id = $1", [id]);
-    res.json(result.rows[0]);
+    res.json(result.rows);
+});
+
+internshipRouter.get("/", async (req, res) => {
+   const result = await pool.query("SELECT * FROM internship");
+   res.json(result.rows);
+});
+
+internshipRouter.get("/current", async (req, res) => {
+    const result = await pool.query("SELECT * FROM internship WHERE application_end > CURRENT_DATE");
+    res.json(result.rows);
 });
