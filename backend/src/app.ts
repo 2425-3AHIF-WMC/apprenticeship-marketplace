@@ -1,4 +1,7 @@
 import {Request, Response} from 'express';
+import {companyRouter} from './routers/company-router';
+import {studentRouter} from "./routers/student-router";
+import {internshipRouter} from "./routers/internship-router";
 
 const express = require("express");
 const cors = require("cors");
@@ -16,6 +19,10 @@ const pool = new Pool({
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.use("/api/company", companyRouter);
+app.use("/api/student", studentRouter);
+app.use("/api/internship", internshipRouter);
 
 // NOTE: temporary code, so we can see how it will look like
 // CREATE
