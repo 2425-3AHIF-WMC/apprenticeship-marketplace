@@ -1,11 +1,11 @@
+import express from 'express';
 import {Request, Response} from 'express';
+import {Pool} from 'pg';
 
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { Pool } = require("pg");
+export const studentRouter = express.Router();
 
-const app = express();
+// NOTE: temporary code, so we can see how it will look like
+
 const pool = new Pool({
     user: "postgres",
     host: "postgres",
@@ -14,25 +14,21 @@ const pool = new Pool({
     port: 5432,
 });
 
-app.use(cors());
-app.use(bodyParser.json());
-
-// NOTE: temporary code, so we can see how it will look like
 // CREATE
-app.post("/items", async (req: Request, res: Response) => {
+studentRouter.post("/items", async (req: Request, res: Response) => {
     const { name } = req.body;
     const result = await pool.query("INSERT INTO items (name) VALUES ($1) RETURNING *", [name]);
     res.json(result.rows[0]);
 });
 
 // READ
-app.get("/items", async (req: Request, res: Response) => {
+studentRouter.get("/items", async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM items");
     res.json(result.rows);
 });
 
 // UPDATE
-app.put("/items/:id", async (req: Request, res: Response) => {
+studentRouter.put("/items/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
     const result = await pool.query("UPDATE items SET name = $1 WHERE id = $2 RETURNING *", [name, id]);
@@ -40,12 +36,8 @@ app.put("/items/:id", async (req: Request, res: Response) => {
 });
 
 // DELETE
-app.delete("/items/:id", async (req: Request, res: Response) => {
+studentRouter.delete("/items/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     await pool.query("DELETE FROM items WHERE id = $1", [id]);
     res.json({ message: "Item deleted" });
-});
-
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
 });
