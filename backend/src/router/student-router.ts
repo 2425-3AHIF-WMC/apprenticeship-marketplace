@@ -15,10 +15,10 @@ const pool = new Pool({
 });
 
 // TODO: Verifying id und so
-studentRouter.get("/student/:id", async (req: Request, res: Response) => {
+studentRouter.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM student WHERE id = $1", [id]);
-    res.json(result.rows[0]);
+    res.json(result.rows);
 });
 
 // CREATE
