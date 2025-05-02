@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import {internshipRouter} from "./router/internship-router";
 import {companyRouter} from "./router/company-router";
 import {studentRouter} from "./router/student-router";
+import {ensureTablesCreated} from "./unit";
 
 const express = require("express");
 const cors = require("cors");

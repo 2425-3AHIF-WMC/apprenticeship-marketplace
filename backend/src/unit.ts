@@ -21,7 +21,11 @@ export class Unit {
     static async create(readOnly: boolean): Promise<Unit> {
         const client = await pool.connect();
         if (!readOnly) await client.query('BEGIN');
+        if (!readOnly) {
+            await ensureTablesCreated();
+        }
         return new Unit(readOnly, client);
+
     }
 
     async prepare(sql: string, bindings: any[] = []): Promise<QueryResult> {

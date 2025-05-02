@@ -33,6 +33,8 @@ studentRouter.get("/students", async (req: Request, res: Response) => {
 
 // TODO: Verifying id und so => ghead  in service eini eig
 studentRouter.get("/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM student WHERE id = $1", [id]);
     res.json(result.rows);
