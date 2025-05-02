@@ -49,10 +49,10 @@ export class Unit {
 export async function ensureTablesCreated(): Promise<void> {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS admin (
-            id INTEGER NOT NULL,
-            CONSTRAINT pk_admin PRIMARY KEY (id),
-            CONSTRAINT fk_admin_person FOREIGN KEY (id)
-            REFERENCES person(id)
+            admin_id INTEGER NOT NULL,
+            CONSTRAINT pk_admin PRIMARY KEY (admin_id),
+            CONSTRAINT fk_admin_person FOREIGN KEY (admin_id)
+            REFERENCES person(person_id)
             );
 
         CREATE TABLE IF NOT EXISTS city (
@@ -88,7 +88,7 @@ export async function ensureTablesCreated(): Promise<void> {
             internship_id SMALLINT,
             CONSTRAINT pk_favourite PRIMARY KEY (favourite_id),
             CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
-            REFERENCES student(id),
+            REFERENCES student(student_id),
             CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
             REFERENCES internship(internship_id),
             );
@@ -104,15 +104,15 @@ export async function ensureTablesCreated(): Promise<void> {
             application_end DATE NOT NULL,
             location_id SMALLINT,
             clicks INTEGER NOT NULL,
-            id INTEGER,
-            id1 INTEGER,
+            worktype_id INTEGER,
+            internshipduration_id INTEGER,
             CONSTRAINT pk_internship PRIMARY KEY (internship_id),
             CONSTRAINT fk_internship_site FOREIGN KEY (location_id)
             REFERENCES site(location_id),
-            CONSTRAINT fk_internship_worktype FOREIGN KEY (id)
-            REFERENCES worktype(id),
-            CONSTRAINT fk_internship_duration FOREIGN KEY (id1)
-            REFERENCES internshipduration(id)
+            CONSTRAINT fk_internship_worktype FOREIGN KEY (worktype_id)
+            REFERENCES worktype(worktype_id),
+            CONSTRAINT fk_internship_duration FOREIGN KEY (internshipduration_id)
+            REFERENCES internshipduration(internshipduration_id)
             );
 
         CREATE TABLE IF NOT EXISTS internship_department_map (
@@ -126,17 +126,17 @@ export async function ensureTablesCreated(): Promise<void> {
             );
 
         CREATE TABLE IF NOT EXISTS internshipduration (
-            id INTEGER NOT NULL,
+            internshipduration_id INTEGER NOT NULL,
             description VARCHAR(50) NOT NULL,
-            CONSTRAINT pk_internshipduration PRIMARY KEY (id)
+            CONSTRAINT pk_internshipduration PRIMARY KEY (internshipduration_id)
             );
 
         CREATE TABLE IF NOT EXISTS person (
-            id SERIAL NOT NULL,
+            person_id SERIAL NOT NULL,
             username VARCHAR(50) NOT NULL,
             added TIMESTAMP NOT NULL,
             persontype VARCHAR(7) NOT NULL,
-            CONSTRAINT pk_person PRIMARY KEY (id),
+            CONSTRAINT pk_person PRIMARY KEY (person_id),
             CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
             );
 
@@ -154,10 +154,10 @@ export async function ensureTablesCreated(): Promise<void> {
             );
 
         CREATE TABLE IF NOT EXISTS student (
-            id INTEGER NOT NULL,
-            CONSTRAINT pk_student PRIMARY KEY (id),
-            CONSTRAINT fk_student_person FOREIGN KEY (id)
-            REFERENCES person(id)
+            student_id INTEGER NOT NULL,
+            CONSTRAINT pk_student PRIMARY KEY (student_id),
+            CONSTRAINT fk_student_person FOREIGN KEY (student_id)
+            REFERENCES person(person_id)
             );
 
         CREATE TABLE IF NOT EXISTS viewedinternships (
@@ -166,16 +166,16 @@ export async function ensureTablesCreated(): Promise<void> {
             viewdate TIMESTAMP NOT NULL,
             CONSTRAINT pk_viewedinternships PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_view_student FOREIGN KEY (student_id)
-            REFERENCES student(id),
+            REFERENCES student(student_id),
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
             REFERENCES internship(internship_id)
             );
 
         CREATE TABLE IF NOT EXISTS worktype (
-            id INTEGER NOT NULL,
+            worktype_id INTEGER NOT NULL,
             name VARCHAR(50) NOT NULL,
             description VARCHAR(50),
-            CONSTRAINT pk_worktype PRIMARY KEY (id)
+            CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
             );
 
     `);
