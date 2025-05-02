@@ -9,6 +9,7 @@ import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
 import AccessDenied from "@/pages/AccessDenied";
+import StudentFavourites from "@/pages/StudentFavourites";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -46,6 +47,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <StudentDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/student/favourites"
+                element={
+                    <ProtectedRoute>
+                        <StudentFavourites />
                     </ProtectedRoute>
                 }
             />
