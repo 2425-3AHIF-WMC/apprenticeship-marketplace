@@ -1,4 +1,4 @@
-import {PoolClient, Pool} from 'pg';
+import {PoolClient, Pool, QueryResult} from 'pg';
 
 const pool = new Pool({
     user: "postgres",
@@ -24,7 +24,7 @@ export class Unit {
         return new Unit(readOnly, client);
     }
 
-    async prepare(sql: string, bindings: any[] = []): Promise<any> {
+    async prepare(sql: string, bindings: any[] = []): Promise<QueryResult> {
         return this.client.query(sql, bindings);
     }
 
