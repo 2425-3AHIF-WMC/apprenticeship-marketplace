@@ -62,7 +62,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS city (
             plz INTEGER,
             name VARCHAR(50) NOT NULL,
-            CONSTRAINT pk_city PRIMARY KEY (plz)
+            CONSTRAINT pk_city PRIMARY KEY (plz),
             CONSTRAINT chk_plz CHECK (plz >= 1000 AND plz <= 9999)
             );
 

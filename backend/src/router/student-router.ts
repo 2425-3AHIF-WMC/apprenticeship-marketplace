@@ -17,7 +17,7 @@ const pool = new Pool({
     port: 5432,
 });
 
-studentRouter.get("/students", async (req: Request, res: Response) => {
+studentRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
         const service = new StudentService(unit);

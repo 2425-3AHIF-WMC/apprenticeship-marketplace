@@ -25,6 +25,7 @@ app.use("api/student", studentRouter);
 app.use("api/internship", internshipRouter);
 app.use("api/company", companyRouter);
 
-app.listen(5000, () => {
+app.listen(5000, async () => {
     console.log("Server running on port 5000");
+    await ensureTablesCreated();
 });
