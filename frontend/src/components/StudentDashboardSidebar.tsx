@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   BookmarkIcon,
-  Settings,
   LogOut,
   Menu,
   X,
