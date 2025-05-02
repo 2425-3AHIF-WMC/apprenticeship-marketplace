@@ -101,8 +101,8 @@ const StudentDashboardSidebar = () => {
           <SidebarItem 
             icon={BookmarkIcon} 
             label="Favoriten" 
-            to="/student/favorites" 
-            active={path === '/student/favorites'} 
+            to="/student/favourites"
+            active={path === '/student/favourites'}
           />
           <SidebarItem 
             icon={Settings} 
