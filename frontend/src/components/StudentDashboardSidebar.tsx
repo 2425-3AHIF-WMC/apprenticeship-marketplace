@@ -105,15 +105,9 @@ const StudentDashboardSidebar = () => {
             active={path === '/student/favorites'} 
           />
           <SidebarItem 
-            icon={Settings} 
-            label="Einstellungen" 
-            to="/student/settings" 
-            active={path === '/student/settings'} 
-          />
-          <SidebarItem 
             icon={Home} 
-            label="Zurück zur Startseite" 
-            to="/" 
+            label="Zurück zu den Praktika"
+            to="/internships"
           />
         </nav>
         
