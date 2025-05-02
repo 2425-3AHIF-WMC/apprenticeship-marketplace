@@ -27,7 +27,8 @@ internshipRouter.get("/current", async (req, res) => {
     res.json(result.rows);
 });
 
-internshipRouter.get("/company", async (req, res) => {
-    const result = await pool.query("SELECT name FROM company c JOIN site s on(c.company_id = s.company_id) JOIN internship i on(s.location_id = i.location_id)");
+internshipRouter.get("/:internship_id/company", async (req, res) => {
+    const { internship_id } = req.params;
+    const result = await pool.query("SELECT name FROM company c JOIN site s on(c.company_id = s.company_id) JOIN internship i on(s.location_id = i.location_id) where i.internship_id=$1", [internship_id]);
     res.json(result.rows);
 });
