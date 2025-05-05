@@ -31,13 +31,24 @@ studentRouter.get("/", async (req: Request, res: Response) => {
     }
 });
 
-// TODO: Verifying id und so => ghead  in service eini eig
 studentRouter.get("/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-
     const { id } = req.params;
-    const result = await pool.query("SELECT * FROM student WHERE id = $1", [id]);
-    res.json(result.rows);
+
+    if(typeof id != "number" || id < 0 || id === null){
+        res.sendStatus(StatusCodes.BAD_REQUEST);
+        return;
+    }
+    try{
+        const service = new StudentService(unit);
+        const student = await service.getById(id);
+        res.status(StatusCodes.OK).json(student);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 // CREATE
