@@ -14,6 +14,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {useAuth} from '@/context/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
+import {Input} from "@/components/ui/input.tsx";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +94,31 @@ const Login = () => {
                                 </Card>
                             </TabsContent>
                             <TabsContent value="company">
-                                <span>Test</span>
+                                <Card className="text-left">
+                                    <CardHeader>
+                                        <CardTitle>Unternehmensanmeldung</CardTitle>
+                                        <CardDescription>
+                                            Melden Sie sich mit Ihrem Unternehmensaccount an
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <label className="text-sm font-medium">E-Mail</label>
+                                        <Input type={"email"} className="mb-4" placeholder="E-Mail eingeben"/>
+                                        <label className="text-sm font-medium">Passwort</label>
+                                        <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
+                                        <Button
+                                            className="w-full"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? "Anmeldung läuft..." : "Mit Unternehmensaccount anmelden"}
+                                        </Button>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-center border-t pt-6">
+                                        <p className="text-sm text-muted-foreground">
+                                            Registrieren als Unternehmen
+                                        </p>
+                                    </CardFooter>
+                                </Card>
                             </TabsContent>
                         </Tabs>
 
