@@ -62,13 +62,13 @@ const Login = () => {
                             <TabsList className="grid w-full grid-cols-2 border-b">
                                 <TabsTrigger
                                     value="student"
-                                    className="flex-1 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
+                                    className="flex-1 px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
                                 >
                                     Schüler
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="company"
-                                    className="flex-1 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
+                                    className="flex-1 px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
                                 >
                                     Unternehmen
                                 </TabsTrigger>
@@ -99,6 +99,7 @@ const Login = () => {
                                 </Card>
                             </TabsContent>
                             <TabsContent value="company">
+                                { !isRegistration ?
                                 <Card className="text-left">
                                     <CardHeader>
                                         <CardTitle>Unternehmensanmeldung</CardTitle>
@@ -106,21 +107,19 @@ const Login = () => {
                                             Melden Sie sich mit Ihrem Unternehmensaccount an
                                         </CardDescription>
                                     </CardHeader>
-                                    {!isRegistration ?
                                         <CardContent>
                                         <label className="text-sm font-medium">E-Mail</label>
                                         <Input type={"email"} className="mb-4" placeholder="E-Mail eingeben"/>
                                         <label className="text-sm font-medium">Passwort</label>
                                         <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
                                         <Button
-                                            className="w-full"
+                                            className="w-full text-md"
                                             disabled={isLoading}
                                         >
-                                            {isLoading ? "Anmeldung läuft..." : "Mit Unternehmensaccount anmelden"}
+                                            {isLoading ? "Anmeldung läuft..." : "Anmelden"}
                                         </Button>
 
                                     </CardContent>
-                                        : <></>}
                                     <CardFooter className="flex justify-center border-t pt-6">
                                         <p className="text-sm text-muted-foreground">
                                             Sie haben noch kein Konto? Registrieren Sie sich <span
@@ -129,6 +128,44 @@ const Login = () => {
                                     </CardFooter>
 
                                 </Card>
+                                :
+                                    <Card className="text-left">
+                                        <CardHeader>
+                                            <CardTitle>Unternehmensregistrierung</CardTitle>
+                                            <CardDescription>
+                                                Registrieren Sie sich mit Ihrem Unternehmensaccount
+                                            </CardDescription>
+                                        </CardHeader>
+                                            <CardContent>
+                                                <label className="text-sm font-medium">Firmenname</label>
+                                                <Input type="text" className="mb-4" placeholder="Firmenname eingeben"/>
+                                                <label className="text-sm font-medium">Firmenbuchnummer</label>
+                                                <Input type="text" className="mb-4" placeholder="Firmenbuchnummer eingeben"/>
+                                                <label className="text-sm font-medium">E-Mail</label>
+                                                <Input type="email" className="mb-4" placeholder="E-Mail eingeben"/>
+                                                <label className="text-sm font-medium">Telefonnummer</label>
+                                                <Input type="tel" className="mb-4" placeholder="Telefonnummer eingeben"/>
+                                                <label className="text-sm font-medium">Webseite</label>
+                                                <Input type="url" className="mb-4" placeholder="Webseite eingeben"/>
+                                                <label className="text-sm font-medium">Passwort</label>
+                                                <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
+                                                <Button
+                                                    className="w-full text-md"
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading ? "Registrierung läuft..." : "Registrieren"}
+                                                </Button>
+
+                                            </CardContent>
+                                        <CardFooter className="flex justify-center border-t pt-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                Sie haben bereits ein Konto? Melden Sie sich <span
+                                                onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
+                                                <span> an</span>
+                                            </p>
+                                        </CardFooter>
+                                    </Card>
+                                }
                             </TabsContent>
                         </Tabs>
                     </FadeIn>
