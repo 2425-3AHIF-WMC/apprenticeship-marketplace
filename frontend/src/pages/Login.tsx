@@ -18,6 +18,7 @@ import {Input} from "@/components/ui/input.tsx";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [isRegistration, setIsRegistration] = useState(false);
     const navigate = useNavigate();
     const {login, studentIsAuthenticated} = useAuth();
 
@@ -35,6 +36,10 @@ const Login = () => {
             console.error('Login failed:', error);
             setIsLoading(false);
         }
+    };
+
+    const handleRegistration = () => {
+        setIsRegistration(prev => !prev);
     };
 
     return (
@@ -101,7 +106,8 @@ const Login = () => {
                                             Melden Sie sich mit Ihrem Unternehmensaccount an
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    {!isRegistration ?
+                                        <CardContent>
                                         <label className="text-sm font-medium">E-Mail</label>
                                         <Input type={"email"} className="mb-4" placeholder="E-Mail eingeben"/>
                                         <label className="text-sm font-medium">Passwort</label>
@@ -112,17 +118,19 @@ const Login = () => {
                                         >
                                             {isLoading ? "Anmeldung läuft..." : "Mit Unternehmensaccount anmelden"}
                                         </Button>
+
                                     </CardContent>
+                                        : <></>}
                                     <CardFooter className="flex justify-center border-t pt-6">
                                         <p className="text-sm text-muted-foreground">
-                                            Registrieren als Unternehmen
+                                            Sie haben noch kein Konto? Registrieren Sie sich <span
+                                            onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
                                         </p>
                                     </CardFooter>
+
                                 </Card>
                             </TabsContent>
                         </Tabs>
-
-
                     </FadeIn>
                 </div>
             </main>
