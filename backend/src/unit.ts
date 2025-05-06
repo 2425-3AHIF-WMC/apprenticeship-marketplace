@@ -4,7 +4,7 @@ const pool = new Pool({
     user: "postgres",
     host: "postgres",
     database: "cruddb",
-    password: "password",
+    password: "postgres",
     port: 5432,
 });
 
@@ -52,6 +52,15 @@ export class Unit {
 
 export async function ensureTablesCreated(): Promise<void> {
     await pool.query(`
+        CREATE TABLE IF NOT EXISTS person (
+            person_id SERIAL NOT NULL,
+            username VARCHAR(50) NOT NULL,
+            added TIMESTAMP NOT NULL,
+            persontype VARCHAR(7) NOT NULL,
+            CONSTRAINT pk_person PRIMARY KEY (person_id),
+            CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
+            );
+
         CREATE TABLE IF NOT EXISTS admin (
             admin_id INTEGER NOT NULL,
             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
@@ -94,7 +103,7 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
             REFERENCES student(student_id),
             CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
-            REFERENCES internship(internship_id),
+            REFERENCES internship(internship_id)
             );
 
         CREATE TABLE IF NOT EXISTS internship (
@@ -135,14 +144,7 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT pk_internshipduration PRIMARY KEY (internshipduration_id)
             );
 
-        CREATE TABLE IF NOT EXISTS person (
-            person_id SERIAL NOT NULL,
-            username VARCHAR(50) NOT NULL,
-            added TIMESTAMP NOT NULL,
-            persontype VARCHAR(7) NOT NULL,
-            CONSTRAINT pk_person PRIMARY KEY (person_id),
-            CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
-            );
+        
 
         CREATE TABLE IF NOT EXISTS site (
             location_id SMALLINT NOT NULL,

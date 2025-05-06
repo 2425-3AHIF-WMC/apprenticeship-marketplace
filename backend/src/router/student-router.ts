@@ -1,9 +1,9 @@
 import express from 'express';
 import {Request, Response} from 'express';
 import {Pool} from 'pg';
-import {Unit} from '../unit';
-import {StudentService} from "../services/student-service";
-import {IStudent} from "../model";
+import {Unit} from '../unit.js';
+import {StudentService} from "../services/student-service.js";
+import {IStudent} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 
 export const studentRouter = express.Router();

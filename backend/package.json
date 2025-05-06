@@ -1,7 +1,8 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "./src/app.js",
+  "main": "./dist/app.js",
+  "type": "module",
   "scripts": {
     "server-dev": "npx nodemon app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,7 +16,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "http-status-codes": "^2.3.0",
-    "pg": "^8.14.1"
+    "pg": "^8.15.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

@@ -1,6 +1,6 @@
-import {ServiceBase} from "./service-base";
-import {Unit} from '../unit';
-import {IStudent} from "../model";
+import {ServiceBase} from "./service-base.js";
+import {Unit} from '../unit.js';
+import {IStudent} from "../model.js";
 
 export class StudentService extends ServiceBase{
     constructor(unit: Unit) {

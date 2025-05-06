@@ -1,4 +1,4 @@
-import {Unit} from '../unit';
+import {Unit} from '../unit.js';
 
 export abstract class ServiceBase {
     protected constructor(protected readonly unit: Unit) {

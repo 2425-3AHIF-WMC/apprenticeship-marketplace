@@ -1,13 +1,12 @@
-import {Request, Response} from 'express';
-import {internshipRouter} from "./router/internship-router";
-import {companyRouter} from "./router/company-router";
-import {studentRouter} from "./router/student-router";
-import {ensureTablesCreated} from "./unit";
+import {internshipRouter} from "./router/internship-router.js";
+import {companyRouter} from "./router/company-router.js";
+import {studentRouter} from "./router/student-router.js";
+import {ensureTablesCreated} from "./unit.js";
 
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { Pool } = require("pg");
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { Pool } from "pg";
 
 const app = express();
 const pool = new Pool({
