@@ -61,6 +61,13 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
             );
 
+        CREATE TABLE IF NOT EXISTS student (
+            student_id INTEGER NOT NULL,
+            CONSTRAINT pk_student PRIMARY KEY (student_id),
+            CONSTRAINT fk_student_person FOREIGN KEY (student_id)
+            REFERENCES person(person_id)
+            );
+
         CREATE TABLE IF NOT EXISTS admin (
             admin_id INTEGER NOT NULL,
             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
@@ -94,16 +101,30 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT pk_department PRIMARY KEY (department_id)
             );
 
-        CREATE TABLE IF NOT EXISTS favourite (
-            favourite_id SMALLINT NOT NULL,
-            student_id INTEGER,
-            added TIMESTAMP,
-            internship_id SMALLINT,
-            CONSTRAINT pk_favourite PRIMARY KEY (favourite_id),
-            CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
-            REFERENCES student(student_id),
-            CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
-            REFERENCES internship(internship_id)
+        CREATE TABLE IF NOT EXISTS site (
+            location_id SMALLINT NOT NULL,
+            address VARCHAR(30) NOT NULL,
+            name VARCHAR(50),
+            company_id INTEGER,
+            plz INTEGER,
+            CONSTRAINT pk_site PRIMARY KEY (location_id),
+            CONSTRAINT fk_site_company FOREIGN KEY (company_id)
+            REFERENCES company(company_id),
+            CONSTRAINT fk_site_city FOREIGN KEY (plz)
+            REFERENCES city(plz)
+            );
+
+        CREATE TABLE IF NOT EXISTS worktype (
+            worktype_id INTEGER NOT NULL,
+            name VARCHAR(50) NOT NULL,
+            description VARCHAR(50),
+            CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
+            );
+
+        CREATE TABLE IF NOT EXISTS internshipduration (
+            internshipduration_id INTEGER NOT NULL,
+            description VARCHAR(50) NOT NULL,
+            CONSTRAINT pk_internshipduration PRIMARY KEY (internshipduration_id)
             );
 
         CREATE TABLE IF NOT EXISTS internship (
@@ -128,6 +149,18 @@ export async function ensureTablesCreated(): Promise<void> {
             REFERENCES internshipduration(internshipduration_id)
             );
 
+        CREATE TABLE IF NOT EXISTS favourite (
+            favourite_id SMALLINT NOT NULL,
+            student_id INTEGER,
+            added TIMESTAMP,
+            internship_id SMALLINT,
+            CONSTRAINT pk_favourite PRIMARY KEY (favourite_id),
+            CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
+            REFERENCES student(student_id),
+            CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
+            REFERENCES internship(internship_id)
+            );
+
         CREATE TABLE IF NOT EXISTS internship_department_map (
             internship_id SMALLINT NOT NULL,
             department_id SMALLINT NOT NULL,
@@ -138,36 +171,8 @@ export async function ensureTablesCreated(): Promise<void> {
             REFERENCES department(department_id)
             );
 
-        CREATE TABLE IF NOT EXISTS internshipduration (
-            internshipduration_id INTEGER NOT NULL,
-            description VARCHAR(50) NOT NULL,
-            CONSTRAINT pk_internshipduration PRIMARY KEY (internshipduration_id)
-            );
-
-        
-
-        CREATE TABLE IF NOT EXISTS site (
-            location_id SMALLINT NOT NULL,
-            address VARCHAR(30) NOT NULL,
-            name VARCHAR(50),
-            company_id INTEGER,
-            plz INTEGER,
-            CONSTRAINT pk_site PRIMARY KEY (location_id),
-            CONSTRAINT fk_site_company FOREIGN KEY (company_id)
-            REFERENCES company(company_id),
-            CONSTRAINT fk_site_city FOREIGN KEY (plz)
-            REFERENCES city(plz)
-            );
-
-        CREATE TABLE IF NOT EXISTS student (
-            student_id INTEGER NOT NULL,
-            CONSTRAINT pk_student PRIMARY KEY (student_id),
-            CONSTRAINT fk_student_person FOREIGN KEY (student_id)
-            REFERENCES person(person_id)
-            );
-
         CREATE TABLE IF NOT EXISTS viewedinternships (
-            student_id VARCHAR(50) NOT NULL,
+            student_id INTEGER NOT NULL,
             internship_id SMALLINT NOT NULL,
             viewdate TIMESTAMP NOT NULL,
             CONSTRAINT pk_viewedinternships PRIMARY KEY (student_id, internship_id),
@@ -176,13 +181,5 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
             REFERENCES internship(internship_id)
             );
-
-        CREATE TABLE IF NOT EXISTS worktype (
-            worktype_id INTEGER NOT NULL,
-            name VARCHAR(50) NOT NULL,
-            description VARCHAR(50),
-            CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
-            );
-
     `);
 }
