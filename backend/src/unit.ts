@@ -54,9 +54,9 @@ export async function ensureTablesCreated(): Promise<void> {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS person (
             person_id SERIAL NOT NULL,
-            username VARCHAR(50) NOT NULL,
+            username TEXT NOT NULL,
             added TIMESTAMP NOT NULL,
-            persontype VARCHAR(7) NOT NULL,
+            persontype TEXT NOT NULL,
             CONSTRAINT pk_person PRIMARY KEY (person_id),
             CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
             );
@@ -77,19 +77,19 @@ export async function ensureTablesCreated(): Promise<void> {
 
         CREATE TABLE IF NOT EXISTS city (
             plz INTEGER,
-            name VARCHAR(50) NOT NULL,
+            name TEXT NOT NULL,
             CONSTRAINT pk_city PRIMARY KEY (plz),
             CONSTRAINT chk_plz CHECK (plz >= 1000 AND plz <= 9999)
             );
 
         CREATE TABLE IF NOT EXISTS company (
             company_id INTEGER NOT NULL,
-            name VARCHAR(50) NOT NULL,
-            company_info VARCHAR(30) NOT NULL,
-            website VARCHAR(30) NOT NULL,
-            email VARCHAR(50) NOT NULL,
-            phone_number VARCHAR(15) NOT NULL,
-            password VARCHAR(50) NOT NULL,
+            name TEXT NOT NULL,
+            company_info TEXT NOT NULL,
+            website TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone_number TEXT NOT NULL,
+            password TEXT NOT NULL,
             email_verified BOOLEAN NOT NULL,
             admin_verified BOOLEAN NOT NULL,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
@@ -97,14 +97,14 @@ export async function ensureTablesCreated(): Promise<void> {
 
         CREATE TABLE IF NOT EXISTS department (
             department_id SMALLINT NOT NULL,
-            name VARCHAR(50),
+            name TEXT,
             CONSTRAINT pk_department PRIMARY KEY (department_id)
             );
 
         CREATE TABLE IF NOT EXISTS site (
             location_id SMALLINT NOT NULL,
-            address VARCHAR(30) NOT NULL,
-            name VARCHAR(50),
+            address TEXT NOT NULL,
+            name TEXT,
             company_id INTEGER,
             plz INTEGER,
             CONSTRAINT pk_site PRIMARY KEY (location_id),
@@ -116,22 +116,22 @@ export async function ensureTablesCreated(): Promise<void> {
 
         CREATE TABLE IF NOT EXISTS worktype (
             worktype_id INTEGER NOT NULL,
-            name VARCHAR(50) NOT NULL,
-            description VARCHAR(50),
+            name TEXT NOT NULL,
+            description TEXT,
             CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
             );
 
-        CREATE TABLE IF NOT EXISTS internshipduration (
-            internshipduration_id INTEGER NOT NULL,
-            description VARCHAR(50) NOT NULL,
-            CONSTRAINT pk_internshipduration PRIMARY KEY (internshipduration_id)
+        CREATE TABLE IF NOT EXISTS internship_duration (
+            internship_duration_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            CONSTRAINT pk_internship_duration PRIMARY KEY (internship_duration_id)
             );
 
         CREATE TABLE IF NOT EXISTS internship (
             internship_id SMALLINT NOT NULL,
-            title VARCHAR(50) NOT NULL,
-            description VARCHAR(50) NOT NULL,
-            workplace VARCHAR(50) NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            workplace TEXT NOT NULL,
             min_year SMALLINT,
             added TIMESTAMP NOT NULL,
             salary NUMERIC(6,2) NOT NULL,
@@ -139,14 +139,14 @@ export async function ensureTablesCreated(): Promise<void> {
             location_id SMALLINT,
             clicks INTEGER NOT NULL,
             worktype_id INTEGER,
-            internshipduration_id INTEGER,
+            internship_duration_id INTEGER,
             CONSTRAINT pk_internship PRIMARY KEY (internship_id),
             CONSTRAINT fk_internship_site FOREIGN KEY (location_id)
             REFERENCES site(location_id),
             CONSTRAINT fk_internship_worktype FOREIGN KEY (worktype_id)
             REFERENCES worktype(worktype_id),
-            CONSTRAINT fk_internship_duration FOREIGN KEY (internshipduration_id)
-            REFERENCES internshipduration(internshipduration_id)
+            CONSTRAINT fk_internship_duration FOREIGN KEY (internship_duration_id)
+            REFERENCES internship_duration(internship_duration_id)
             );
 
         CREATE TABLE IF NOT EXISTS favourite (
@@ -171,11 +171,11 @@ export async function ensureTablesCreated(): Promise<void> {
             REFERENCES department(department_id)
             );
 
-        CREATE TABLE IF NOT EXISTS viewedinternships (
+        CREATE TABLE IF NOT EXISTS viewed_internships (
             student_id INTEGER NOT NULL,
             internship_id SMALLINT NOT NULL,
             viewdate TIMESTAMP NOT NULL,
-            CONSTRAINT pk_viewedinternships PRIMARY KEY (student_id, internship_id),
+            CONSTRAINT pk_viewed_internships PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_view_student FOREIGN KEY (student_id)
             REFERENCES student(student_id),
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
@@ -186,22 +186,22 @@ export async function ensureTablesCreated(): Promise<void> {
 
 export async function insertSampleData(unit: Unit): Promise<void> {
 
-    const tables: string[] = ["worktype", "internshipduration", "city", "company", "site", "internship"];
+    const tables: string[] = ["worktype", "internship_duration", "city", "company", "site", "internship"];
 
     async function dataPresent(table: string): Promise<boolean> {
-        const chkStmt = await unit.prepare('select count(*) as "count" from ?1');
+        const chkStmt = await unit.prepare('select count(*) as "count" from internship');
         const result: number = chkStmt.rows[0].count;
         return result > 0;
     }
 
     async function insert(): Promise<void> {
         await pool.query(`
-        INSERT INTO WorkType (id, name, description) VALUES
+        INSERT INTO WorkType (worktype_id, name, description) VALUES
         (1, 'Hybrid', 'keine Arbeit aus dem Homeoffice möglich'),
         (2, 'On-Site', 'teilweise Arbeit aus dem Homeoffice möglich'),
         (3, 'Remote', 'Arbeit aus dem Homeoffice möglich');
         
-        INSERT INTO InternshipDuration (id, description) VALUES
+        INSERT INTO internship_duration (internship_duration_id, description) VALUES
         (1, '4 Wochen'),
         (2, '8 Wochen'),
         (3, 'variabel');
@@ -213,7 +213,8 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (8010, 'Graz'),
         (6020, 'Innsbruck'),
         (3100, 'St. Pölten'),
-        (9020, 'Klagenfurt');
+        (9020, 'Klagenfurt'),
+        (4463, 'Großraming');
         
         -- Firmen
         INSERT INTO Company (company_id, name, company_info, website, email, phone_number, password, email_verified, admin_verified) VALUES
@@ -236,7 +237,7 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
         
         -- Praktika
-        INSERT INTO Internship (internship_id, title, description, min_year, added, salary, application_end, location_id, clicks, id, id1) VALUES
+        INSERT INTO Internship (internship_id, title, description, min_year, added, salary, application_end, location_id, clicks, worktype_id, internship_duration_id) VALUES
         (1, 'Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1),
         (2, 'Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2),
         (3, 'Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1),

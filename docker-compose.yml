@@ -9,10 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - florasCoolesNetzwerk
 
   backend:
     build:
-      context: ./backend  # Stelle sicher, dass dies korrekt ist
+      context: ./backend
       dockerfile: Dockerfile
     environment:
       POSTGRES_USER: postgres
@@ -23,6 +25,8 @@ services:
       - "5000:5000"
     depends_on:
       - postgres
+    networks:
+      - florasCoolesNetzwerk
 
   frontend:
     build:
@@ -31,6 +35,8 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+    networks:
+      - florasCoolesNetzwerk
 
 volumes:
   pgdata:
