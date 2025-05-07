@@ -17,13 +17,17 @@ import { useAuth } from '@/context/AuthContext';
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, studentIsAuthenticated } = useAuth();
+    const { login, studentIsAuthenticated, studentUsername } = useAuth();
 
     useEffect(() => {
         if (studentIsAuthenticated) {
-            navigate('/student/dashboard');
+            if (studentUsername === 'if220183') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/student/dashboard');
+            }
         }
-    }, [studentIsAuthenticated, navigate]);
+    }, [studentIsAuthenticated, studentUsername, navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
