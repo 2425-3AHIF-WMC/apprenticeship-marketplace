@@ -8,12 +8,12 @@ export class StudentService extends ServiceBase{
     }
 
     public async getAll(): Promise<IStudent[]> {
-        const stmt = await this.unit.prepare("select * from passenger");
+        const stmt = await this.unit.prepare("select * from student");
         return stmt.rows as IStudent[];
     }
 
     public async getById(id: number): Promise<IStudent>{
-        const stmt = await this.unit.prepare("select * from passenger where id = ?", [id]);
+        const stmt = await this.unit.prepare("select * from student where student_id = ?", [id]);
         return stmt.rows[0] as IStudent;
     }
 }
