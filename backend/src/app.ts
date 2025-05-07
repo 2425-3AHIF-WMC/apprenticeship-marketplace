@@ -12,9 +12,9 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use("api/student", studentRouter);
-app.use("api/internship", internshipRouter);
-app.use("api/company", companyRouter);
+app.use("/api/student", studentRouter);
+app.use("/api/internship", internshipRouter);
+app.use("/api/company", companyRouter);
 
 app.listen(5000, async () => {
     const unit: Unit = await Unit.create(false);
