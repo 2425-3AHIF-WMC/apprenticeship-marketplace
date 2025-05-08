@@ -13,7 +13,7 @@ export class StudentService extends ServiceBase{
     }
 
     public async getById(id: number): Promise<IStudent>{
-        const stmt = await this.unit.prepare("select * from student where student_id = ?", [id]);
+        const stmt = await this.unit.prepare("select description as 'department', address as 'site', name as 'duration',  from student where student_id = ?", [id]);
         return stmt.rows[0] as IStudent;
     }
 }
