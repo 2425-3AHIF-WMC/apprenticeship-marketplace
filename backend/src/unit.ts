@@ -92,6 +92,7 @@ export async function ensureTablesCreated(): Promise<void> {
             password TEXT NOT NULL,
             email_verified BOOLEAN NOT NULL,
             admin_verified BOOLEAN NOT NULL,
+            company_logo TEXT,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
             );
 
