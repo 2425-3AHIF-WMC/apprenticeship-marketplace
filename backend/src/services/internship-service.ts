@@ -12,7 +12,7 @@ export class StudentService extends ServiceBase{
         return stmt.rows as IStudent[];
     }
 
-    public async getById(id: number): Promise<IStudent>{
+    public async getById(id: number): Promise<IInternshipDetailed>{
         const stmt = await this.unit.prepare(`select d.name as "department", s.address as "site", internship_duration.description as "duration", i.description, i.salary, i.application_end, i.min_year, w.name as "work_type", i.title, c.name as "company_name", c.company_info
                                                                     from internship i
                                                                         join worktype w on (i.worktype_id = w.worktype_id)
