@@ -6,23 +6,14 @@ import {InternshipService} from "../services/internship-service.js";
 
 export const internshipRouter = express.Router();
 
-const pool = new Pool({
-    user: "postgres",
-    host: "postgres",
-    database: "cruddb",
-    password: "password",
-    port: 5432,
-});
-
-
-
-internshipRouter.get("/:id", async (req: Request, res: Response) => {
+internshipRouter.get("/:id_prop", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const { id } = req.params;
+    const { id_prop } = req.params;
 
-    if(typeof id != "number" || id < 0 || id === null){
+    let id: number = parseInt(id_prop);
+
+    if(!Number.isInteger(id) || id < 0 || id === null){
         res.sendStatus(StatusCodes.BAD_REQUEST);
-        console.log("id is not a number");
         return;
     }
     try{
@@ -32,6 +23,7 @@ internshipRouter.get("/:id", async (req: Request, res: Response) => {
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+
     } finally {
         await unit.complete();
     }
@@ -56,18 +48,15 @@ internshipRouter.get("/current", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     try{
         const service = new InternshipService(unit);
+
         const internship = await service.getAllCurrent();
+
         res.status(StatusCodes.OK).json(internship);
+
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
     } finally {
         await unit.complete();
     }
-});
-
-internshipRouter.get("/:internship_id/company", async (req, res) => {
-    const { internship_id } = req.params;
-    const result = await pool.query("SELECT name FROM company c JOIN site s on(c.company_id = s.company_id) JOIN internship i on(s.location_id = i.location_id) where i.internship_id=$1", [internship_id]);
-    res.json(result.rows);
 });

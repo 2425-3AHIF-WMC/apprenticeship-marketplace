@@ -41,7 +41,7 @@ export class InternshipService extends ServiceBase{
                                                                         join department d on (idm.department_id = d.department_id)
                                                                         join site s on (s.location_id = i.location_id)
                                                                         join company c on (s.company_id = c.company_id)
-                                                                    where i.internship_id = ?;`, [id]);
+                                                                    where i.internship_id = $1;`, [id]);
         return stmt.rows[0] as IInternshipDetailed;
     }
 }
