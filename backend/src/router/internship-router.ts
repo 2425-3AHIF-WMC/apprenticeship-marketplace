@@ -1,10 +1,8 @@
 import express, {Request, Response} from "express";
 import {Pool} from "pg";
-import {Unit} from "../unit";
+import {Unit} from "../unit.js";
 import {StatusCodes} from "http-status-codes";
-import {StudentService} from "../services/student-service";
-import {studentRouter} from "./student-router";
-import {InternshipService} from "../services/internship-service";
+import {InternshipService} from "../services/internship-service.js";
 
 export const internshipRouter = express.Router();
 
