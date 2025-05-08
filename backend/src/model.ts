@@ -21,3 +21,15 @@ export interface IInternshipDetailed{
     company_info: string;
     company_logo: string;
 }
+
+export interface IInternship{
+    title: String;
+    company_name: String;
+    application_end: Date;
+    min_year: number;
+    department: String;
+    site: String;
+    work_type: String;
+    company_logo: String;
+    duration: String;
+}
