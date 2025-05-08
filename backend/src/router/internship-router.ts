@@ -22,6 +22,7 @@ internshipRouter.get("/:id", async (req: Request, res: Response) => {
 
     if(typeof id != "number" || id < 0 || id === null){
         res.sendStatus(StatusCodes.BAD_REQUEST);
+        console.log("id is not a number");
         return;
     }
     try{
@@ -38,8 +39,17 @@ internshipRouter.get("/:id", async (req: Request, res: Response) => {
 
 
 internshipRouter.get("/", async (req, res) => {
-   const result = await pool.query("SELECT * FROM internship");
-   res.json(result.rows);
+    const unit: Unit = await Unit.create(true);
+    try{
+        const service = new InternshipService(unit);
+        const internship = await service.getAll();
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 internshipRouter.get("/current", async (req, res) => {
