@@ -53,8 +53,17 @@ internshipRouter.get("/", async (req, res) => {
 });
 
 internshipRouter.get("/current", async (req, res) => {
-    const result = await pool.query("SELECT * FROM internship WHERE application_end > CURRENT_DATE");
-    res.json(result.rows);
+    const unit: Unit = await Unit.create(true);
+    try{
+        const service = new InternshipService(unit);
+        const internship = await service.getAllCurrent();
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 internshipRouter.get("/:internship_id/company", async (req, res) => {
