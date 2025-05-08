@@ -2,7 +2,7 @@ import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
 import {IInternshipDetailed, IStudent} from "../model.js";
 
-export class StudentService extends ServiceBase{
+export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
         super(unit);
     }

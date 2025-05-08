@@ -1,5 +1,10 @@
 import express, {Request, Response} from "express";
 import {Pool} from "pg";
+import {Unit} from "../unit";
+import {StatusCodes} from "http-status-codes";
+import {StudentService} from "../services/student-service";
+import {studentRouter} from "./student-router";
+import {InternshipService} from "../services/internship-service";
 
 export const internshipRouter = express.Router();
 
@@ -11,11 +16,28 @@ const pool = new Pool({
     port: 5432,
 });
 
+
+
 internshipRouter.get("/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
     const { id } = req.params;
-    const result = await pool.query("SELECT * FROM internship WHERE id = $1", [id]);
-    res.json(result.rows);
+
+    if(typeof id != "number" || id < 0 || id === null){
+        res.sendStatus(StatusCodes.BAD_REQUEST);
+        return;
+    }
+    try{
+        const service = new InternshipService(unit);
+        const internship = await service.getById(id);
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
+
 
 internshipRouter.get("/", async (req, res) => {
    const result = await pool.query("SELECT * FROM internship");
