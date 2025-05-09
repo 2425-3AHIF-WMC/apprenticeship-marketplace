@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -47,7 +46,7 @@ const internship = {
   company: 'LT-Studios',
   location: 'Graz',
   duration: '6 Wochen',
-  deadline: '2025-04-30',
+  deadline: '2025-07-30',
   added: '2025-03-29',
   clicks: 89,
   workMode: 'Hybrid',

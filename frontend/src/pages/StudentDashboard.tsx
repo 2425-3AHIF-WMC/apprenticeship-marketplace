@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookmarkIcon, Search, Calendar, FileText, FileCheck } from 'lucide-react';
+import { BookmarkIcon, Search, Calendar, FileCheck } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipProps } from '@/components/InternshipCard';
 import { useAuth } from '@/context/AuthContext';
