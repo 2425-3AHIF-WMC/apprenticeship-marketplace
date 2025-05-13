@@ -21,6 +21,8 @@ const pool = new Pool({
 companyRouter.get("/", async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM company");
     res.json(result.rows);
+    console.log("CLEAR \r\n\r\n\r\n\r\n")
+    console.clear();
 })
 
 companyRouter.get("/:id", async (req: Request, res: Response) => {
@@ -41,6 +43,7 @@ companyRouter.post("/login", async (req:Request, res: Response) => {
 
         if (result.rows.length === 0) {
             res.status(401).json("E-Mail or password incorrect");
+            return;
         }
         const company : ICompany = result.rows[0];
         // Acesstoken erstellen
