@@ -4,7 +4,14 @@ import {Unit} from "../unit";
 import {StudentService} from "../services/student-service";
 import {ICompany, IStudent} from "../model";
 import {StatusCodes} from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, {JwtPayload, VerifyErrors} from "jsonwebtoken";
+import {
+    generateAccessToken,
+    generateRefreshToken,
+    isRefreshTokenValid,
+    storeRefreshToken,
+    revokeRefreshToken,
+} from "../services/token-service";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -46,19 +53,19 @@ companyRouter.post("/login", async (req:Request, res: Response) => {
             return;
         }
         const company : ICompany = result.rows[0];
-        // Acesstoken erstellen
-
-        const accessToken = jwt.sign({
+        // Acesstoken & Refreshtoken erstellen
+        const payload = {
             company_id:company.company_id,
             admin_verified:company.admin_verified,
-            email_verified:company.email_verified
-        }, process.env.JWT_SECRET!)
-        res.json({
-            company:company.email,
-            admin_verified:company.admin_verified,
-            email_verified:company.email_verified,
-            accessToken
+            email_verified:company.email_verified        }
+        const newAccessToken= generateAccessToken(payload);
+        const newRefreshToken = generateRefreshToken(payload);
+        await storeRefreshToken(newRefreshToken, company.company_id)
+        res.status(StatusCodes.OK).json({
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
         });
+        return;
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });
     }
