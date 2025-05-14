@@ -8,9 +8,6 @@ import jwt, {JwtPayload, VerifyErrors} from "jsonwebtoken";
 import {
     generateAccessToken,
     generateRefreshToken,
-    isRefreshTokenValid,
-    storeRefreshToken,
-    revokeRefreshToken,
 } from "../services/token-service";
 import dotenv from "dotenv";
 dotenv.config();
@@ -28,8 +25,6 @@ const pool = new Pool({
 companyRouter.get("/", async (req: Request, res: Response) => {
     const result = await pool.query("SELECT * FROM company");
     res.json(result.rows);
-    console.log("CLEAR \r\n\r\n\r\n\r\n")
-    console.clear();
 })
 
 companyRouter.get("/:id", async (req: Request, res: Response) => {
@@ -38,8 +33,8 @@ companyRouter.get("/:id", async (req: Request, res: Response) => {
     res.json(result.rows);
 });
 
-companyRouter.post("/login", async (req:Request, res: Response) => {
-    const {email,password} = req.body;
+companyRouter.post("/login", async (req: Request, res: Response) => {
+    const { email, password } = req.body;
     try {
         const result = await pool.query(
             `SELECT c.*
@@ -60,7 +55,7 @@ companyRouter.post("/login", async (req:Request, res: Response) => {
             email_verified:company.email_verified        }
         const newAccessToken= generateAccessToken(payload);
         const newRefreshToken = generateRefreshToken(payload);
-        await storeRefreshToken(newRefreshToken, company.company_id)
+
         res.status(StatusCodes.OK).json({
             accessToken: newAccessToken,
             refreshToken: newRefreshToken,
