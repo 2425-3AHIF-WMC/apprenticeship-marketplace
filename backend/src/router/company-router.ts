@@ -8,7 +8,7 @@ import jwt, {JwtPayload, VerifyErrors} from "jsonwebtoken";
 import {
     generateAccessToken,
     generateRefreshToken,
-} from "../services/token-service";
+} from "../services/token-service.js";
 import dotenv from "dotenv";
 dotenv.config();
 
