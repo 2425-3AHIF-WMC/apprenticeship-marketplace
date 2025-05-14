@@ -21,6 +21,9 @@ const Login = () => {
     const [isRegistration, setIsRegistration] = useState(false);
     const navigate = useNavigate();
     const { login, studentIsAuthenticated, studentUsername } = useAuth();
+    const [emailLogin, setEmailLogin] = useState('');
+    const [passwordLogin, setPasswordLogin] = useState('');
+
 
     useEffect(() => {
         if (studentIsAuthenticated) {
@@ -38,6 +41,34 @@ const Login = () => {
             await login();
         } catch (error) {
             console.error('Login failed:', error);
+            setIsLoading(false);
+        }
+    };
+
+    const handleCompanyLogin = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/company/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: emailLogin,
+                    password: passwordLogin
+                }),
+            });
+            if (!res.ok) {
+                throw new Error("Login fehlgeschlagen");
+            }
+            const data = await res.json();
+
+            localStorage.setItem("companyAccessToken", data.accessToken);
+            localStorage.setItem("companyRefreshToken", data.refreshToken);
+
+        } catch (err) {
+            console.error(err);
+        } finally {
             setIsLoading(false);
         }
     };
@@ -113,12 +144,13 @@ const Login = () => {
                                     </CardHeader>
                                         <CardContent>
                                         <label className="text-sm font-medium">E-Mail</label>
-                                        <Input type={"email"} className="mb-4" placeholder="E-Mail eingeben"/>
+                                        <Input type={"email"} value={emailLogin} onChange={e => setEmailLogin(e.target.value)} className="mb-4" placeholder="E-Mail eingeben"/>
                                         <label className="text-sm font-medium">Passwort</label>
-                                        <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
+                                        <Input type="password" value={passwordLogin} onChange={e => setPasswordLogin(e.target.value)} className="mb-4" placeholder="Passwort eingeben" />
                                         <Button
                                             className="w-full text-md"
                                             disabled={isLoading}
+                                            onClick={handleCompanyLogin}
                                         >
                                             {isLoading ? "Anmeldung läuft..." : "Anmelden"}
                                         </Button>
@@ -175,7 +207,6 @@ const Login = () => {
                     </FadeIn>
                 </div>
             </main>
-
             <Footer/>
         </div>
     );
