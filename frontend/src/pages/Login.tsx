@@ -15,6 +15,8 @@ import Footer from '@/components/Footer';
 import {useAuth} from '@/context/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import {Input} from "@/components/ui/input.tsx";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
+import {ShieldAlert} from "lucide-react";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +25,7 @@ const Login = () => {
     const { login, studentIsAuthenticated, studentUsername } = useAuth();
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 
     useEffect(() => {
@@ -59,7 +62,8 @@ const Login = () => {
                 }),
             });
             if (!res.ok) {
-                throw new Error("Login fehlgeschlagen");
+                setIsDialogOpen(true);
+                return;
             }
             const data = await res.json();
 
@@ -208,6 +212,22 @@ const Login = () => {
                 </div>
             </main>
             <Footer/>
+            <Dialog open={isDialogOpen} onOpenChange={open => setIsDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <ShieldAlert className="text-red-600 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Login fehlgeschlagen</DialogTitle>
+                            <DialogDescription>
+                                Bitte überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setIsDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
