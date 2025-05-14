@@ -66,3 +66,25 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
     }
 })
 
+companyRouter.post("/refresh", async (req: Request, res: Response) => {
+    const refreshToken  = req.body;
+
+    if (!refreshToken) {
+        res.status(401).json("No refresh token");
+        return;
+    }
+
+    try {
+        const decoded : JwtPayload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as JwtPayload;
+
+        const newAccessToken = generateAccessToken({
+            company_id: decoded.company_id,
+            admin_verified: decoded.admin_verified,
+            email_verified: decoded.email_verified
+        });
+
+        res.status(200).json({accessToken: newAccessToken});
+    } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
