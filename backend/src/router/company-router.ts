@@ -67,7 +67,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
 })
 
 companyRouter.post("/refresh", async (req: Request, res: Response) => {
-    const refreshToken  = req.body;
+    const { refreshToken }  = req.body;
 
     if (!refreshToken) {
         res.status(401).json("No refresh token");
@@ -86,5 +86,23 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
         res.status(200).json({accessToken: newAccessToken});
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+companyRouter.get("/verify", (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({ error: "No token" });
+        return;
+    }
+
+    const token = authHeader.split(" ")[1]; // to get the part after Bearer
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!);
+        res.status(200).json({ valid: true, decoded });
+    } catch (err) {
+        res.status(400).json({ error: "Invalid token" });
     }
 });
