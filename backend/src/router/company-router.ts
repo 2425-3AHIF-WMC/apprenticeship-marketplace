@@ -27,12 +27,6 @@ companyRouter.get("/", async (req: Request, res: Response) => {
     res.json(result.rows);
 })
 
-companyRouter.get("/:id", async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const result = await pool.query("SELECT * FROM company WHERE id = $1", [id]);
-    res.json(result.rows);
-});
-
 companyRouter.get("/me", async (req: Request, res: Response) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -128,3 +122,10 @@ companyRouter.get("/verify", (req: Request, res: Response) => {
         res.status(400).json({ error: "Invalid token" });
     }
 });
+
+companyRouter.get("/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await pool.query("SELECT * FROM company WHERE company_id = $1", [id]);
+    res.json(result.rows);
+});
+
