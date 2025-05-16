@@ -69,7 +69,7 @@ const Login = () => {
 
             localStorage.setItem("companyAccessToken", data.accessToken);
             localStorage.setItem("companyRefreshToken", data.refreshToken);
-
+            navigate('/company/dashboard');
         } catch (err) {
             console.error(err);
         } finally {
