@@ -33,6 +33,28 @@ companyRouter.get("/:id", async (req: Request, res: Response) => {
     res.json(result.rows);
 });
 
+companyRouter.get("/me", async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({ error: "No token" });
+        return;
+    }
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as JwtPayload;
+        const result = await pool.query("select company_id, name, email FROM company WHERE company_id = $1", [decoded.company_id]);
+        if (result.rows.length === 0) {
+            res.status(404).json({ error: "Company not found" });
+            return;
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(401).json({ error: "Invalid token" });
+    }
+});
+
+
 companyRouter.post("/login", async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
