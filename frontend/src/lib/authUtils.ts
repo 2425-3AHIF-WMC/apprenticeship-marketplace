@@ -1,12 +1,12 @@
-export async function checkCompanyAuth(): Promise<boolean> {
+export async function checkCompanyAuth(): Promise<string | null> {
     const token = localStorage.getItem("companyAccessToken");
     if (!token) {
-        return false;
+        return null;
     }
 
     const isValid = await verifyAccessToken(token);
     if (isValid) {
-        return true;
+        return token;
     }
 
     return await refreshToken();
@@ -27,10 +27,10 @@ async function verifyAccessToken(token: string): Promise<boolean> {
     }
 }
 
-async function refreshToken(): Promise<boolean> {
+async function refreshToken(): Promise<string | null> {
     const refreshToken = localStorage.getItem("companyRefreshToken");
     if (!refreshToken) {
-        return false;
+        return null;
     }
 
     try {
@@ -43,19 +43,19 @@ async function refreshToken(): Promise<boolean> {
         });
 
         if (!res.ok) {
-            return false;
+            return null;
         }
 
         const data = await res.json();
 
         if (data.accessToken != null) {
             localStorage.setItem("companyAccessToken", data.accessToken);
-            return true;
+            return data.accessToken;
         }
 
-        return false;
+        return null;
     } catch (error) {
         console.log(error);
-        return false;
+        return null;
     }
 }

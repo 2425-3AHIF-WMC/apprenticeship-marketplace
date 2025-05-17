@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, X, User, ChevronDown, LogOut } from "lucide-react";
+import {Menu, X, User, ChevronDown, LogOut, Building} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -127,9 +127,9 @@ const Navbar = () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" className="gap-2 px-2 md:px-4">
-
-                                        <User className="h-4 w-4" />
-
+                                        { studentIsAuthenticated ?
+                                        <User className="h-4 w-4" /> : <Building className="h-4 w-4"/>
+                                        }
                                         {!isMobile && displayName}
                                         <ChevronDown className="h-4 w-4" />
                                     </Button>

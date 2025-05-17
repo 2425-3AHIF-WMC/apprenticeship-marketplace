@@ -42,7 +42,7 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
             res.status(404).json({ error: "Company not found" });
             return;
         }
-        res.json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
     } catch (err) {
         res.status(401).json({ error: "Invalid token" });
     }
@@ -78,7 +78,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
         });
         return;
     } catch (err) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: err });
     }
 })
 
@@ -122,10 +122,10 @@ companyRouter.get("/verify", (req: Request, res: Response) => {
         res.status(400).json({ error: "Invalid token" });
     }
 });
-
+/*
 companyRouter.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM company WHERE company_id = $1", [id]);
     res.json(result.rows);
 });
-
+*/
