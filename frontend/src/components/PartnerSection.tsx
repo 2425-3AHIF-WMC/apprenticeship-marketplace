@@ -66,9 +66,9 @@ const PartnerSection = () => {
                             </FadeIn>
                         </div>
 
-                        <div className="grid md:grid-cols-5 gap-8 relative">
-                            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-border -z-10" />
-
+                        <div className="grid xl:grid-cols-5 gap-8 relative items-stretch px-4 md:px-0">
+                            <div className="hidden xl:block absolute top-1/2 left-0 right-0 h-0.5 bg-border -z-10" />
+                            <div className="block xl:hidden absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -z-10" style={{transform: 'translateX(-50%)'}} />
                             {[
                                 {
                                     step: "01",
@@ -97,8 +97,8 @@ const PartnerSection = () => {
                                 }
                             ].map((item, i) => (
                                 <FadeIn key={item.step} delay={i * 200 + 300}>
-                                    <div className="relative">
-                                        <div className="p-6 rounded-xl bg-card shadow-subtle border border-border/40 relative z-10 h-full dark:bg-card/80">
+                                    <div className="relative h-full flex flex-col">
+                                        <div className="p-6 rounded-xl bg-card shadow-subtle border border-border/40 relative z-10 h-full flex flex-col">
                                             <div className="absolute -top-5 left-6 inline-flex items-center justify-center h-10 w-10 rounded-full bg-primary text-white font-bold">
                                                 {item.step}
                                             </div>
