@@ -101,7 +101,7 @@ const Navbar = () => {
 
                                     {studentIsAuthenticated && (
                                         <DropdownMenuItem asChild>
-                                            <Link to="/student/dashboard">Dashboard</Link>
+                                            <Link to={studentUsername === 'if220183' ? '/admin/dashboard' : '/student/dashboard'}>Dashboard</Link>
                                         </DropdownMenuItem>
                                     )}
                                     {studentIsAuthenticated && (
