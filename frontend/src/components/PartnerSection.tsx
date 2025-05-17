@@ -1,6 +1,6 @@
-import {Button} from '@/components/ui/button';
-import {ArrowRight} from 'lucide-react';
-import {Link} from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import FadeIn from './FadeIn';
 
 const PartnerSection = () => {
@@ -11,32 +11,21 @@ const PartnerSection = () => {
                     <FadeIn>
                         <h2 className="htl-header mb-8 text-center">Für Unternehmen</h2>
                     </FadeIn>
-                    <FadeIn delay={100}>
-                        <h2 className="heading-md mb-4">Praktika veröffentlichen leicht gemacht</h2>
-                    </FadeIn>
-                    <FadeIn delay={200}>
-                        <p className="text-muted-foreground max-w-2xl mx-auto">
-                            Um ein Praktikum hochladen zu dürfen, müssen Unternehmen
-                            zumindest <strong>Silber-Mitglied</strong> im Absolventenverein sein. Die Mitgliedschaft
-                            wird bei der erstmaligen Registrierung zum Praktikumsportal überprüft.
-                        </p>
-                    </FadeIn>
                 </div>
-                <FadeIn delay={300}>
+                <FadeIn delay={200}>
                     <div className="bg-muted rounded-2xl p-8 md:p-12 lg:text-left text-center">
                         <div className="grid md:grid-cols-2 gap-8 items-center">
                             <div>
-                                <h3 className="heading-sm mb-4">Mitglied werden & Praktika posten</h3>
+                                <h3 className="heading-sm mb-4">Registrieren & Praktika posten</h3>
                                 <p className="text-muted-foreground mb-8">
                                     Als Mitglied erhalten Sie exklusiven Zugang zu den <strong>Top-Schüler:innen der
-                                    HTL</strong>, die in der Industrie stark nachgefragt sind. Profitieren Sie von
+                                        HTL</strong>, die in der Industrie stark nachgefragt sind. Profitieren Sie von
                                     hochmotivierten Talenten mit exzellenter technischer Ausbildung.
                                 </p>
                                 <Button asChild>
-                                    <Link to="https://www.absleo.at/allgemeines/mitgliedschaft/" target="_blank"
-                                          rel="noopener noreferrer" className="flex items-center">
+                                    <Link to="/login" className="flex items-center">
                                         Jetzt Mitglied werden
-                                        <ArrowRight className="ml-2 h-4 w-4"/>
+                                        <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
                                 </Button>
                             </div>
@@ -61,8 +50,77 @@ const PartnerSection = () => {
                         </div>
                     </div>
                 </FadeIn>
-            </div>
-        </section>
+                <div className="container-xl py-16 md:py-24">
+                    <div className="text-center mb-16">
+                        <FadeIn>
+                            <span className="text-sm font-medium text-primary mb-2 block">Einfacher Prozess</span>
+                        </FadeIn>
+
+                            <FadeIn delay={100}>
+                                <h2 className="htl-header text-center">So funktioniert's</h2>
+                            </FadeIn>
+                            <FadeIn delay={200}>
+                                <p className="text-muted-foreground max-w-2xl mx-auto">
+                                    In wenigen Schritten können Sie als Unternehmen Praktika veröffentlichen und Nachwuchstalente erreichen.
+                                </p>
+                            </FadeIn>
+                        </div>
+
+                        <div className="grid md:grid-cols-5 gap-8 relative">
+                            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-border -z-10" />
+
+                            {[
+                                {
+                                    step: "01",
+                                    title: "Registrieren",
+                                    description: "Erstellen Sie ein Unternehmenskonto mit Ihren Firmendaten."
+                                },
+                                {
+                                    step: "02",
+                                    title: "E-Mail verifizieren",
+                                    description: "Bestätigen Sie Ihre E-Mail-Adresse über den zugesandten Link."
+                                },
+                                {
+                                    step: "03",
+                                    title: "Praktikum hochladen",
+                                    description: "Laden Sie Ihr erstes Praktikumsangebot im Portal hoch."
+                                },
+                                {
+                                    step: "04",
+                                    title: "Admin prüft Unternehmen",
+                                    description: "Ein Administrator prüft und verifiziert Ihr Unternehmen."
+                                },
+                                {
+                                    step: "05",
+                                    title: "Praktika werden online gestellt",
+                                    description: "Nach der Verifizierung sind Ihre Praktika sofort für Schüler:innen sichtbar."
+                                }
+                            ].map((item, i) => (
+                                <FadeIn key={item.step} delay={i * 200 + 300}>
+                                    <div className="relative">
+                                        <div className="p-6 rounded-xl bg-card shadow-subtle border border-border/40 relative z-10 h-full dark:bg-card/80">
+                                            <div className="absolute -top-5 left-6 inline-flex items-center justify-center h-10 w-10 rounded-full bg-primary text-white font-bold">
+                                                {item.step}
+                                            </div>
+                                            <h3 className="text-xl font-semibold mt-6 mb-3">{item.title}</h3>
+                                            <p className="text-muted-foreground">{item.description}</p>
+                                        </div>
+                                    </div>
+                                </FadeIn>
+                            ))}
+                        </div>
+
+                        <div className="text-center mt-12">
+                            <Button asChild size="lg">
+                                <Link to="/login" className="flex items-center">
+                                    Jetzt starten
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
     );
 };
 
