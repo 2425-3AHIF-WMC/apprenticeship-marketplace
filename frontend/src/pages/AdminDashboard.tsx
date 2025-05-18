@@ -17,7 +17,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col gap-2">
               <h1 className="heading-md">Admin Dashboard</h1>
               <p className="text-muted-foreground">
-                Übersicht über das Praktikumsportal (Admin).
+                Übersicht über das Praktikumsportal.
               </p>
             </div>
           </FadeIn>
