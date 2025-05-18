@@ -74,6 +74,28 @@ const Navbar = () => {
         return baseLinks;
     };
 
+    const handleLogout = async () => {
+        if (studentIsAuthenticated) {
+            await logout();
+        } else if (companyIsAuthenticated) {
+            try {
+                const response = await fetch("http://localhost:5000/api/company/logout", {
+                    method: "POST",
+                    credentials: 'include',
+                });
+
+                if (response.ok) {
+                    setCompanyIsAuthenticated(false);
+                    setCompanyName(null);
+                    localStorage.removeItem('companyAccessToken');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    };
+
+
     const navLinks = getNavLinks();
 
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
@@ -146,8 +168,8 @@ const Navbar = () => {
                                             <Link to="/internships">Praktika</Link>
                                         </DropdownMenuItem>
                                     )}
-                                    {studentIsAuthenticated && (
-                                        <DropdownMenuItem onClick={logout} className="text-destructive">
+                                    {(studentIsAuthenticated || companyIsAuthenticated) && (
+                                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                                             <LogOut className="h-4 w-4 mr-2" />
                                             Abmelden
                                         </DropdownMenuItem>)}

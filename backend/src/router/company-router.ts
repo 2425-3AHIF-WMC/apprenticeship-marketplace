@@ -134,6 +134,21 @@ companyRouter.get("/verify", (req: Request, res: Response) => {
         res.status(400).json({ error: "Invalid token" });
     }
 });
+
+companyRouter.post("/logout", (req: Request, res: Response) => {
+    try {
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: false,
+            maxAge: 0
+        });
+        res.status(200).json({ message: "Logged out" });
+    } catch (err) {
+        res.status(500).json({ error: err });
+    }
+});
+
 /*
 companyRouter.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
