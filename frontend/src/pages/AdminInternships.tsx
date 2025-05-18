@@ -207,7 +207,7 @@ const AdminInternships = () => {
             matchesSchoolYear
         );
     }).sort((a, b) => {
-        if (sortBy === 'älteste Bewerbungsfrist') {
+        if (sortBy === 'Abgelaufen') {
             return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
         }
         if (sortBy === 'Neueste') {
@@ -281,7 +281,7 @@ const AdminInternships = () => {
                                             <option value="Nichts">Nichts</option>
                                             <option value="Aktuell Aktiv">Aktuell Aktiv</option>
                                             <option value="Neueste">Neueste</option>
-                                            <option value="älteste Bewerbungsfrist">Bewerbungsfrist</option>
+                                            <option value="Abgelaufen">Abgelaufen</option>
                                             <option value="Beliebteste">Beliebteste</option>
                                         </select>
 

@@ -12,6 +12,7 @@ import AccessDenied from "@/pages/AccessDenied";
 import StudentFavourites from "@/pages/StudentFavourites";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminInternships from "@/pages/AdminInternships";
+import AdminCompanies from "@/pages/AdminCompanies";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -76,7 +77,14 @@ function App() {
                     </ProtectedRoute>
                 }
                 />
-            
+            <Route
+                path="/admin/companies"
+                element={
+                    <ProtectedRoute>
+                        <AdminCompanies />
+                    </ProtectedRoute>
+                }
+            />
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
