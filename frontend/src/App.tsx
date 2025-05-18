@@ -12,6 +12,7 @@ import AccessDenied from "@/pages/AccessDenied";
 import StudentFavourites from "@/pages/StudentFavourites";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminInternships from "@/pages/AdminInternships";
+import AdminCompanies from "@/pages/AdminCompanies";
 import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
 import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 
@@ -78,6 +79,12 @@ function App() {
                     </ProtectedRoute>
                 }
                 />
+            <Route
+                path="/admin/companies"
+                element={
+                    <ProtectedRoute>
+                        <AdminCompanies />
+                    </ProtectedRoute>
 
             <Route
                 path="/company/dashboard"
