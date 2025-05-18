@@ -11,6 +11,8 @@ import StudentDashboard from "@/pages/StudentDashboard";
 import AccessDenied from "@/pages/AccessDenied";
 import StudentFavourites from "@/pages/StudentFavourites";
 import AdminDashboard from "@/pages/AdminDashboard";
+import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
+import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -65,6 +67,14 @@ function App() {
                     <ProtectedRoute>
                         <AdminDashboard />
                     </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/company/dashboard"
+                element={
+                    <ProtectedCompanyRoute>
+                        <CompanyDashboard/>
+                    </ProtectedCompanyRoute>
                 }
             />
             <Route path="/access-denied" element={<AccessDenied />} />

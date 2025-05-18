@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, X, User, ChevronDown, LogOut } from "lucide-react";
+import {Menu, X, User, ChevronDown, LogOut, Building} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "@/ThemeProvider";
 import { useAuth } from '@/context/AuthContext';
+import {checkCompanyAuth} from "@/lib/authUtils.ts";
 
 
 const Navbar = () => {
@@ -22,6 +23,37 @@ const Navbar = () => {
     const isMobile = useIsMobile();
     const { theme } = useTheme();
     const { studentIsAuthenticated, studentUsername, logout } = useAuth();
+    const [companyName, setCompanyName] = useState<string | null>(null);
+    const [companyIsAuthenticated, setCompanyIsAuthenticated] = useState(false);
+    useEffect(() => {
+        (async () => {
+            const token = await checkCompanyAuth();
+            if (!token) {
+                setCompanyIsAuthenticated(false);
+                setCompanyName(null);
+                return;
+            }
+
+            const res = await fetch("http://localhost:5000/api/company/me", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log(res);
+            if (res.ok) {
+                const data = await res.json();
+                console.log(data)
+                setCompanyName(data.name);
+                setCompanyIsAuthenticated(true);
+            } else {
+                setCompanyIsAuthenticated(false);
+                setCompanyName("None");
+            }
+        })();
+    }, []);
+
+
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
@@ -42,9 +74,36 @@ const Navbar = () => {
         return baseLinks;
     };
 
+    const handleLogout = async () => {
+        if (studentIsAuthenticated) {
+            await logout();
+        } else if (companyIsAuthenticated) {
+            try {
+                const response = await fetch("http://localhost:5000/api/company/logout", {
+                    method: "POST",
+                    credentials: 'include',
+                });
+
+                if (response.ok) {
+                    setCompanyIsAuthenticated(false);
+                    setCompanyName(null);
+                    localStorage.removeItem('companyAccessToken');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    };
+
+
     const navLinks = getNavLinks();
 
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
+
+
+    const displayName = studentIsAuthenticated ? studentUsername : (companyIsAuthenticated ? companyName : null);
+    const dashboardLink =
+        studentIsAuthenticated ? "/student/dashboard" : companyIsAuthenticated ? "/company/dashboard" : null;
 
     return (
         <header
@@ -86,22 +145,22 @@ const Navbar = () => {
 
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
-                        {studentIsAuthenticated ? (
+                        {studentIsAuthenticated || companyIsAuthenticated ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" className="gap-2 px-2 md:px-4">
-
-                                        <User className="h-4 w-4" />
-
-                                        {!isMobile && studentUsername}
+                                        { studentIsAuthenticated ?
+                                        <User className="h-4 w-4" /> : <Building className="h-4 w-4"/>
+                                        }
+                                        {!isMobile && displayName}
                                         <ChevronDown className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-popover">
 
-                                    {studentIsAuthenticated && (
+                                    {dashboardLink && (
                                         <DropdownMenuItem asChild>
-                                            <Link to="/student/dashboard">Dashboard</Link>
+                                            <Link to={dashboardLink}>Dashboard</Link>
                                         </DropdownMenuItem>
                                     )}
                                     {studentIsAuthenticated && (
@@ -109,8 +168,8 @@ const Navbar = () => {
                                             <Link to="/internships">Praktika</Link>
                                         </DropdownMenuItem>
                                     )}
-                                    {studentIsAuthenticated && (
-                                        <DropdownMenuItem onClick={logout} className="text-destructive">
+                                    {(studentIsAuthenticated || companyIsAuthenticated) && (
+                                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                                             <LogOut className="h-4 w-4 mr-2" />
                                             Abmelden
                                         </DropdownMenuItem>)}
