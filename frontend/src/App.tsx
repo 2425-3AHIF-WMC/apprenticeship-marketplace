@@ -13,6 +13,8 @@ import StudentFavourites from "@/pages/StudentFavourites";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminInternships from "@/pages/AdminInternships";
 import AdminCompanies from "@/pages/AdminCompanies";
+import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
+import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -83,6 +85,13 @@ function App() {
                     <ProtectedRoute>
                         <AdminCompanies />
                     </ProtectedRoute>
+
+            <Route
+                path="/company/dashboard"
+                element={
+                    <ProtectedCompanyRoute>
+                        <CompanyDashboard/>
+                    </ProtectedCompanyRoute>
                 }
             />
             <Route path="/access-denied" element={<AccessDenied />} />
