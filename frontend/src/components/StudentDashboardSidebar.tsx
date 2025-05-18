@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   BookmarkIcon,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -101,19 +100,13 @@ const StudentDashboardSidebar = () => {
           <SidebarItem 
             icon={BookmarkIcon} 
             label="Favoriten" 
-            to="/student/favorites" 
-            active={path === '/student/favorites'} 
-          />
-          <SidebarItem 
-            icon={Settings} 
-            label="Einstellungen" 
-            to="/student/settings" 
-            active={path === '/student/settings'} 
+            to="/student/favourites"
+            active={path === '/student/favourites'}
           />
           <SidebarItem 
             icon={Home} 
-            label="Zurück zur Startseite" 
-            to="/" 
+            label="Zurück zu den Praktika"
+            to="/internships"
           />
         </nav>
         

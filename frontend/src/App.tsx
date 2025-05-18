@@ -9,6 +9,13 @@ import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
 import AccessDenied from "@/pages/AccessDenied";
+import StudentFavourites from "@/pages/StudentFavourites";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminInternships from "@/pages/AdminInternships";
+import AdminCompanies from "@/pages/AdminCompanies";
+import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
+import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
+import AdminToVerify from "@/pages/AdminToVerify";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -47,6 +54,55 @@ function App() {
                     <ProtectedRoute>
                         <StudentDashboard />
                     </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/student/favourites"
+                element={
+                    <ProtectedRoute>
+                        <StudentFavourites />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <AdminDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/internships"
+                element={
+                    <ProtectedRoute>
+                        <AdminInternships />
+                    </ProtectedRoute>
+                }
+                />
+            <Route
+                path="/admin/companies"
+                element={
+                    <ProtectedRoute>
+                        <AdminCompanies />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/companies/verify"
+                element={
+                    <ProtectedRoute>
+                        <AdminToVerify />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/company/dashboard"
+                element={
+                    <ProtectedCompanyRoute>
+                        <CompanyDashboard/>
+                    </ProtectedCompanyRoute>
                 }
             />
             <Route path="/access-denied" element={<AccessDenied />} />
