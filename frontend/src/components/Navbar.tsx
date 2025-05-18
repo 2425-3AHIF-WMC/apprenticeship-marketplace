@@ -67,13 +67,6 @@ const Navbar = () => {
         setMobileMenuOpen(false);
     }, [pathname]);
 
-    const getNavLinks = () => {
-        const baseLinks = [{ href: "/", label: "Home" }];
-        baseLinks.push({ href: "/internships", label: "Praktika" });
-
-        return baseLinks;
-    };
-
     const handleLogout = async () => {
         if (studentIsAuthenticated) {
             await logout();
@@ -95,15 +88,12 @@ const Navbar = () => {
         }
     };
 
-
-    const navLinks = getNavLinks();
-
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
 
 
     const displayName = studentIsAuthenticated ? studentUsername : (companyIsAuthenticated ? companyName : null);
     const dashboardLink =
-        studentIsAuthenticated ? "/student/dashboard" : companyIsAuthenticated ? "/company/dashboard" : null;
+        studentIsAuthenticated ? (studentUsername === 'if220183' ? '/admin/dashboard' : '/student/dashboard') : companyIsAuthenticated ? "/company/dashboard" : null;
 
     return (
         <header
