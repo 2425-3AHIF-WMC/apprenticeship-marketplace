@@ -1,0 +1,40 @@
+= Work instructions
+
+== Web-Entwicklungstools
+* tailwind css: https://tailwindcss.com/
+** css Klassen, damit wir nicht selber css schreiben müssen
+* vite: https://vite.dev/
+** build tool
+* react: https://react.dev/
+** Komponenten erstellen, die in die pages eingefügt werden
+
+== Branching
+* wir arbeiten auf den feature branches
+** für jede Komponente wird neuer branch erstellt
+* Namensvergabe: feature/$page/$component
+* wenn eine Komponente fertig ist, wird sie auf den dev-branch gemerged
+* wenn eine Seite fertig ist, wird der dev-branch mit den main-branch gemerged
+
+== src-folder
+
+=== pages
+* einzelne pages
+* Beispiel: index-page, internship-page (quasi die html files)
+
+=== components
+* Komponenten, die in die einzelnen pages eingeführt werden
+* verwendet man immer wieder
+* Beispiel: Navbar
+
+=== ui
+* Dinge, die in die components eingefügt werden
+* verwendet man immer wieder
+* wenn man es nur 1 Mal braucht für eine bestimmte component, kommt es nicht in den ui-folder, sondern wird direkt in die Komponente eingefügt
+* Beispiel: Button, Card
+
+=== lib
+* Methoden, die wir immer wieder verwenden, die uns helfen
+* Beispiel: cn
+** damit können wir Klassen zusammenfügen
+** benutzen wir z.B. um den light und dark mode zu switchen
+

@@ -15,6 +15,7 @@ import AdminInternships from "@/pages/AdminInternships";
 import AdminCompanies from "@/pages/AdminCompanies";
 import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
 import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
+import AdminToVerify from "@/pages/AdminToVerify";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -84,6 +85,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <AdminCompanies />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/companies/verify"
+                element={
+                    <ProtectedRoute>
+                        <AdminToVerify />
                     </ProtectedRoute>
                 }
             />
