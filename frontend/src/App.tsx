@@ -85,6 +85,8 @@ function App() {
                     <ProtectedRoute>
                         <AdminCompanies />
                     </ProtectedRoute>
+                }
+            />
 
             <Route
                 path="/company/dashboard"
