@@ -56,6 +56,7 @@ const Login = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     email: emailLogin,
                     password: passwordLogin
@@ -68,7 +69,6 @@ const Login = () => {
             const data = await res.json();
 
             localStorage.setItem("companyAccessToken", data.accessToken);
-            localStorage.setItem("companyRefreshToken", data.refreshToken);
             navigate('/company/dashboard');
         } catch (err) {
             console.error(err);

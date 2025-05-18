@@ -2,16 +2,20 @@ import {internshipRouter} from "./router/internship-router.js";
 import {companyRouter} from "./router/company-router.js";
 import {studentRouter} from "./router/student-router.js";
 import {Unit, insertSampleData, ensureTablesCreated} from "./unit.js";
-
+import cookieParser from 'cookie-parser';
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8081',
+    credentials: true,
+    exposedHeaders: ['Authorization']
+}));
 app.use(bodyParser.json());
-
+app.use(cookieParser());
 app.use("/api/student", studentRouter);
 app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);

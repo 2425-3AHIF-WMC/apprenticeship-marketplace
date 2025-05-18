@@ -28,29 +28,21 @@ async function verifyAccessToken(token: string): Promise<boolean> {
 }
 
 async function refreshToken(): Promise<string | null> {
-    const refreshToken = localStorage.getItem("companyRefreshToken");
-    if (!refreshToken) {
-        return null;
-    }
-
     try {
         const res = await fetch("http://localhost:5000/api/company/refresh", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ refreshToken }),
+            credentials: 'include',
         });
 
         if (!res.ok) {
             return null;
         }
 
-        const data = await res.json();
 
-        if (data.accessToken != null) {
-            localStorage.setItem("companyAccessToken", data.accessToken);
-            return data.accessToken;
+        const accessToken = res.headers.get('Authorization')?.split(' ')[1];
+        if (accessToken != null) {
+            localStorage.setItem("companyAccessToken", accessToken);
+            return accessToken;
         }
 
         return null;

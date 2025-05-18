@@ -72,10 +72,15 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
         const newAccessToken= generateAccessToken(payload);
         const newRefreshToken = generateRefreshToken(payload);
 
-        res.status(StatusCodes.OK).json({
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-        });
+        res.cookie('refreshToken', newRefreshToken, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false, // for testing purposes, changing later
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            })
+            .header('Authorization', `Bearer ${newAccessToken}`)
+            .status(StatusCodes.OK)
+            .json({ accessToken: newAccessToken });
         return;
     } catch (err) {
         res.status(500).json({ error: err });
@@ -83,7 +88,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
 })
 
 companyRouter.post("/refresh", async (req: Request, res: Response) => {
-    const { refreshToken }  = req.body;
+    const refreshToken = req.cookies['refreshToken'];
 
     if (!refreshToken) {
         res.status(401).json("No refresh token");
@@ -99,8 +104,11 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
             email_verified: decoded.email_verified
         });
 
-        res.status(200).json({accessToken: newAccessToken});
-    } catch (err) {
+        res.header('Authorization', `Bearer ${newAccessToken}`)
+            .status(200)
+            .json({ accessToken: newAccessToken })
+    }
+    catch (err) {
         res.status(500).json({ error: "Internal server error" });
     }
 });
