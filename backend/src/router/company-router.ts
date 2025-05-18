@@ -1,15 +1,12 @@
 import express, {Request, Response} from "express";
 import {Pool} from "pg";
-import {Unit} from "../unit";
-import {StudentService} from "../services/student-service";
-import {ICompany, IStudent} from "../model";
+import {ICompany} from "../model";
 import {StatusCodes} from "http-status-codes";
-import jwt, {JwtPayload, VerifyErrors} from "jsonwebtoken";
-import {
-    generateAccessToken,
-    generateRefreshToken,
-} from "../services/token-service.js";
+import jwt, {JwtPayload} from "jsonwebtoken";
+import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
 import dotenv from "dotenv";
+import argon2 from '@node-rs/argon2';
+
 dotenv.config();
 
 export const companyRouter = express.Router();
@@ -55,15 +52,22 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
         const result = await pool.query(
             `SELECT c.*
              FROM company c
-             WHERE c.email = $1 AND c.password = $2`,
-            [email, password]
+             WHERE c.email = $1`,
+            [email]
         );
+        const company : ICompany = result.rows[0];
 
         if (result.rows.length === 0) {
             res.status(401).json("E-Mail or password incorrect");
             return;
         }
-        const company : ICompany = result.rows[0];
+
+        const isMatch = await argon2.verify(company.password, password);
+        if (!isMatch) {
+            res.status(401).json("E-Mail or password incorrect");
+            return
+        }
+
         // Acesstoken & Refreshtoken erstellen
         const payload = {
             company_id:company.company_id,
