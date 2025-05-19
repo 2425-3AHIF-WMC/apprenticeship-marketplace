@@ -60,7 +60,8 @@ const internship: InternshipDetailsUIProps = {
   min_year: '4. Schulstufe',
   company_link: 'https://random-company.com/ltstudios',
   internship_link: 'https://random-company.com/ltstudios',
-  company_id: '3'
+  company_id: '3',
+  pdf: '/job_postings/2.pdf'
 };
 
 const InternshipDescription = () => {
@@ -147,7 +148,7 @@ const InternshipDescription = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <div className="lg:col-span-2 overflow-x-auto ">
-              <Document file={`/job_postings/${internship.id}.pdf`}>
+              <Document file={internship.pdf}>
                 <Page pageNumber={1} className="w-full h-auto" scale={1.2}/>
               </Document>
             </div>

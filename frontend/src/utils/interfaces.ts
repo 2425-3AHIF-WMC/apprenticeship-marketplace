@@ -44,7 +44,7 @@ export interface InternshipDetailsUIProps {
     salary: string;
     internship_link: string;
     company_id: string;
-
+    pdf: string;
 }
 
 export interface CompanyUIPropsAdmin {
