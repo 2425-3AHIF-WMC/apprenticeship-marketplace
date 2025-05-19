@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
+import InternshipDescription from "./pages/InternshipDescription";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
@@ -45,6 +46,11 @@ function App() {
             <Route path="/internships" element={
                 <ProtectedRoute>
                     <Internships />
+                </ProtectedRoute>
+            } />
+            <Route path="/internships/1" element={
+                <ProtectedRoute>
+                    <InternshipDescription />
                 </ProtectedRoute>
             } />
             <Route path="/login" element={<Login />} />
