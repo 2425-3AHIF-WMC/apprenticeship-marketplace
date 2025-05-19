@@ -8,7 +8,8 @@ export interface IStudent{
 }
 
 export interface IInternshipDetailed{
-    department: string;
+    id: number;
+    department: string[];
     site: string;
     duration: string;
     description: string;
@@ -23,13 +24,14 @@ export interface IInternshipDetailed{
 }
 
 export interface IInternship{
-    title: String;
-    company_name: String;
+    id: number;
+    title: string;
+    company_name: string;
     application_end: Date;
     min_year: number;
-    department: String;
-    site: String;
-    work_type: String;
-    company_logo: String;
-    duration: String;
+    department: string[];
+    site: string;
+    work_type: string;
+    company_logo: string;
+    duration: string;
 }
