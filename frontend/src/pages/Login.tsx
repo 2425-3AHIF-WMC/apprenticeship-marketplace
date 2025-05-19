@@ -26,7 +26,20 @@ const Login = () => {
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+    const [nameRegistration, setNameRegistration] = useState('');
+    const [companyNumberRegistration, setCompanyNumberRegistration] = useState('');
+    const [emailRegistration, setEmailRegistration] = useState('');
+    const [phoneNumberRegistration, setPhoneNumberRegistration] = useState('');
+    const [websiteRegistration, setWebsiteRegistration] = useState('');
+    const [passwordRegistration, setPasswordRegistration] = useState('');
+    const [errors, setErrors] = useState<{
+        name?: string;
+        companyNumber?: string;
+        email?: string;
+        phone?: string;
+        website?: string;
+        password?: string;
+    }>({});
 
     useEffect(() => {
         if (studentIsAuthenticated) {
@@ -77,7 +90,40 @@ const Login = () => {
         }
     };
 
-    const handleRegistration = () => {
+    const handleCompanyRegistration = () => {
+        const newErrors: typeof errors = {};
+
+        if (!nameRegistration.trim()) {
+            newErrors.name = "Firmenname ist erforderlich.";
+        }
+
+        if (!companyNumberRegistration.trim()) {
+            newErrors.companyNumber = "Firmenbuchnummer ist erforderlich.";
+        }
+
+        if (!emailRegistration || !/^\w+@\w+\.\w+$/.test(emailRegistration)) {
+            newErrors.email = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+        }
+
+        if (!phoneNumberRegistration || !/^\+?[0-9\-()\s]+$/.test(phoneNumberRegistration)) {
+            newErrors.phone = "Bitte geben Sie eine gültige Telefonnummer ein.";
+        }
+
+        if (!websiteRegistration ||   !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(websiteRegistration.trim())) {
+            newErrors.website = "Bitte geben Sie eine gültige URL ein.";
+        }
+
+        if (!passwordRegistration || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:'",.<>/?]).{8,}$/.test(passwordRegistration)) {
+            newErrors.password = "Das Passwort muss mindestens 8 Zeichen lang sein, " +
+                "mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten.";
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const toggleCompanyRegisterForm = () => {
         setIsRegistration(prev => !prev);
     };
 
@@ -163,7 +209,7 @@ const Login = () => {
                                     <CardFooter className="flex justify-center border-t pt-6">
                                         <p className="text-sm text-muted-foreground">
                                             Sie haben noch kein Konto? Registrieren Sie sich <span
-                                            onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
+                                            onClick={toggleCompanyRegisterForm} className="text-primary cursor-pointer hover:underline">hier</span>
                                         </p>
                                     </CardFooter>
 
@@ -178,20 +224,45 @@ const Login = () => {
                                         </CardHeader>
                                             <CardContent>
                                                 <label className="text-sm font-medium">Firmenname</label>
-                                                <Input type="text" className="mb-4" placeholder="Firmenname eingeben"/>
+                                                <Input type="text" value={nameRegistration} className={`mb-1 ${errors.name ? 'border-red-500' : ''}`}
+                                                       onChange={e => setNameRegistration(e.target.value)} placeholder="Firmenname eingeben"/>
+                                                {errors.name && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.name}</p>
+                                                )}
                                                 <label className="text-sm font-medium">Firmenbuchnummer</label>
-                                                <Input type="text" className="mb-4" placeholder="Firmenbuchnummer eingeben"/>
+                                                <Input type="text" value={companyNumberRegistration} className={`mb-1 ${errors.companyNumber ? 'border-red-500' : ''}`}
+                                                       onChange={e => setCompanyNumberRegistration(e.target.value)} placeholder="Firmenbuchnummer eingeben"/>
+                                                {errors.companyNumber && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.companyNumber}</p>
+                                                )}
                                                 <label className="text-sm font-medium">E-Mail</label>
-                                                <Input type="email" className="mb-4" placeholder="E-Mail eingeben"/>
+                                                <Input type="email" value={emailRegistration} className={`mb-1 ${errors.email ? 'border-red-500' : ''}`}
+                                                       onChange={e => setEmailRegistration(e.target.value)} placeholder="E-Mail eingeben"/>
+                                                {errors.email && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.email}</p>
+                                                )}
                                                 <label className="text-sm font-medium">Telefonnummer</label>
-                                                <Input type="tel" className="mb-4" placeholder="Telefonnummer eingeben"/>
+                                                <Input type="tel" value={phoneNumberRegistration} className={`mb-1 ${errors.phone ? 'border-red-500' : ''}`}
+                                                       onChange={e => setPhoneNumberRegistration(e.target.value)} placeholder="Telefonnummer eingeben"/>
+                                                {errors.phone && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.phone}</p>
+                                                )}
                                                 <label className="text-sm font-medium">Webseite</label>
-                                                <Input type="url" className="mb-4" placeholder="Webseite eingeben"/>
+                                                <Input type="url" value={websiteRegistration} className={`mb-1 ${errors.website ? 'border-red-500' : ''}`}
+                                                       onChange={e => setWebsiteRegistration(e.target.value)} placeholder="Webseite eingeben"/>
+                                                {errors.website && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.website}</p>
+                                                )}
                                                 <label className="text-sm font-medium">Passwort</label>
-                                                <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
+                                                <Input type="email" value={passwordRegistration} className={`mb-1 ${errors.password ? 'border-red-500' : ''}`}
+                                                       onChange={e => setPasswordRegistration(e.target.value)} placeholder="Passwort eingeben" />
+                                                {errors.password && (
+                                                    <p className="text-sm text-red-500 mb-3">{errors.password}</p>
+                                                )}
                                                 <Button
                                                     className="w-full text-md"
                                                     disabled={isLoading}
+                                                    onClick={handleCompanyRegistration}
                                                 >
                                                     {isLoading ? "Registrierung läuft..." : "Registrieren"}
                                                 </Button>
@@ -200,7 +271,7 @@ const Login = () => {
                                         <CardFooter className="flex justify-center border-t pt-6">
                                             <p className="text-sm text-muted-foreground">
                                                 Sie haben bereits ein Konto? Melden Sie sich <span
-                                                onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
+                                                onClick={toggleCompanyRegisterForm} className="text-primary cursor-pointer hover:underline">hier</span>
                                                 <span> an</span>
                                             </p>
                                         </CardFooter>
