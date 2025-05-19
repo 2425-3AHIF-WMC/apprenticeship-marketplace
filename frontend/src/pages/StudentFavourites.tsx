@@ -12,12 +12,12 @@ import {
     CardTitle
 } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
-import { InternshipProps } from '@/components/InternshipCard';
+import { InternshipUIProps } from '@/utils/interfaces';
 import { cn } from '@/lib/utils';
 import StudentDashboardSidebar from "@/components/StudentDashboardSidebar.tsx";
 
 const StudentFavourites = () => {
-    const [favourites, setFavourites] = useState<InternshipProps[]>([]);
+    const [favourites, setFavourites] = useState<InternshipUIProps[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
 
 
@@ -49,7 +49,7 @@ const StudentFavourites = () => {
 
     const filteredFavorites = favourites.filter(favorite =>
         favorite.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        favorite.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        favorite.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         favorite.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         categoryIncludesSearchTerm(favorite.category, searchTerm)
     );
@@ -105,9 +105,9 @@ const StudentFavourites = () => {
                                                     <h3 className="font-semibold">{favourite.title}</h3>
                                                     <div
                                                         className="flex flex-col md:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
-                                                        <span>{favourite.company}</span>
+                                                        <span>{favourite.company_name}</span>
                                                         <span>{favourite.location}</span>
-                                                        <span>Frist: {favourite.deadline}</span>
+                                                        <span>Frist: {favourite.application_end}</span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2 mt-2">
                                                         {Array.isArray(favourite.category) ? (
@@ -132,7 +132,7 @@ const StudentFavourites = () => {
                                                             </span>
                                                         )}
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                            {favourite.workMode}
+                                                            {favourite.work_type}
                                                         </span>
                                                     </div>
                                                 </div>

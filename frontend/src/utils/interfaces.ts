@@ -64,21 +64,6 @@ export interface InternshipUIProps {
     category: string[];
     company_link: string;
 }
-export interface InternshipProps {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    duration: string;
-    deadline: string;
-    workMode: string;
-    logo?: string;
-    category: string[];
-    schoolYear?: string;
-    companyLink: string;
-    added: string;
-    clicks: number;
-}
 
 export interface CompanyUIProps {
     id: string;
