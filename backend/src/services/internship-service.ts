@@ -1,13 +1,13 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
-import {IInternshipDetailed, IStudent} from "../model.js";
+import {IInternship, IInternshipDetailed, IStudent} from "../model.js";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
         super(unit);
     }
 
-    public async getAll(): Promise<IStudent[]> {
+    public async getAll(): Promise<IInternship[]> {
         const stmt = await this.unit.prepare(`select i.title, c.name as "company_name", i.application_end, i.min_year, d.name as "department", s.address as "site", wt.name as "work_type", c.company_logo, id.description as "duration"
                                                                     from internship i
                                                                         join worktype wt on(i.worktype_id = wt.worktype_id)
@@ -16,10 +16,10 @@ export class InternshipService extends ServiceBase{
                                                                         join department d on (idm.department_id = d.department_id)
                                                                         join site s on(i.location_id = s.location_id)
                                                                         join company c on (s.company_id = c.company_id);`);
-        return stmt.rows as IStudent[];
+        return stmt.rows as IInternship[];
     }
 
-    public async getAllCurrent(): Promise<IStudent[]> {
+    public async getAllCurrent(): Promise<IInternship[]> {
         const stmt = await this.unit.prepare(`select i.title, c.name as "company_name", i.application_end, i.min_year, d.name as "department", s.address as "site", wt.name as "work_type", c.company_logo, id.description as "duration"
                                                                     from internship i
                                                                         join worktype wt on(i.worktype_id = wt.worktype_id)
@@ -29,7 +29,7 @@ export class InternshipService extends ServiceBase{
                                                                         join site s on(i.location_id = s.location_id)
                                                                         join company c on (s.company_id = c.company_id)
                                                                         WHERE i.application_end > CURRENT_DATE;`);
-        return stmt.rows as IStudent[];
+        return stmt.rows as IInternship[];
     }
 
     public async getById(id: number): Promise<IInternshipDetailed>{
