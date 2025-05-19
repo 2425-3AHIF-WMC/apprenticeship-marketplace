@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Search, CheckCircle, XCircle, ShieldCheck, ExternalLink, BookmarkX } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
-import { cn } from '@/lib/utils';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
+import CompanyCard from '@/components/CompanyCard';
 
 const ALL_COMPANIES = [
   {
@@ -17,6 +17,8 @@ const ALL_COMPANIES = [
     phone_number: '+43 123 456789',
     email_verified: true,
     admin_verified: true,
+    logo: '/assets/company-logos/LT-Studios_Logo.png'
+
   },
   {
     id: '2',
@@ -26,6 +28,8 @@ const ALL_COMPANIES = [
     phone_number: '+43 987 654321',
     email_verified: true,
     admin_verified: false,
+    logo: '/assets/company-logos/LT-Studios_Logo.png'
+
   },
   {
     id: '3',
@@ -35,6 +39,8 @@ const ALL_COMPANIES = [
     phone_number: '+43 555 123456',
     email_verified: false,
     admin_verified: false,
+    logo: '/assets/company-logos/LT-Studios_Logo.png'
+
   },
   {
     id: '4',
@@ -44,6 +50,8 @@ const ALL_COMPANIES = [
     phone_number: '+43 222 333444',
     email_verified: true,
     admin_verified: true,
+    logo: '/assets/company-logos/LT-Studios_Logo.png'
+
   },
   {
     id: '5',
@@ -53,6 +61,7 @@ const ALL_COMPANIES = [
     phone_number: '+43 111 222333',
     email_verified: false,
     admin_verified: false,
+    logo: '/assets/company-logos/LT-Studios_Logo.png'
   },
 ];
 
@@ -62,23 +71,6 @@ const getStatus = (company: any) => {
   return 'keine';
 };
 
-const statusStyles = {
-  vollständig: 'bg-green-100 text-green-800',
-  nur_email: 'bg-yellow-100 text-yellow-800',
-  keine: 'bg-red-100 text-red-800',
-};
-
-const statusIcons = {
-  vollständig: <CheckCircle className="h-5 w-5 text-green-600 mr-1" />, // fully verified
-  nur_email: <ShieldCheck className="h-5 w-5 text-yellow-600 mr-1" />, // only email
-  keine: <XCircle className="h-5 w-5 text-red-600 mr-1" />, // not verified
-};
-
-const statusLabels = {
-  vollständig: 'Vollständig verifiziert',
-  nur_email: 'Nur E-Mail verifiziert',
-  keine: 'Nicht verifiziert',
-};
 
 const AdminToVerify = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -137,53 +129,26 @@ const AdminToVerify = () => {
               <CardContent>
                 {filteredCompanies.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredCompanies.map((company) => {
-                      const status = getStatus(company);
-                      return (
-                        <div
-                          key={company.id}
-                          className={cn(
-                            'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg transition-colors',
-                            status === 'vollständig' && 'bg-green-50',
-                            status === 'nur_email' && 'bg-yellow-50',
-                            status === 'keine' && 'bg-red-50'
-                          )}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', statusStyles[status])}>
-                                {statusIcons[status]}
-                                {statusLabels[status]}
-                              </span>
-                            </div>
-                            <h3 className="font-semibold text-left text-lg">{company.name}</h3>
-                            <div className="flex flex-col md:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
-                              <span>E-Mail: {company.email}</span>
-                              <span>Website: <a href={company.website} target="_blank" rel="noopener noreferrer" className="underline text-blue-700">{company.website}</a></span>
-                              <span>Telefon: {company.phone_number}</span>
-                            </div>
-                          </div>
-                          <div className="flex flex-row gap-2 self-end md:self-auto">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/companies/${company.id}`}>
-                                <ExternalLink className="h-4 w-4 mr-1" />
-                                Details
-                              </Link>
-                            </Button>
-                            {status === 'nur_email' ? (
-                              <Button variant="default" size="sm">
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Akzeptieren
-                              </Button>
-                            ) : null}
-                            <Button variant="destructive" size="sm">
-                              <BookmarkX className="h-4 w-4 mr-1" />
-                              Entfernen
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {filteredCompanies.map((company) => (
+                      <CompanyCard key={company.id} company={company}>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/companies/${company.id}`}>
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Details
+                          </Link>
+                        </Button>
+                        {getStatus(company) === 'nur_email' ? (
+                          <Button variant="default" size="sm">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Akzeptieren
+                          </Button>
+                        ) : null}
+                        <Button variant="destructive" size="sm">
+                          <BookmarkX className="h-4 w-4 mr-1" />
+                          Entfernen
+                        </Button>
+                      </CompanyCard>
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">

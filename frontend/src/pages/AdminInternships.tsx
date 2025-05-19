@@ -23,12 +23,14 @@ const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
     duration: item.duration,
     application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
     added: item.added || '',
-    clicks: item.clicks || 0,
+    views: item.clicks || 0,
     work_type: item.work_type,
     company_logo: item.company_logo,
     category: Array.isArray(item.department) ? item.department : [item.department],
     min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
     company_link: item.companyLink || '',
+    internship_link: 'https://random-company.com/ltstudios'
+
 });
 
 
@@ -92,7 +94,7 @@ const AdminInternships = () => {
             return new Date(b.added).getTime() - new Date(a.added).getTime();
         }
         if (sortBy === 'Beliebteste') {
-            return b.clicks - a.clicks;
+            return b.views - a.views;
         }
         if (sortBy === 'Aktuell Aktiv') {
             return new Date(b.application_end).getTime() - new Date(a.application_end).getTime();
