@@ -106,11 +106,16 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             res.status(409).json({error: "E-Mail is already in Use"});
             return;
         }
-
+        const hashedPassword = await argon2.hash(password, {
+            algorithm: argon2.Algorithm.Argon2id,
+            memoryCost: 2 ** 16,
+            timeCost: 3,
+            parallelism: 2,
+        })
         await pool.query(`
             INSERT INTO COMPANY(name, website, email, phone_number, password, email_verified, admin_verified)
             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [name, website, email, phoneNumber, password, false, false]);
+            [name, website, email, phoneNumber, hashedPassword, false, false]);
 
         res.status(200).send('Company created');
     } catch (err) {
