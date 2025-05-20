@@ -67,13 +67,6 @@ const Navbar = () => {
         setMobileMenuOpen(false);
     }, [pathname]);
 
-    const getNavLinks = () => {
-        const baseLinks = [{ href: "/", label: "Home" }];
-        baseLinks.push({ href: "/internships", label: "Praktika" });
-
-        return baseLinks;
-    };
-
     const handleLogout = async () => {
         if (studentIsAuthenticated) {
             await logout();
@@ -95,15 +88,12 @@ const Navbar = () => {
         }
     };
 
-
-    const navLinks = getNavLinks();
-
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
 
 
     const displayName = studentIsAuthenticated ? studentUsername : (companyIsAuthenticated ? companyName : null);
     const dashboardLink =
-        studentIsAuthenticated ? "/student/dashboard" : companyIsAuthenticated ? "/company/dashboard" : null;
+        studentIsAuthenticated ? (studentUsername === 'if220183' ? '/admin/dashboard' : '/student/dashboard') : companyIsAuthenticated ? "/company/dashboard" : null;
 
     return (
         <header
@@ -124,23 +114,30 @@ const Navbar = () => {
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-1">
-                        {navLinks.map((link) => (
+                        <Button
+                            key="/"
+                            variant="ghost"
+                            asChild
+                            className={cn(
+                                "hover:bg-primary hover:text-primary-foreground text-base md:text-lg font-bold",
+                                pathname === "/" ? "text-primary font-bold" : ""
+                            )}
+                        >
+                            <Link to="/">Home</Link>
+                        </Button>
+                        {studentIsAuthenticated && (
                             <Button
-                                key={link.href}
+                                key="/internships"
                                 variant="ghost"
                                 asChild
                                 className={cn(
                                     "hover:bg-primary hover:text-primary-foreground text-base md:text-lg font-bold",
-                                    pathname === link.href ? "text-primary font-bold" : ""
+                                    pathname === "/internships" ? "text-primary font-bold" : ""
                                 )}
                             >
-                                <Link
-                                    to={link.href}
-                                >
-                                    {link.label}
-                                </Link>
+                                <Link to="/internships">Praktika</Link>
                             </Button>
-                        ))}
+                        )}
                     </nav>
 
                     <div className="flex items-center gap-2">
@@ -210,23 +207,28 @@ const Navbar = () => {
                 >
                     <div className="container-xl py-4">
                         <nav className="flex flex-col space-y-1">
-                            {navLinks.map((link) => (
+                            <Button
+                                key="/"
+                                variant="ghost"
+                                asChild
+                                className={cn("justify-start hover:bg-primary hover:text-primary-foreground text-base md:text-lg font-bold", {
+                                    "bg-muted": pathname === "/",
+                                })}
+                            >
+                                <Link to="/">Home</Link>
+                            </Button>
+                            {studentIsAuthenticated && (
                                 <Button
-                                    key={link.href}
+                                    key="/internships"
                                     variant="ghost"
                                     asChild
                                     className={cn("justify-start hover:bg-primary hover:text-primary-foreground text-base md:text-lg font-bold", {
-                                        "bg-muted": pathname === link.href,
-
+                                        "bg-muted": pathname === "/internships",
                                     })}
                                 >
-                                    <Link
-                                        to={link.href}
-                                    >
-                                        {link.label}
-                                    </Link>
+                                    <Link to="/internships">Praktika</Link>
                                 </Button>
-                            ))}
+                            )}
                         </nav>
                     </div>
                 </div>

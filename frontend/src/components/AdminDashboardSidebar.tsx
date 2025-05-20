@@ -9,7 +9,8 @@ import {
   X,
   Building,
   ShieldCheck,
-  BriefcaseBusiness
+  BriefcaseBusiness,
+  Home
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -115,6 +116,11 @@ const AdminDashboardSidebar = () => {
             label="Zu Verifizieren"
             to="/admin/companies/verify"
             active={path === '/admin/companies/verify'}
+          />
+          <SidebarItem 
+            icon={Home} 
+            label="Zurück zu den Praktika"
+            to="/internships"
           />
         </nav>
         <div className="pt-4 border-t border-border">

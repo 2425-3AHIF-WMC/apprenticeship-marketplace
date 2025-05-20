@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const { studentIsAuthenticated, studentToken } = useAuth();
+    const { studentIsAuthenticated, studentToken, studentUsername } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const location = useLocation();
 
@@ -27,8 +27,21 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     // Only redirect if we're sure the user is not authenticated
     if (!studentIsAuthenticated || !studentToken) {
-        console.log('Not authenticated, redirecting to access denied');
         return <Navigate to="/access-denied" state={{ from: location }} replace />;
+    }
+
+    // Admin route protection
+    if (location.pathname.startsWith('/admin')) {
+        if (studentUsername !== 'if220183') {
+            return <Navigate to="/access-denied" state={{ from: location }} replace />;
+        }
+    }
+
+    // Student route protection
+    if (location.pathname.startsWith('/student')) {
+        if (studentUsername === 'if220183') {
+            return <Navigate to="/access-denied" state={{ from: location }} replace />;
+        }
     }
 
     return <>{children}</>;
