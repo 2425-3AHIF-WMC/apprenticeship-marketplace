@@ -90,7 +90,13 @@ const Login = () => {
         }
     };
 
-    const handleCompanyRegistration = () => {
+    const handleCompanyRegistration = async () => {
+        if(!validateCompanyRegistrationFields()) {
+            return;
+        }
+    };
+
+    const validateCompanyRegistrationFields = () => {
         const newErrors: typeof errors = {};
 
         if (!nameRegistration.trim()) {
@@ -121,7 +127,7 @@ const Login = () => {
         setErrors(newErrors);
 
         return Object.keys(newErrors).length === 0;
-    };
+    }
 
     const toggleCompanyRegisterForm = () => {
         setIsRegistration(prev => !prev);
