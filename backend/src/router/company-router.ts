@@ -103,7 +103,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         );
 
         if (result.rows.length != 0) {
-            res.status(409).json("E-Mail is already in Use");
+            res.status(409).json({error: "E-Mail is already in Use"});
             return;
         }
 
