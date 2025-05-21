@@ -94,7 +94,34 @@ const Login = () => {
         if(!validateCompanyRegistrationFields()) {
             return;
         }
-    };
+        setIsLoading(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/company/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    name: nameRegistration,
+                    companyNumber: companyNumberRegistration,
+                    email: emailRegistration,
+                    phoneNumber: phoneNumberRegistration,
+                    website: websiteRegistration,
+                    password: passwordRegistration
+                })
+            });
+            if (!res.ok) {
+                return;
+            }
+            const data = await res.json();
+
+            localStorage.setItem("companyAccessToken", data.accessToken);
+            navigate('/company/dashboard');
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     const validateCompanyRegistrationFields = () => {
         const newErrors: typeof errors = {};
