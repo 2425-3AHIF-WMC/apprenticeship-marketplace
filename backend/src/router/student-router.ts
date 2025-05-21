@@ -31,18 +31,25 @@ studentRouter.get("/", async (req: Request, res: Response) => {
     }
 });
 
-studentRouter.get("/:id", async (req: Request, res: Response) => {
+studentRouter.get("/:paramId", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const { id } = req.params;
+    const { paramId } = req.params;
+    const id:number = parseInt(paramId);
 
-    if(typeof id != "number" || id < 0 || id === null){
+    if(isNaN(id) || id <= 0 || id === null){
         res.sendStatus(StatusCodes.BAD_REQUEST);
         return;
     }
+
     try{
         const service = new StudentService(unit);
-        const student = await service.getById(id);
-        res.status(StatusCodes.OK).json(student);
+        const student:IStudent = await service.getById(id);
+
+        if(student){
+            res.status(StatusCodes.OK).json(student);
+        } else {
+            res.sendStatus(StatusCodes.NOT_FOUND);
+        }
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -51,15 +58,15 @@ studentRouter.get("/:id", async (req: Request, res: Response) => {
     }
 });
 
+
+// NOTE: temporary code, so we can see how it will look like
+
 // CREATE
 studentRouter.post("/items", async (req: Request, res: Response) => {
     const { name } = req.body;
     const result = await pool.query("INSERT INTO items (name) VALUES ($1) RETURNING *", [name]);
     res.json(result.rows[0]);
 });
-
-
-// NOTE: temporary code, so we can see how it will look like
 
 // READ
 studentRouter.get("/items", async (req: Request, res: Response) => {

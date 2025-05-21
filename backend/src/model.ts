@@ -39,11 +39,21 @@ export interface IInternship{
 export interface ICompany {
     company_id: number,
     name: string,
+    company_number: string,
     company_info: string,
     website: string,
     email: string
     phone_number : string,
     password: string,
     email_verified: string,
-    admin_verified: string
+    admin_verified: string,
+    company_registration_timestamp: string,
+    email_verification_timestamp: Date,
+    admin_verification_timestamp: Date
+}
+
+export interface ICompanySmall {
+    company_id: number,
+    name: string,
+    email:string
 }
