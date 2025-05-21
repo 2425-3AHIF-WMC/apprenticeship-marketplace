@@ -287,7 +287,7 @@ const Login = () => {
                                                     <p className="text-sm text-red-500 mb-3">{errors.website}</p>
                                                 )}
                                                 <label className="text-sm font-medium">Passwort</label>
-                                                <Input type="email" value={passwordRegistration} className={`mb-1 ${errors.password ? 'border-red-500' : ''}`}
+                                                <Input type="password" value={passwordRegistration} className={`mb-1 ${errors.password ? 'border-red-500' : ''}`}
                                                        onChange={e => setPasswordRegistration(e.target.value)} placeholder="Passwort eingeben" />
                                                 {errors.password && (
                                                     <p className="text-sm text-red-500 mb-3">{errors.password}</p>
