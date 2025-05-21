@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, CheckCircle, XCircle, ShieldCheck, ExternalLink, BookmarkX } from 'lucide-react';
+import { Search, CheckCircle, ExternalLink, BookmarkX } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
