@@ -1,8 +1,8 @@
 import express, {Request, Response} from "express";
-import {Pool} from "pg";
 import {Unit} from "../unit.js";
 import {StatusCodes} from "http-status-codes";
 import {InternshipService} from "../services/internship-service.js";
+import {InternshipUIProps} from "../model";
 
 export const internshipRouter = express.Router();
 

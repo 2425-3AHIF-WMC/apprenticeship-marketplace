@@ -7,33 +7,51 @@ export interface IStudent{
     personType: string;
 }
 
-export interface IInternshipDetailed{
-    id: number;
-    department: string[];
-    site: string;
-    duration: string;
-    description: string;
-    salary: number;
-    application_end: Date;
-    min_year: number;
-    work_type: string;
+export interface InternshipUIProps {
+    id: string;
     title: string;
     company_name: string;
-    company_info: string;
+    application_end: string; // ISO date string
+    min_year: string;
+    location: string;
+    work_type: string;
     company_logo: string;
+    duration: string;
+    added: string;
+    views: number;
+    category: string[];
+    company_link: string;
+    internship_link: string;
+}
+export interface InternshipDetailsUIProps {
+    id: string;
+    title: string;
+    company_name: string;
+    application_end: string; // ISO date string
+    min_year: string;
+    location: string;
+    work_type: string;
+    company_logo: string;
+    duration: string;
+    added: string;
+    views: number;
+    category: string[];
+    company_link: string;
+    salary: string;
+    internship_link: string;
+    company_id: string;
+    pdf: string;
 }
 
-export interface IInternship{
-    id: number;
-    title: string;
-    company_name: string;
-    application_end: Date;
-    min_year: number;
-    department: string[];
-    site: string;
-    work_type: string;
-    company_logo: string;
-    duration: string;
+export interface CompanyUIPropsAdmin {
+    id: string;
+    name: string;
+    email: string;
+    website: string;
+    phone_number: string;
+    email_verified: boolean;
+    admin_verified: boolean;
+    logo: string;
 }
 
 export interface ICompany {
