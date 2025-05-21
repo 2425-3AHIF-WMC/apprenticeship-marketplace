@@ -1,6 +1,6 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
-import {InternshipDetailsUIProps, InternshipUIProps} from "../model";
+import {IInternship, InternshipDetailsUIProps, InternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
@@ -66,4 +66,11 @@ export class InternshipService extends ServiceBase{
                         `, [id]);
         return stmt.rows[0] as InternshipDetailsUIProps;
     }
+
+    public async newInternship(internship: IInternship){
+        const stmt = await this.unit.prepare(`INSERT INTO Internship (internship_id, title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
+                                                                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`, [])
+    }
+
+
 }
