@@ -55,7 +55,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS person (
             person_id SERIAL NOT NULL,
             username TEXT NOT NULL,
-            added TIMESTAMP NOT NULL,
+            person_creation_timestamp TIMESTAMP NOT NULL,
             persontype TEXT NOT NULL,
             CONSTRAINT pk_person PRIMARY KEY (person_id),
             CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
@@ -85,6 +85,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS company (
             company_id INTEGER NOT NULL,
             name TEXT NOT NULL,
+            company_number TEXT NOT NULL,
             company_info TEXT NOT NULL,
             website TEXT NOT NULL,
             email TEXT NOT NULL,
@@ -92,6 +93,9 @@ export async function ensureTablesCreated(): Promise<void> {
             password TEXT NOT NULL,
             email_verified BOOLEAN NOT NULL,
             admin_verified BOOLEAN NOT NULL,
+            company_registration_timestamp TIMESTAMP NOT NULL,
+            email_verfication_timestamp TIMESTAMP,
+            admin_verification_timestamp TIMESTAMP,
             company_logo TEXT,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
             );
@@ -133,13 +137,14 @@ export async function ensureTablesCreated(): Promise<void> {
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             min_year SMALLINT,
-            added TIMESTAMP NOT NULL,
+            internship_creation_timestamp TIMESTAMP NOT NULL,
             salary NUMERIC(6,2) NOT NULL,
             application_end DATE NOT NULL,
             location_id SMALLINT,
             clicks INTEGER NOT NULL,
             worktype_id INTEGER,
             internship_duration_id INTEGER,
+            internship_application_link TEXT NOT NULL,
             CONSTRAINT pk_internship PRIMARY KEY (internship_id),
             CONSTRAINT fk_internship_site FOREIGN KEY (location_id)
             REFERENCES site(location_id),
@@ -152,7 +157,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS favourite (
             favourite_id SMALLINT NOT NULL,
             student_id INTEGER,
-            added TIMESTAMP,
+            favourite_creation_timestamp TIMESTAMP,
             internship_id SMALLINT,
             CONSTRAINT pk_favourite PRIMARY KEY (favourite_id),
             CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
@@ -174,7 +179,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS viewed_internships (
             student_id INTEGER NOT NULL,
             internship_id SMALLINT NOT NULL,
-            viewdate TIMESTAMP NOT NULL,
+            viewed_timestamp TIMESTAMP NOT NULL,
             CONSTRAINT pk_viewed_internships PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_view_student FOREIGN KEY (student_id)
             REFERENCES student(student_id),
@@ -217,14 +222,14 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (4463, 'Großraming');
         
         -- Firmen
-        INSERT INTO Company (company_id, name, company_info, website, email, phone_number, password, email_verified, admin_verified) VALUES
-        (1, 'TechNova GmbH', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y'),
-        (2, 'GreenFuture AG', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y'),
-        (3, 'MediCare Solutions', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y'),
-        (4, 'EduLearn GmbH', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y'),
-        (5, 'AutoDrive AG', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y'),
-        (6, 'BuildTech', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y'),
-        (7, 'DataOcean GmbH', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y');
+        INSERT INTO Company (company_id, name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
+        (1, 'TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
+        (2, 'GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
+        (3, 'MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
+        (4, 'EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
+        (5, 'AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
+        (6, 'BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
+        (7, 'DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
         
         -- Standorte
         INSERT INTO Site (location_id, address, name, company_id, plz) VALUES
@@ -237,27 +242,27 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
         
         -- Praktika
-        INSERT INTO Internship (internship_id, title, description, min_year, added, salary, application_end, location_id, clicks, worktype_id, internship_duration_id) VALUES
-        (1, 'Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1),
-        (2, 'Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2),
-        (3, 'Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1),
-        (4, 'Marketing Assistant', 'Unterstützung bei Online-Kampagnen', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3),
-        (5, 'Health App Tester', 'Usability-Tests von mobilen Anwendungen', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1),
-        (6, 'E-Learning Content Creator', 'Multimedia-Inhalte entwickeln', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2),
-        (7, 'Fahrzeugsimulation Praktikum', 'Simulation autonomer Fahrzeuge', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2),
-        (8, 'Smart Building Testing', 'IoT-Sensorik evaluieren', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3),
-        (9, 'Machine Learning Assistant', 'Modelle für Vorhersagen trainieren', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1),
-        (10, 'Webdesign Praktikum', 'Mitarbeit an responsiven Layouts', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2),
-        (11, 'Backoffice Assistant', 'Dokumentenmanagement und Kommunikation', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3),
-        (12, 'UX Research Praktikum', 'Interviews und Nutzeranalysen', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2),
-        (13, 'Energieoptimierung Praktikum', 'Auswertung von Verbrauchsdaten', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1),
-        (14, 'Cloud Infrastruktur Praktikum', 'Arbeiten mit AWS und Docker', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3),
-        (15, 'Technischer Redakteur', 'Erstellen technischer Dokumentationen', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2),
-        (16, 'App-Entwicklung iOS', 'Swift und Xcode kennenlernen', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1),
-        (17, 'DevOps Intern', 'CI/CD Pipelines automatisieren', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2),
-        (18, 'CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2),
-        (19, 'Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1),
-        (20, 'SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3);
+        INSERT INTO Internship (internship_id, title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) VALUES
+        (1, 'Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
+        (2, 'Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
+        (3, 'Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
+        (4, 'Marketing Assistant', 'Unterstützung bei Online-Kampagnen', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
+        (5, 'Health App Tester', 'Usability-Tests von mobilen Anwendungen', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
+        (6, 'E-Learning Content Creator', 'Multimedia-Inhalte entwickeln', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
+        (7, 'Fahrzeugsimulation Praktikum', 'Simulation autonomer Fahrzeuge', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
+        (8, 'Smart Building Testing', 'IoT-Sensorik evaluieren', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
+        (9, 'Machine Learning Assistant', 'Modelle für Vorhersagen trainieren', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
+        (10, 'Webdesign Praktikum', 'Mitarbeit an responsiven Layouts', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),    
+        (11, 'Backoffice Assistant', 'Dokumentenmanagement und Kommunikation', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
+        (12, 'UX Research Praktikum', 'Interviews und Nutzeranalysen', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
+        (13, 'Energieoptimierung Praktikum', 'Auswertung von Verbrauchsdaten', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
+        (14, 'Cloud Infrastruktur Praktikum', 'Arbeiten mit AWS und Docker', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
+        (15, 'Technischer Redakteur', 'Erstellen technischer Dokumentationen', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
+        (16, 'App-Entwicklung iOS', 'Swift und Xcode kennenlernen', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
+        (17, 'DevOps Intern', 'CI/CD Pipelines automatisieren', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
+        (18, 'CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
+        (19, 'Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
+        (20, 'SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
         `)
     }
 
