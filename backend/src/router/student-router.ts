@@ -43,7 +43,7 @@ studentRouter.get("/:paramId", async (req: Request, res: Response) => {
 
     try{
         const service = new StudentService(unit);
-        const student = await service.getById(id);
+        const student:IStudent = await service.getById(id);
 
         if(student){
             res.status(StatusCodes.OK).json(student);
