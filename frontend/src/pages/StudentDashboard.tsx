@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { BookmarkIcon, Search, Calendar, FileCheck } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
-import { InternshipProps } from '@/components/InternshipCard';
+import { InternshipUIProps } from "@/utils/interfaces";
 import { useAuth } from '@/context/AuthContext';
 import StudentDashboardSidebar from '@/components/StudentDashboardSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const StudentDashboard = () => {
-  const [favoriteInternships] = useState<InternshipProps[]>([]);
+  const [favoriteInternships] = useState<InternshipUIProps[]>([]);
   const { studentName } = useAuth();
   const isMobile = useIsMobile();
 
@@ -101,7 +101,7 @@ const StudentDashboard = () => {
                                 <h3 className="font-medium">{internship.title}</h3>
                                 <div className="flex items-center text-sm text-muted-foreground">
                                   <Calendar className="h-3.5 w-3.5 mr-1" />
-                                  <span>Bewerbungsfrist: {internship.deadline}</span>
+                                  <span>Bewerbungsfrist: {internship.application_end}</span>
                                 </div>
                               </div>
                               <Button variant="outline" size="sm" asChild>
@@ -169,12 +169,12 @@ const StudentDashboard = () => {
                       {favoriteInternships.length > 0 ? (
                         <ul className="space-y-3">
                           {favoriteInternships
-                            .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+                            .sort((a, b) => new Date(a.application_end).getTime() - new Date(b.application_end).getTime())
                             .slice(0, 3)
                             .map((internship) => (
                               <li key={internship.id} className="flex justify-between items-center text-sm">
                                 <span className="font-medium">{internship.title}</span>
-                                <span className="text-muted-foreground">{internship.deadline}</span>
+                                <span className="text-muted-foreground">{internship.application_end}</span>
                               </li>
                             ))}
                         </ul>
