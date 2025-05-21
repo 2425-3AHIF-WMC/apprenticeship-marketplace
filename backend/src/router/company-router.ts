@@ -1,6 +1,6 @@
 import express, {Request, Response} from "express";
 import {Pool} from "pg";
-import {ICompany} from "../model";
+import {ICompany, ICompanyPayload} from "../model";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -111,14 +111,37 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             memoryCost: 2 ** 16,
             timeCost: 3,
             parallelism: 2,
-        })
-        await pool.query(`
-            INSERT INTO COMPANY(name, website, email, phone_number, password, email_verified, admin_verified)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [name, website, email, phoneNumber, hashedPassword, false, false]);
+        });
 
-        res.status(200).send('Company created');
+        const timestampInSeconds = Date.now() / 1000;
+        const insertResult  = await  pool.query(`
+            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
+            RETURNING company_id, admin_verified, email_verified`,
+            [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
+
+        const company : ICompanyPayload = insertResult.rows[0];
+
+        const payload = {
+            company_id: company.company_id,
+            admin_verified: company.admin_verified,
+            email_verified: company.email_verified,
+        };
+
+        const newAccessToken = generateAccessToken(payload);
+        const newRefreshToken = generateRefreshToken(payload);
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+            .header('Authorization', `Bearer ${newAccessToken}`)
+            .status(201)
+            .json({accessToken: newAccessToken});
     } catch (err) {
+        console.log(err);
         res.status(500).json({Error: err})
     }
 })
