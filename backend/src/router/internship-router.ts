@@ -59,5 +59,3 @@ internshipRouter.get("/:id_prop", async (req: Request, res: Response) => {
         await unit.complete();
     }
 });
-
-

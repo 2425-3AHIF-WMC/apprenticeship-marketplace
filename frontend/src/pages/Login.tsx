@@ -12,18 +12,31 @@ import {
 import FadeIn from '@/components/FadeIn';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useAuth } from '@/context/AuthContext';
+import {useAuth} from '@/context/AuthContext';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
+import {Input} from "@/components/ui/input.tsx";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
+import {ShieldAlert} from "lucide-react";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [isRegistration, setIsRegistration] = useState(false);
     const navigate = useNavigate();
-    const { login, studentIsAuthenticated } = useAuth();
+    const { login, studentIsAuthenticated, studentUsername } = useAuth();
+    const [emailLogin, setEmailLogin] = useState('');
+    const [passwordLogin, setPasswordLogin] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 
     useEffect(() => {
         if (studentIsAuthenticated) {
-            navigate('/student/dashboard');
+            if (studentUsername === 'if220183') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/student/dashboard');
+            }
         }
-    }, [studentIsAuthenticated, navigate]);
+    }, [studentIsAuthenticated, studentUsername, navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
@@ -33,6 +46,39 @@ const Login = () => {
             console.error('Login failed:', error);
             setIsLoading(false);
         }
+    };
+
+    const handleCompanyLogin = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/company/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    email: emailLogin,
+                    password: passwordLogin
+                }),
+            });
+            if (!res.ok) {
+                setIsDialogOpen(true);
+                return;
+            }
+            const data = await res.json();
+
+            localStorage.setItem("companyAccessToken", data.accessToken);
+            navigate('/company/dashboard');
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRegistration = () => {
+        setIsRegistration(prev => !prev);
     };
 
     return (
@@ -51,33 +97,137 @@ const Login = () => {
                     </FadeIn>
 
                     <FadeIn delay={100}>
-                        <Card className="text-left">
-                            <CardHeader>
-                                <CardTitle>Schüleranmeldung</CardTitle>
-                                <CardDescription>
-                                    Melden Sie sich mit Ihrem Schulaccount an
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button 
-                                    onClick={handleLogin} 
-                                    className="w-full" 
-                                    disabled={isLoading}
+                        <Tabs defaultValue="student" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 border-b">
+                                <TabsTrigger
+                                    value="student"
+                                    className="flex-1 px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
                                 >
-                                    {isLoading ? "Anmeldung läuft..." : "Mit Schulaccount anmelden"}
-                                </Button>
-                            </CardContent>
-                            <CardFooter className="flex justify-center border-t pt-6">
-                                <p className="text-sm text-muted-foreground">
-                                    Bei Fragen zum Login wenden Sie sich an Ihre Lehrkräfte.
-                                </p>
-                            </CardFooter>
-                        </Card>
+                                    Schüler
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="company"
+                                    className="flex-1 px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors duration-200 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary bg-transparent"
+                                >
+                                    Unternehmen
+                                </TabsTrigger>
+
+                            </TabsList>
+                            <TabsContent value="student">
+                                <Card className="text-left">
+                                    <CardHeader>
+                                        <CardTitle>Schüleranmeldung</CardTitle>
+                                        <CardDescription>
+                                            Melden Sie sich mit Ihrem Schulaccount an
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Button
+                                            onClick={handleLogin}
+                                            className="w-full"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? "Anmeldung läuft..." : "Mit Schulaccount anmelden"}
+                                        </Button>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-center border-t pt-6">
+                                        <p className="text-sm text-muted-foreground">
+                                            Bei Fragen zum Login wenden Sie sich an Ihre Lehrkräfte.
+                                        </p>
+                                    </CardFooter>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="company">
+                                { !isRegistration ?
+                                <Card className="text-left">
+                                    <CardHeader>
+                                        <CardTitle>Unternehmensanmeldung</CardTitle>
+                                        <CardDescription>
+                                            Melden Sie sich mit Ihrem Unternehmensaccount an
+                                        </CardDescription>
+                                    </CardHeader>
+                                        <CardContent>
+                                        <label className="text-sm font-medium">E-Mail</label>
+                                        <Input type={"email"} value={emailLogin} onChange={e => setEmailLogin(e.target.value)} className="mb-4" placeholder="E-Mail eingeben"/>
+                                        <label className="text-sm font-medium">Passwort</label>
+                                        <Input type="password" value={passwordLogin} onChange={e => setPasswordLogin(e.target.value)} className="mb-4" placeholder="Passwort eingeben" />
+                                        <Button
+                                            className="w-full text-md"
+                                            disabled={isLoading}
+                                            onClick={handleCompanyLogin}
+                                        >
+                                            {isLoading ? "Anmeldung läuft..." : "Anmelden"}
+                                        </Button>
+
+                                    </CardContent>
+                                    <CardFooter className="flex justify-center border-t pt-6">
+                                        <p className="text-sm text-muted-foreground">
+                                            Sie haben noch kein Konto? Registrieren Sie sich <span
+                                            onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
+                                        </p>
+                                    </CardFooter>
+
+                                </Card>
+                                :
+                                    <Card className="text-left">
+                                        <CardHeader>
+                                            <CardTitle>Unternehmensregistrierung</CardTitle>
+                                            <CardDescription>
+                                                Registrieren Sie sich mit Ihrem Unternehmensaccount
+                                            </CardDescription>
+                                        </CardHeader>
+                                            <CardContent>
+                                                <label className="text-sm font-medium">Firmenname</label>
+                                                <Input type="text" className="mb-4" placeholder="Firmenname eingeben"/>
+                                                <label className="text-sm font-medium">Firmenbuchnummer</label>
+                                                <Input type="text" className="mb-4" placeholder="Firmenbuchnummer eingeben"/>
+                                                <label className="text-sm font-medium">E-Mail</label>
+                                                <Input type="email" className="mb-4" placeholder="E-Mail eingeben"/>
+                                                <label className="text-sm font-medium">Telefonnummer</label>
+                                                <Input type="tel" className="mb-4" placeholder="Telefonnummer eingeben"/>
+                                                <label className="text-sm font-medium">Webseite</label>
+                                                <Input type="url" className="mb-4" placeholder="Webseite eingeben"/>
+                                                <label className="text-sm font-medium">Passwort</label>
+                                                <Input type="password" className="mb-4" placeholder="Passwort eingeben" />
+                                                <Button
+                                                    className="w-full text-md"
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading ? "Registrierung läuft..." : "Registrieren"}
+                                                </Button>
+
+                                            </CardContent>
+                                        <CardFooter className="flex justify-center border-t pt-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                Sie haben bereits ein Konto? Melden Sie sich <span
+                                                onClick={handleRegistration} className="text-primary cursor-pointer hover:underline">hier</span>
+                                                <span> an</span>
+                                            </p>
+                                        </CardFooter>
+                                    </Card>
+                                }
+                            </TabsContent>
+                        </Tabs>
                     </FadeIn>
                 </div>
             </main>
-
             <Footer/>
+            <Dialog open={isDialogOpen} onOpenChange={open => setIsDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <ShieldAlert className="text-red-600 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Login fehlgeschlagen</DialogTitle>
+                            <DialogDescription>
+                                Bitte überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setIsDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
