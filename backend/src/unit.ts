@@ -83,10 +83,10 @@ export async function ensureTablesCreated(): Promise<void> {
             );
 
         CREATE TABLE IF NOT EXISTS company (
-            company_id INTEGER NOT NULL,
+            company_id SERIAL NOT NULL,
             name TEXT NOT NULL,
             company_number TEXT NOT NULL,
-            company_info TEXT NOT NULL,
+            company_info TEXT,
             website TEXT NOT NULL,
             email TEXT NOT NULL,
             phone_number TEXT NOT NULL,
@@ -94,7 +94,7 @@ export async function ensureTablesCreated(): Promise<void> {
             email_verified BOOLEAN NOT NULL,
             admin_verified BOOLEAN NOT NULL,
             company_registration_timestamp TIMESTAMP NOT NULL,
-            email_verfication_timestamp TIMESTAMP,
+            email_verification_timestamp TIMESTAMP,
             admin_verification_timestamp TIMESTAMP,
             company_logo TEXT,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
