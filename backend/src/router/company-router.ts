@@ -161,13 +161,34 @@ companyRouter.post("/logout", (req: Request, res: Response) => {
     }
 });
 
+companyRouter.get("/unverified_admin", async (_, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+
+    try {
+        const service = new CompanyService(unit);
+        const companies: ICompany[] = await service.getByUnverifiedAdmin();
+        console.log(companies);
+
+        if(companies.length > 0) {
+            res.status(StatusCodes.OK).json(companies);
+        } else {
+            res.sendStatus(StatusCodes.NOT_FOUND);
+        }
+    } catch(e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
 companyRouter.get("/:paramId", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const {paramId} = req.params;
     const id: number = parseInt(paramId);
 
     if (isNaN(id) || id <= 0 || id === null) {
-        res.sendStatus(StatusCodes.BAD_REQUEST);
+        res.status(StatusCodes.BAD_REQUEST).send("Invalid id");
         return;
     }
 
@@ -187,3 +208,5 @@ companyRouter.get("/:paramId", async (req: Request, res: Response) => {
         await unit.complete();
     }
 });
+
+

@@ -26,4 +26,11 @@ export class CompanyService extends ServiceBase {
         const stmt = await this.unit.prepare(`select company_id, name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp, email_verfication_timestamp, admin_verification_timestamp from company where email=$1`, [email]);
         return ServiceBase.nullIfUndefined(stmt.rows[0] as ICompany);
     }
+
+    public async getByUnverifiedAdmin(): Promise<ICompany[]> {
+        const stmt = await this.unit.prepare(`select company_id, name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp, email_verfication_timestamp, admin_verification_timestamp 
+                                                                        from company
+                                                                        where admin_verified = 'no'`);
+        return stmt.rows as ICompany[];
+    }
 }
