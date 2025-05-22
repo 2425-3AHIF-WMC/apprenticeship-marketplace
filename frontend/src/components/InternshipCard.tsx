@@ -65,15 +65,15 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3">
-                {internship.category.map((cat, index) => (
+                {internship.department.map((dep, index) => (
                     <span
-                        key={`${cat}-${index}`}
+                        key={`${dep}-${index}`}
                         className={cn(
                             'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                            getCategoryClasses(cat)
+                            getCategoryClasses(dep)
                         )}
                     >
-                        {cat}
+                        {dep}
                     </span>
                 ))}
                 {internship.location && internship.work_type != "Remote" && (
