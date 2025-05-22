@@ -66,3 +66,32 @@ export async function logoutCompany(): Promise<void> {
         console.error(err);
     }
 }
+
+export async function fetchCompanyProfile(): Promise<{
+    company_id: number;
+    name: string;
+    email: string;
+} | null> {
+    const token = await checkCompanyAuth();
+
+    if (!token) {
+        return null;
+    }
+
+    try {
+        const res = await fetch("http://localhost:5000/api/company/me", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!res.ok) {
+            return null;
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error("Error fetching company profile:", error);
+        return null;
+    }
+}

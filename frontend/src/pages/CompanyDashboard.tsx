@@ -1,8 +1,11 @@
+import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 
-const companyDashboard = () => {
+const CompanyDashboard = () => {
     return (
-        <div>Test</div>
-    );
+        <div className="flex min-h-screen">
+        <CompanyDashboardSidebar/>
+        </div>
+        );
 }
 
-export default companyDashboard;
+export default CompanyDashboard;
