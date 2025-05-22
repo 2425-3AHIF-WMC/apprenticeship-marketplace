@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
-import InternshipDescription from "./pages/InternshipDescription";
+import InternshipDescription from "./pages/InternshipDetails";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";

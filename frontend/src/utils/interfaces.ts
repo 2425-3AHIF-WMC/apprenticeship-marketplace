@@ -22,10 +22,11 @@ export interface InternshipUIProps {
     duration: string;
     added: string;
     views: number;
-    category: string[];
+    department: string[];
     company_link: string;
     internship_link: string;
 }
+
 export interface InternshipDetailsUIProps {
     id: string;
     title: string;
