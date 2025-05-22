@@ -7,6 +7,8 @@ export interface IStudent{
     personType: string;
 }
 
+//----------------------------------
+//Internship Interfaces
 export interface InternshipUIProps {
     id: string;
     title: string;
@@ -42,6 +44,25 @@ export interface InternshipDetailsUIProps {
     company_id: string;
     pdf: string;
 }
+
+export interface IInternship{
+    internship_id: string,
+    title: string,
+    description: string,
+    min_year: string,
+    internship_creation_timestamp: string,
+    salary: string,
+    application_end: string,
+    location_id: string,
+    clicks: string,
+    worktype_id: string,
+    internship_duration_id: string,
+    internship_application_link: string;
+}
+//----------------------------------
+
+
+
 
 export interface CompanyUIPropsAdmin {
     id: string;
