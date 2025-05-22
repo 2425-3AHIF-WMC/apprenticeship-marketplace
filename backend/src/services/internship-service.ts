@@ -17,8 +17,8 @@ export class InternshipService extends ServiceBase{
                                                                         join site s on(i.location_id = s.location_id)
                                                                         join company c on (s.company_id = c.company_id)
                                                                     group by
-                                                                        i.internship_id, s.address, internship_duration.description, i.description, i.salary,
-                                                                        i.application_end, i.min_year, w.name, i.title, c.name, c.company_info, c.company_logo;`);
+                                                                        i.internship_id, s.address, id.description, i.description, i.salary,
+                                                                        i.application_end, i.min_year, wt.name, i.title, c.name, c.company_info, c.company_logo;`);
         return stmt.rows as IInternship[];
     }
 
@@ -33,8 +33,8 @@ export class InternshipService extends ServiceBase{
                                                                         join company c on (s.company_id = c.company_id)
                                                                     WHERE i.application_end > CURRENT_DATE
                                                                     group by
-                                                                        i.internship_id, s.address, internship_duration.description, i.description, i.salary,
-                                                                        i.application_end, i.min_year, w.name, i.title, c.name, c.company_info, c.company_logo;`);
+                                                                        i.internship_id, s.address, id.description, i.description, i.salary,
+                                                                        i.application_end, i.min_year, wt.name, i.title, c.name, c.company_info, c.company_logo;`);
         return stmt.rows as IInternship[];
     }
 
