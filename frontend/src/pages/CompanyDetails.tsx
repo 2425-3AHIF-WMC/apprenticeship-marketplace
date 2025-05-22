@@ -1,9 +1,7 @@
-import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building, Mail, Phone, Globe, ArrowLeft } from 'lucide-react';
+import { Building, Mail, Phone, Globe} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import InternshipCard from '@/components/InternshipCard';
 import { CompanyUIProps, InternshipUIProps } from '@/utils/interfaces';
