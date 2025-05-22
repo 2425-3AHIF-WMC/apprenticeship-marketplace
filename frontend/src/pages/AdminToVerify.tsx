@@ -162,12 +162,7 @@ const AdminToVerify = () => {
                   <div className="space-y-4">
                     {filteredCompanies.map((company) => (
                       <CompanyCard key={company.company_id} company={company}>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/companies/${company.company_id}`}>
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Details
-                          </Link>
-                        </Button>
+                        
                         {getStatus(company) === 'nur_email' ? (
                           <Button variant="default" size="sm">
                             <CheckCircle className="h-4 w-4 mr-1" />
@@ -178,8 +173,15 @@ const AdminToVerify = () => {
                           <BookmarkX className="h-4 w-4 mr-1" />
                           Entfernen
                         </Button>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/companies/${company.company_id}`}>
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Details
+                          </Link>
+                        </Button>
                       </CompanyCard>
                     ))}
+                    
                   </div>
                 ) : (
                   <div className="text-center py-8">

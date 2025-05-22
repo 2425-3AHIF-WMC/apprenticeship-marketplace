@@ -28,7 +28,7 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
-        <div className="flex items-start justify-between mb-4 min-h-20">
+        <div className="flex items-start mb-4 min-h-20">
             {internship.company_logo ? <div
                 className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50 ">
                 <img
@@ -40,9 +40,9 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
                 className="h-10 w-10 mr-3 rounded-md bg-primary/10 text-primary flex items-center justify-center">
                 <Building className="h-5 w-5" />
             </div>}
-            <div className="flex items-center">
+            <div className="flex items-center ">
                 <div>
-                    <h3 className="font-semibold text-lg transition-colors group-hover:text-primary line-clamp-2 max-w-72 text-left">
+                    <h3 className="font-semibold text-lg text-left transition-colors group-hover:text-primary line-clamp-2 max-w-72">
                         {internship.title}
                     </h3>
                     <p className="text-sm text-muted-foreground text-left">{internship.company_name}</p>
