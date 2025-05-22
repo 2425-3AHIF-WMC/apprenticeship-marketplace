@@ -161,13 +161,34 @@ companyRouter.post("/logout", (req: Request, res: Response) => {
     }
 });
 
-companyRouter.get("/:paramId", async (req: Request, res: Response) => {
+companyRouter.get("/unverified_admin", async (_, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const {paramId} = req.params;
-    const id: number = parseInt(paramId);
 
-    if (isNaN(id) || id <= 0 || id === null) {
-        res.sendStatus(StatusCodes.BAD_REQUEST);
+    try {
+        const service = new CompanyService(unit);
+        const companies: ICompany[] = await service.getByUnverifiedAdmin();
+        console.log(companies);
+
+        if (companies.length > 0) {
+            res.status(StatusCodes.OK).json(companies);
+        } else {
+            res.sendStatus(StatusCodes.NOT_FOUND);
+        }
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:param_id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const {param_id} = req.params;
+    const id: number = parseInt(param_id);
+
+    if (!isValidId(id)) {
+        res.status(StatusCodes.BAD_REQUEST).send("Invalid id");
         return;
     }
 
@@ -187,3 +208,77 @@ companyRouter.get("/:paramId", async (req: Request, res: Response) => {
         await unit.complete();
     }
 });
+
+companyRouter.put("", async (req: Request, res: Response) => {
+    const company: ICompany = {
+        company_id: parseInt(req.body.company_id),
+        name: req.body.name,
+        company_number: req.body.company_number,
+        company_info: req.body.company_info,
+        website: req.body.website,
+        email: req.body.email,
+        phone_number: req.body.phone_number,
+        password: req.body.password,
+        email_verified: req.body.email_verified,
+        admin_verified: req.body.admin_verified,
+        company_registration_timestamp: new Date(req.body.company_registration_timestamp),
+        email_verification_timestamp: req.body.email_verification_timestamp
+            ? new Date(req.body.email_verification_timestamp)
+            : null,
+        admin_verification_timestamp: req.body.admin_verification_timestamp
+            ? new Date(req.body.admin_verification_timestamp)
+            : null
+    };
+    const unit: Unit = await Unit.create(false);
+
+    console.log(company);
+
+    try {
+        const service = new CompanyService(unit);
+        const companyExists: boolean = await service.getByIdSmall(company.company_id) ? true : false;
+        const validWebsite: boolean = company.website.substring(0, 8) === "https://";
+        const validEmail: boolean = company.email.includes('@');
+        const allowedBooleanString: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
+        const validVerifications: boolean = allowedBooleanString.includes(company.email_verified.toLowerCase()) && allowedBooleanString.includes(company.admin_verified.toLowerCase());
+
+        if (validWebsite && validEmail && validVerifications
+            && isValidId(company.company_id) && isValidCompanyNumber(company.company_number)
+            && isValidDate(company.company_registration_timestamp)
+            && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true)) { // some complex validation, because these timestamps can be null
+            const success: boolean = await (companyExists ? service.update(company) : service.insert(company));
+
+            if (success) {
+                await unit.complete(true);
+                res.status(companyExists ? StatusCodes.NO_CONTENT : StatusCodes.CREATED).json(company)
+            } else {
+                await unit.complete(false);
+                res.status(StatusCodes.BAD_REQUEST).send("updating or creating was not successful");
+            }
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("verification failed");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+});
+
+function isValidId(id: number): boolean {
+    return !isNaN(id) && id > 0 && id !== null && id !== undefined;
+}
+
+function isValidDate(date: Date): boolean {
+    return date.toString() !== 'Invalid Date';
+}
+
+function isValidCompanyNumber(number: string): boolean {
+    const nums: number = parseInt(number.substring(0, 6));
+    const letter: number = parseInt(number.substring(6));
+
+    return !isNaN(nums) && isNaN(letter);
+}
+
+
