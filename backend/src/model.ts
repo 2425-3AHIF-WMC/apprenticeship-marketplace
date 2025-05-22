@@ -42,14 +42,14 @@ export interface ICompany {
     company_number: string,
     company_info: string,
     website: string,
-    email: string
+    email: string,
     phone_number : string,
     password: string,
     email_verified: string,
     admin_verified: string,
-    company_registration_timestamp: string,
-    email_verification_timestamp: Date,
-    admin_verification_timestamp: Date
+    company_registration_timestamp: Date,
+    email_verification_timestamp: Date | null,
+    admin_verification_timestamp: Date | null
 }
 
 export interface ICompanySmall {
