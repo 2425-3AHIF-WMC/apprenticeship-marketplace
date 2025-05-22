@@ -49,12 +49,30 @@ export interface InternshipDetailsUIProps {
 }
 
 export interface CompanyUIPropsAdmin {
-    id: string;
+    company_id: number;
     name: string;
-    email: string;
+    company_info: string;
     website: string;
+    email: string;
     phone_number: string;
+    password: string;
     email_verified: boolean;
     admin_verified: boolean;
-    logo: string;
+    company_registration_timestamp: string; // ISO date string
+    email_verification_timestamp: string; // ISO date string
+    admin_verification_timestamp: string; // ISO date string
+    company_logo: string;
+    company_number: string;
+}
+
+export interface CompanyUIProps {
+    company_id: number;
+    name: string;
+    company_info: string;
+    website: string;
+    email: string;
+    phone_number: string;
+    password: string;
+    company_logo: string;
+    company_number: string;
 } 
