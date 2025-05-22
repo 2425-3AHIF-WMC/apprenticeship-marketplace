@@ -26,7 +26,7 @@ const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
     views: item.clicks || 0,
     work_type: item.work_type,
     company_logo: item.company_logo,
-    category: Array.isArray(item.department) ? item.department : [item.department],
+    department: Array.isArray(item.department) ? item.department : [item.department],
     min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
     company_link: item.companyLink || '',
     internship_link: 'https://random-company.com/ltstudios'
@@ -68,7 +68,7 @@ const AdminInternships = () => {
 
         const matchesCategory =
             selectedCategory === 'Alle' ||
-            (Array.isArray(internship.category) && internship.category.includes(selectedCategory));
+            (Array.isArray(internship.department) && internship.department.includes(selectedCategory));
 
         const matchesWorkMode =
             selectedWorkMode === 'Alle' || internship.work_type === selectedWorkMode;
@@ -226,25 +226,25 @@ const AdminInternships = () => {
                                                             <span>Frist: {internship.application_end}</span>
                                                         </div>
                                                         <div className="flex flex-wrap gap-2 mt-2">
-                                                            {Array.isArray(internship.category) ? (
-                                                                internship.category.map((cat, index) => (
+                                                            {Array.isArray(internship.department) ? (
+                                                                internship.department.map((dep, index) => (
                                                                     <span
-                                                                        key={`${cat}-${index}`}
+                                                                        key={`${dep}-${index}`}
                                                                         className={cn(
                                                                             'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                            getCategoryClasses(cat)
+                                                                            getCategoryClasses(dep)
                                                                         )}
                                                                     >
-                                                                        {cat}
+                                                                        {dep}
                                                                     </span>
 
                                                                 ))
                                                             ) : (
                                                                 <span className={cn(
                                                                     'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                    getCategoryClasses(internship.category)
+                                                                    getCategoryClasses(internship.department)
                                                                 )}>
-                                                                    {internship.category}
+                                                                    {internship.department}
                                                                 </span>
                                                             )}
                                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">

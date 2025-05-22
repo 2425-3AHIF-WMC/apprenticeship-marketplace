@@ -1,1 +1,9 @@
 @BaseUrl = http://localhost:5000/api/
+
+POST {{BaseUrl}}company/login
+Content-Type: application/json
+
+{
+  "email": "info@technova.at",
+  "password": "pass123"
+}

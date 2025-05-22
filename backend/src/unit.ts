@@ -83,10 +83,10 @@ export async function ensureTablesCreated(): Promise<void> {
             );
 
         CREATE TABLE IF NOT EXISTS company (
-            company_id INTEGER NOT NULL,
+            company_id SERIAL NOT NULL,
             name TEXT NOT NULL,
             company_number TEXT NOT NULL,
-            company_info TEXT NOT NULL,
+            company_info TEXT,
             website TEXT NOT NULL,
             email TEXT NOT NULL,
             phone_number TEXT NOT NULL,
@@ -94,7 +94,7 @@ export async function ensureTablesCreated(): Promise<void> {
             email_verified BOOLEAN NOT NULL,
             admin_verified BOOLEAN NOT NULL,
             company_registration_timestamp TIMESTAMP NOT NULL,
-            email_verfication_timestamp TIMESTAMP,
+            email_verification_timestamp TIMESTAMP,
             admin_verification_timestamp TIMESTAMP,
             company_logo TEXT,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
@@ -222,14 +222,14 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (4463, 'Großraming');
         
         -- Firmen
-        INSERT INTO Company (company_id, name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
-        (1, 'TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
-        (2, 'GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
-        (3, 'MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
-        (4, 'EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
-        (5, 'AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
-        (6, 'BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
-        (7, 'DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
+        INSERT INTO Company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
+        ('TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
+        ('GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
+        ('MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
+        ('EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
+        ('AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
+        ('BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
+        ('DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
         
         -- Standorte
         INSERT INTO Site (location_id, address, name, company_id, plz) VALUES

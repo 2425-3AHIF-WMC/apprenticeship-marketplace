@@ -74,4 +74,11 @@ export interface ICompanySmall {
     company_id: number,
     name: string,
     email:string
+    admin_verified: string
+}
+
+export interface ICompanyPayload {
+    company_id: number,
+    email_verified: string,
+    admin_verified: string,
 }

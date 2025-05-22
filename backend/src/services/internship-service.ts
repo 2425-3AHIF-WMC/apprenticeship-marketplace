@@ -43,6 +43,7 @@ export class InternshipService extends ServiceBase{
                                                                   group by i.internship_id, i.title, c.name, i.application_end, i.min_year, s.address, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
         `);
 
+
         return await stmt.rows as InternshipUIProps[];
     }
 

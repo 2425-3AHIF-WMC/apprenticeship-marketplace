@@ -42,10 +42,10 @@ export default function CompanyCard({ company, children }: CompanyCardProps) {
         status === 'keine' && 'bg-red-50 dark:bg-red-950'
       )}
     >
-      {company.logo ? (
+      {company.company_logo ? (
         <div className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50">
           <img
-            src={company.logo}
+            src={company.company_logo}
             alt={`${company.name} Logo`}
             className="h-full w-full object-contain"
           />
@@ -63,7 +63,7 @@ export default function CompanyCard({ company, children }: CompanyCardProps) {
           </span>
         </div>
         <h3 className="font-semibold text-left text-lg">{company.name}</h3>
-        <div className="flex flex-col md:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col xl:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
           <span className='text-left'>E-Mail: {company.email}</span>
           <span className='text-left'>Website: <a href={company.website} target="_blank" rel="noopener noreferrer" className="underline text-blue-700">{company.website}</a></span>
           <span className='text-left'>Telefon: {company.phone_number}</span>
