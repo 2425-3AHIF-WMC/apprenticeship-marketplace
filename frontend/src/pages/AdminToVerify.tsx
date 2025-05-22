@@ -10,58 +10,89 @@ import CompanyCard from '@/components/CompanyCard';
 
 const ALL_COMPANIES = [
   {
-    id: '1',
-    name: 'CarlaCo Enterprises',
-    email: 'info@carlaco.com',
-    website: 'https://carlaco.com',
-    phone_number: '+43 123 456789',
-    email_verified: true,
-    admin_verified: true,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
+      company_id: 1,
+      name: 'CarlaCo Enterprises',
+      company_info: 'Innovatives Unternehmen für moderne Lösungen.',
+      website: 'https://carlaco.com',
+      email: 'info@carlaco.com',
+      phone_number: '+43 123 456789',
+      password: '',
+      email_verified: true,
+      admin_verified: true,
+      company_registration_timestamp: '2024-01-01T10:00:00Z',
+      email_verification_timestamp: '2024-01-02T10:00:00Z',
+      admin_verification_timestamp: '2024-01-03T10:00:00Z',
+      company_logo: '/assets/company-logos/LT-Studios_Logo.png',
+      company_number: 'C-12345',
+      internships: [1, 2],
   },
   {
-    id: '2',
-    name: 'LT-Studios',
-    email: 'kontakt@ltstudios.at',
-    website: 'https://ltstudios.at',
-    phone_number: '+43 987 654321',
-    email_verified: true,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
+      company_id: 2,
+      name: 'LT-Studios',
+      company_info: 'Fokus auf Medientechnik und Informatik.',
+      website: 'https://ltstudios.at',
+      email: 'kontakt@ltstudios.at',
+      phone_number: '+43 987 654321',
+      password: '',
+      email_verified: true,
+      admin_verified: false,
+      company_registration_timestamp: '2024-02-01T10:00:00Z',
+      email_verification_timestamp: '2024-02-02T10:00:00Z',
+      admin_verification_timestamp: '',
+      company_logo: '/assets/company-logos/LT-Studios_Logo.png',
+      company_number: 'LT-12345',
+      internships: [3],
   },
   {
-    id: '3',
-    name: 'ITMedia Solutions',
-    email: 'office@itmedia.at',
-    website: 'https://itmedia.at',
-    phone_number: '+43 555 123456',
-    email_verified: false,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
+      company_id: 3,
+      name: 'ITMedia Solutions',
+      company_info: 'IT-Dienstleistungen und Medien.',
+      website: 'https://itmedia.at',
+      email: 'office@itmedia.at',
+      phone_number: '+43 555 123456',
+      password: '',
+      email_verified: false,
+      admin_verified: false,
+      company_registration_timestamp: '2024-03-01T10:00:00Z',
+      email_verification_timestamp: '',
+      admin_verification_timestamp: '',
+      company_logo: '/assets/company-logos/LT-Studios_Logo.png',
+      company_number: 'IT-98765',
+      internships: [],
   },
   {
-    id: '4',
-    name: 'Elektronic Design',
-    email: 'info@elektronicdesign.at',
-    website: 'https://elektronicdesign.at',
-    phone_number: '+43 222 333444',
-    email_verified: true,
-    admin_verified: true,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
+      company_id: 4,
+      name: 'Elektronic Design',
+      company_info: 'Elektroniklösungen für Unternehmen.',
+      website: 'https://elektronicdesign.at',
+      email: 'info@elektronicdesign.at',
+      phone_number: '+43 222 333444',
+      password: '',
+      email_verified: true,
+      admin_verified: true,
+      company_registration_timestamp: '2024-04-01T10:00:00Z',
+      email_verification_timestamp: '2024-04-02T10:00:00Z',
+      admin_verification_timestamp: '2024-04-03T10:00:00Z',
+      company_logo: '/assets/company-logos/LT-Studios_Logo.png',
+      company_number: 'ED-54321',
+      internships: [4],
   },
   {
-    id: '5',
-    name: 'MeliCorp',
-    email: 'kontakt@melicorp.com',
-    website: 'https://melicorp.com',
-    phone_number: '+43 111 222333',
-    email_verified: false,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
+      company_id: 5,
+      name: 'MeliCorp',
+      company_info: 'Innovative Lösungen für Unternehmen.',
+      website: 'https://melicorp.com',
+      email: 'kontakt@melicorp.com',
+      phone_number: '+43 111 222333',
+      password: '',
+      email_verified: false,
+      admin_verified: false,
+      company_registration_timestamp: '2024-05-01T10:00:00Z',
+      email_verification_timestamp: '',
+      admin_verification_timestamp: '',
+      company_logo: '/assets/company-logos/LT-Studios_Logo.png',
+      company_number: 'MC-67890',
+      internships: [],
   },
 ];
 
@@ -130,9 +161,9 @@ const AdminToVerify = () => {
                 {filteredCompanies.length > 0 ? (
                   <div className="space-y-4">
                     {filteredCompanies.map((company) => (
-                      <CompanyCard key={company.id} company={company}>
+                      <CompanyCard key={company.company_id} company={company}>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/companies/${company.id}`}>
+                          <Link to={`/companies/${company.company_id}`}>
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Details
                           </Link>

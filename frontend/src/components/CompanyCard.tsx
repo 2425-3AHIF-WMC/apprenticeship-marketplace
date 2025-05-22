@@ -42,10 +42,10 @@ export default function CompanyCard({ company, children }: CompanyCardProps) {
         status === 'keine' && 'bg-red-50 dark:bg-red-950'
       )}
     >
-      {company.logo ? (
+      {company.company_logo ? (
         <div className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50">
           <img
-            src={company.logo}
+            src={company.company_logo}
             alt={`${company.name} Logo`}
             className="h-full w-full object-contain"
           />

@@ -63,11 +63,12 @@ export interface CompanyUIPropsAdmin {
     admin_verification_timestamp: string; // ISO date string
     company_logo: string;
     company_number: string;
+    internships: number[];
 }
 
 export interface CompanyUIProps {
     company_id: number;
-    name: string;
+    company_name: string;
     company_info: string;
     website: string;
     email: string;
@@ -75,4 +76,5 @@ export interface CompanyUIProps {
     password: string;
     company_logo: string;
     company_number: string;
+    internships: number[];
 } 
