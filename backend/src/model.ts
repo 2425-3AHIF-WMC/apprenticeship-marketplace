@@ -57,8 +57,8 @@ export interface IInternship{
     clicks: string,
     worktype_id: string,
     internship_duration_id: string,
-    internship_application_link: string
-};
+    internship_application_link: string;
+}
 //----------------------------------
 
 
