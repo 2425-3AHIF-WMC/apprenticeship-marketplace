@@ -252,7 +252,14 @@ const InternshipDescription = () => {
                     </p>
 
                     <Button variant="outline" className="w-full">
-                      Unternehmenswebsite besuchen
+                      <Link to={internship.company_link}>
+                        Unternehmenswebsite besuchen
+                      </Link>
+                    </Button>
+                    <Button className="w-full" asChild>
+                      <Link to={`/companies/${internship.company_id}`}>
+                        Unternehmensinformationen
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>

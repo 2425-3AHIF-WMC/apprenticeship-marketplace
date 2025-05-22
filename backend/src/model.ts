@@ -78,11 +78,28 @@ export interface CompanyUIPropsAdmin {
 export interface ICompany {
     company_id: number,
     name: string,
+    company_number: string,
     company_info: string,
     website: string,
-    email: string
+    email: string,
     phone_number : string,
     password: string,
     email_verified: string,
+    admin_verified: string,
+    company_registration_timestamp: Date,
+    email_verification_timestamp: Date | null,
+    admin_verification_timestamp: Date | null
+}
+
+export interface ICompanySmall {
+    company_id: number,
+    name: string,
+    email:string
     admin_verified: string
+}
+
+export interface ICompanyPayload {
+    company_id: number,
+    email_verified: string,
+    admin_verified: string,
 }

@@ -19,7 +19,7 @@ const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
     views: item.clicks || 0,
     work_type: item.work_type,
     company_logo: item.company_logo,
-    category: Array.isArray(item.department) ? item.department : [item.department],
+    department: Array.isArray(item.department) ? item.department : [item.department],
     min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
     company_link: item.companyLink || '',
     internship_link: 'https://random-company.com/ltstudios'
@@ -86,7 +86,7 @@ const Internships = () => {
 
         const matchesCategory =
             selectedCategory === 'Alle' ||
-            (Array.isArray(internship.category) && internship.category.includes(selectedCategory));
+            (Array.isArray(internship.department) && internship.department.includes(selectedCategory));
 
         const matchesWorkMode =
             selectedWorkMode === 'Alle' || internship.work_type === selectedWorkMode;
