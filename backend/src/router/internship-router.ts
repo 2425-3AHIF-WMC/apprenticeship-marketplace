@@ -16,12 +16,13 @@ internshipRouter.get("/current", async (req, res) => {
         res.status(StatusCodes.OK).json(internship);
 
     } catch (e) {
-        console.log(e);
-        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
     } finally {
         await unit.complete();
     }
 });
+
+
 
 internshipRouter.post("/", async (req, res) => {
     const unit: Unit = await Unit.create(true);
@@ -39,6 +40,11 @@ internshipRouter.post("/", async (req, res) => {
             res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
         }
 
+        if(!Number.isInteger(internship_id) || internship_id < 0 || internship_id === null){
+            res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
+            return;
+        }
+
 
         const doesIdExist = await unit.prepare(`SELECT internship_id 
                                                                     FROM internship
@@ -46,6 +52,8 @@ internshipRouter.post("/", async (req, res) => {
         let rowNumb = doesIdExist.rowCount?? -1;
         if(rowNumb > 0){
             res.status(StatusCodes.BAD_REQUEST).send("Id already exists");
+            return;
+
         }
 
         const doesLocationExist = await unit.prepare(`SELECT location_id
@@ -59,7 +67,9 @@ internshipRouter.post("/", async (req, res) => {
                                                                                      WHERE internsip_duration_id=$1`, [internship_duration_id]);
 
         if((doesLocationExist.rowCount??0) <1 || (doesWorktypeExist.rowCount??0) <1 || (doesInternshipDurationExist.rowCount??0) < 1){
-            res.status(StatusCodes.BAD_REQUEST).send("Parameter für Fremdschlüssel nicht existierend")
+            res.status(StatusCodes.BAD_REQUEST).send("Parameter für Fremdschlüssel nicht existierend");
+            return;
+
         }
 
         let internship: IInternship = {
@@ -76,6 +86,8 @@ internshipRouter.post("/", async (req, res) => {
             res.status(StatusCodes.CREATED).send("Internship added successfully");
         } else {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+            return;
+
         }
 
     }catch (e) {
@@ -83,9 +95,6 @@ internshipRouter.post("/", async (req, res) => {
     }finally {
         await unit.complete();
     }
-
-
-
 });
 
 internshipRouter.get("/", async (req, res) => {
@@ -97,7 +106,53 @@ internshipRouter.get("/", async (req, res) => {
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+
     } finally {
+        await unit.complete();
+    }
+});
+
+internshipRouter.delete("/delete/:id", async (req, res) => {
+    const unit: Unit = await Unit.create(true);
+    const id : number = parseInt(req.params.id);
+
+
+    if(!Number.isInteger(id) || id < 0 || id === null){
+        res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
+        return;
+    }
+
+    try {
+        const doesIdExist = await unit.prepare(`SELECT internship_id 
+                                                                    FROM internship
+                                                                    WHERE internship_id=$1`,[id]);
+        let rowNumb = doesIdExist.rowCount?? -1;
+        if(rowNumb <= 0){
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+            return;
+        }
+
+        const service = new InternshipService(unit);
+
+        const addedSuccessful = await service.deleteInternship(id);
+
+        if(addedSuccessful != -1){
+            res.status(StatusCodes.OK).send("deleted successfully");
+            return;
+
+
+        } else  {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("could not be deleted");
+            return;
+
+        }
+
+    }catch (e){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        return;
+
+    }finally {
         await unit.complete();
     }
 });
