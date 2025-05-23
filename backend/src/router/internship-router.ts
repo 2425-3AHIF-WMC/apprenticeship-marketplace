@@ -25,10 +25,11 @@ internshipRouter.get("/current", async (req, res) => {
 internshipRouter.put("/change", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
+    const clicks = req.body.clicks ?? 0;
 
     const {title, description, min_year,
         internship_creation_timestamp, salary, application_end,
-        location_id, clicks, worktype_id, internship_duration_id,
+        location_id, worktype_id, internship_duration_id,
         internship_application_link} = req.body;
 
     if(!title || !description || !min_year
@@ -36,6 +37,7 @@ internshipRouter.put("/change", async (req, res) => {
         || !location_id || !clicks || !worktype_id || !internship_duration_id
         || !internship_application_link){
         res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
+        return;
     }
 
     try{
@@ -48,7 +50,7 @@ internshipRouter.put("/change", async (req, res) => {
                                                                            WHERE worktype_id=$1`, [worktype_id]);
         const doesInternshipDurationExist = await unit.prepare(`SELECT internship_duration_id
                                                                                      FROM internship_duration
-                                                                                     WHERE internsip_duration_id=$1`, [internship_duration_id]);
+                                                                                     WHERE internship_duration_id=$1`, [internship_duration_id]);
 
         if((doesLocationExist.rowCount??0) <1 || (doesWorktypeExist.rowCount??0) <1 || (doesInternshipDurationExist.rowCount??0) < 1){
             res.status(StatusCodes.BAD_REQUEST).send("Parameter für Fremdschlüssel nicht existierend");
@@ -103,13 +105,11 @@ internshipRouter.put("/change", async (req, res) => {
             }
         }
     }catch (e) {
-
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
     }finally {
-
+        await unit.complete();
     }
-
 });
-
 
 internshipRouter.get("/", async (req, res) => {
     const unit: Unit = await Unit.create(true);
