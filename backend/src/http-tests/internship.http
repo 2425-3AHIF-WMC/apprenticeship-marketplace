@@ -4,7 +4,7 @@
 DELETE {{BaseUrl}}delete/20 HTTP/1.1
 
 ### create a new internship
-POST {{BaseUrl}}/ HTTP/1.1
+PUT {{BaseUrl}}change HTTP/1.1
 Content-Type:application/json
 
 {
@@ -20,3 +20,5 @@ Content-Type:application/json
   "internship_duration_id": 2,
   "internship_application_link": "https://ai-solutions.at/karriere/ki-chatbot-entwicklung"
 }
+
+
