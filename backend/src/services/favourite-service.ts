@@ -17,11 +17,12 @@ export class FavouriteService extends ServiceBase {
         return result?.internship_id ?? -1;
     }
 
-    public async deleteFavourite(id: number): Promise<number>{
+    public async deleteFavourite(internship_id: number, student_id: number): Promise<number>{
         const stmt = await this.unit.prepare(`DELETE FROM favourite 
                                                                    WHERE internship_id = $1
+                                                                       AND student_id = $2
                                                                    RETURNING internship_id`
-                                                              , [id]);
+                                                              , [internship_id, student_id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
