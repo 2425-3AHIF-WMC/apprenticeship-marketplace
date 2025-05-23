@@ -155,11 +155,10 @@ export async function ensureTablesCreated(): Promise<void> {
             );
 
         CREATE TABLE IF NOT EXISTS favourite (
-            favourite_id SMALLINT NOT NULL,
-            student_id INTEGER,
+            student_id INTEGER NOT NULL,
+            internship_id SMALLINT NOT NULL,
             favourite_creation_timestamp TIMESTAMP,
-            internship_id SMALLINT,
-            CONSTRAINT pk_favourite PRIMARY KEY (favourite_id),
+            CONSTRAINT pk_favourite PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
             REFERENCES student(student_id),
             CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
