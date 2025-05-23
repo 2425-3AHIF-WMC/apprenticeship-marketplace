@@ -11,7 +11,7 @@ export class FavouriteService extends ServiceBase {
         const stmt = await this.unit.prepare(`INSERT INTO favourite (student_id, internship_id, favourite_creation_timestamp) 
                                                                    VALUES ($1, $2, $3) 
                                                                    RETURNING internship_id;`
-            , [f.studentId, f.internshipId, f.added]);
+            , [f.student_id, f.internship_id, f.added]);
 
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
