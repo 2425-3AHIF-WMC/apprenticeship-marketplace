@@ -6,7 +6,27 @@ import {useState} from "react";
 
 const CompanyInternshipCreation = () => {
     const [description, setDescription] = useState('');
+    const modules = {
+        toolbar: [
+            [{ 'font': [] }, { 'size': [] }],
+            [ 'bold', 'italic', 'underline', 'strike' ],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'script': 'super' }, { 'script': 'sub' }],
+            [{ 'header': '1' }, { 'header': '2' }, 'blockquote', 'code-block' ],
+            [{ 'list': 'ordered' }, { 'list': 'bullet'}, { 'indent': '-1' }, { 'indent': '+1' }],
+            [ { 'align': [] }],
+            [ 'link', 'image', 'video'],
+            [ 'clean' ]
+        ]
+    };
 
+    const formats = [
+        'background', 'bold', 'color', 'font', 'code', 'italic', 'link', 'size',
+        'strike', 'script', 'underline',
+        'blockquote', 'header', 'indent', 'list', 'align', 'code-block',
+        'image', 'video'
+    ];
+    console.log(description);
     return (
         <div className="flex min-h-screen">
             <CompanyDashboardSidebar/>
@@ -25,6 +45,8 @@ const CompanyInternshipCreation = () => {
                                     <ReactQuill
                                         value={description}
                                         onChange={setDescription}
+                                        modules={modules}
+                                        formats={formats}
                                         className="bg-primary-foreground text-black"
                                     />
                                 </div>
