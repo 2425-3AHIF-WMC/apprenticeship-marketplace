@@ -22,39 +22,25 @@ internshipRouter.get("/current", async (req, res) => {
     }
 });
 
-
-
-internshipRouter.post("/", async (req, res) => {
+internshipRouter.put("/change", async (req, res) => {
     const unit: Unit = await Unit.create(true);
+    const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
+    const clicks = req.body.clicks ?? 0;
+
+    const {title, description, min_year,
+        internship_creation_timestamp, salary, application_end,
+        location_id, worktype_id, internship_duration_id,
+        internship_application_link} = req.body;
+
+    if(!title || !description || !min_year
+        || !internship_creation_timestamp || !salary || !application_end
+        || !location_id || !clicks || !worktype_id || !internship_duration_id
+        || !internship_application_link){
+        res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
+        return;
+    }
 
     try{
-        const {internship_id, title, description, min_year,
-            internship_creation_timestamp, salary, application_end,
-            location_id, clicks, worktype_id, internship_duration_id,
-            internship_application_link} = req.body;
-
-        if(!internship_id || !title || !description || !min_year
-            || !internship_creation_timestamp || !salary || !application_end
-            || !location_id || !clicks || !worktype_id || !internship_duration_id
-            || !internship_application_link){
-            res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
-        }
-
-        if(!Number.isInteger(internship_id) || internship_id < 0 || internship_id === null){
-            res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
-            return;
-        }
-
-
-        const doesIdExist = await unit.prepare(`SELECT internship_id 
-                                                                    FROM internship
-                                                                    WHERE internship_id=$1`,[internship_id]);
-        let rowNumb = doesIdExist.rowCount?? -1;
-        if(rowNumb > 0){
-            res.status(StatusCodes.BAD_REQUEST).send("Id already exists");
-            return;
-
-        }
 
         const doesLocationExist = await unit.prepare(`SELECT location_id
                                                                            FROM site
@@ -64,7 +50,7 @@ internshipRouter.post("/", async (req, res) => {
                                                                            WHERE worktype_id=$1`, [worktype_id]);
         const doesInternshipDurationExist = await unit.prepare(`SELECT internship_duration_id
                                                                                      FROM internship_duration
-                                                                                     WHERE internsip_duration_id=$1`, [internship_duration_id]);
+                                                                                     WHERE internship_duration_id=$1`, [internship_duration_id]);
 
         if((doesLocationExist.rowCount??0) <1 || (doesWorktypeExist.rowCount??0) <1 || (doesInternshipDurationExist.rowCount??0) < 1){
             res.status(StatusCodes.BAD_REQUEST).send("Parameter für Fremdschlüssel nicht existierend");
@@ -72,26 +58,54 @@ internshipRouter.post("/", async (req, res) => {
 
         }
 
-        let internship: IInternship = {
-            internship_id, title, description, min_year,
-            internship_creation_timestamp, salary, application_end,
-            location_id, clicks, worktype_id, internship_duration_id,
-            internship_application_link
-        }
+        if(id === -1){
+            let internship: IInternship = {
+                title, description, min_year,
+                internship_creation_timestamp, salary, application_end,
+                location_id, clicks, worktype_id, internship_duration_id,
+                internship_application_link
+            }
 
-        const service = new InternshipService(unit);
-        const addedSuccessful = await service.newInternship(internship);
+            const service = new InternshipService(unit);
+            const addedSuccessful = await service.newInternship(internship);
 
-        if(addedSuccessful != -1){
-            res.status(StatusCodes.CREATED).send("Internship added successfully");
+            if(addedSuccessful != -1){
+                res.status(StatusCodes.CREATED).send("Internship added successfully");
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+                return;
+
+            }
         } else {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
-            return;
+            const doesIdExist = await unit.prepare(`SELECT internship_id 
+                                                                    FROM internship
+                                                                    WHERE internship_id=$1`,[id]);
+            let rowNumb = doesIdExist.rowCount?? -1;
+            if(rowNumb <= 0){
+                res.status(StatusCodes.BAD_REQUEST).send("Id does not");
+                return;
+            }
 
+            let internship: IInternship = {
+                title, description, min_year,
+                internship_creation_timestamp, salary, application_end,
+                location_id, clicks, worktype_id, internship_duration_id,
+                internship_application_link
+            }
+
+            const service = new InternshipService(unit);
+            const addedSuccessful = await service.updateInternship(internship);
+
+            if(addedSuccessful != -1){
+                res.status(StatusCodes.CREATED).send("Internship updated successfully");
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+                return;
+
+            }
         }
-
     }catch (e) {
-
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
     }finally {
         await unit.complete();
     }
