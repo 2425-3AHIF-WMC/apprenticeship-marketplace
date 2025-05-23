@@ -232,8 +232,6 @@ companyRouter.put("", async (req: Request, res: Response) => {
     };
     const unit: Unit = await Unit.create(false);
 
-    console.log(company);
-
     try {
         const service = new CompanyService(unit);
         const companyExists: boolean = await service.getByIdSmall(company.company_id) ? true : false;

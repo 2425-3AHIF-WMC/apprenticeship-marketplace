@@ -128,7 +128,7 @@ export class CompanyService extends ServiceBase {
                                                                    admin_verified, company_registration_timestamp,
                                                                    email_verification_timestamp,
                                                                    admin_verification_timestamp)
-                                              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, [
+                                              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, [
             company.name,
             company.company_number,
             company.company_info,
