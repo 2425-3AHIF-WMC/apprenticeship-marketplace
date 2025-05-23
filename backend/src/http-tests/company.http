@@ -37,7 +37,7 @@ Content-Type:application/json
   "admin_verification_timestamp": null
 }
 
-### Post a company login
+### post a company login
 POST {{BaseUrl}}company/login
 Content-Type: application/json
 
@@ -46,3 +46,8 @@ Content-Type: application/json
   "password": "pass123"
 }
 
+### delete a company
+DELETE {{BaseUrl}}/8 HTTP/1.1
+
+### delete a company that doesn't exist
+DELETE {{BaseUrl}}/20000 HTTP/1.1

@@ -1,6 +1,6 @@
 @BaseUrl = http://localhost:5000/api/internship/
 
-### Delete a specific internship
+### delete a specific internship
 DELETE {{BaseUrl}}delete/20 HTTP/1.1
 
 ### create a new internship

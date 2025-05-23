@@ -145,4 +145,17 @@ export class CompanyService extends ServiceBase {
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
+
+    public async delete(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`DELETE FROM company WHERE company_id = $1`, [id]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async companyExists(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select count(company_id) from company where company_id=$1`, [id])
+        const count: number = parseInt(stmt.rows[0].count, 10);
+
+        return count === 1;
+    }
 }

@@ -234,7 +234,7 @@ companyRouter.put("", async (req: Request, res: Response) => {
 
     try {
         const service = new CompanyService(unit);
-        const companyExists: boolean = await service.getByIdSmall(company.company_id) ? true : false;
+        const companyExists: boolean = await service.companyExists(company.company_id);
         const validWebsite: boolean = company.website.substring(0, 8) === "https://";
         const validEmail: boolean = company.email.includes('@');
         const allowedBooleanString: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
@@ -265,6 +265,40 @@ companyRouter.put("", async (req: Request, res: Response) => {
     } finally {
         await unit.complete(false);
     }
+});
+
+companyRouter.delete("/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(false);
+    try {
+        const company_id: number = parseInt(req.params.id);
+        const service = new CompanyService(unit);
+
+        const companyExists: boolean = await service.companyExists(company_id);
+
+        if (isValidId(company_id)) {
+            if (!companyExists) {
+                res.status(StatusCodes.OK).send("Nothing to delete; id was not found");
+            } else {
+                const success: boolean = await service.delete(company_id);
+                if (success) {
+                    await unit.complete(true);
+                    res.status(StatusCodes.OK).send(`company with id ${company_id} was deleted`);
+                } else {
+                    await unit.complete(false);
+                    res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                }
+            }
+        } else {
+            res.sendStatus(StatusCodes.BAD_REQUEST);
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+
 });
 
 function isValidId(id: number): boolean {
