@@ -10,9 +10,10 @@ export interface IStudent{
 //Internship Interfaces
 
 export interface IFavourite{
-
+    studentId: string;
+    internshipId: string;
+    added: Date;
 }
-
 
 //----------------------------------
 //Internship Interfaces
