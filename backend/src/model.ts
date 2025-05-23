@@ -46,7 +46,6 @@ export interface InternshipDetailsUIProps {
 }
 
 export interface IInternship{
-    internship_id: string,
     title: string,
     description: string,
     min_year: string,
