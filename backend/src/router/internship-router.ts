@@ -22,7 +22,7 @@ internshipRouter.get("/current", async (req, res) => {
     }
 });
 
-internshipRouter.put("/", async (req, res) => {
+internshipRouter.put("/change", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
 
@@ -83,6 +83,24 @@ internshipRouter.put("/", async (req, res) => {
                 res.status(StatusCodes.BAD_REQUEST).send("Id does not");
                 return;
             }
+
+            let internship: IInternship = {
+                title, description, min_year,
+                internship_creation_timestamp, salary, application_end,
+                location_id, clicks, worktype_id, internship_duration_id,
+                internship_application_link
+            }
+
+            const service = new InternshipService(unit);
+            const addedSuccessful = await service.updateInternship(internship);
+
+            if(addedSuccessful != -1){
+                res.status(StatusCodes.CREATED).send("Internship updated successfully");
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+                return;
+
+            }
         }
     }catch (e) {
 
@@ -91,8 +109,6 @@ internshipRouter.put("/", async (req, res) => {
     }
 
 });
-
-
 
 
 internshipRouter.get("/", async (req, res) => {
