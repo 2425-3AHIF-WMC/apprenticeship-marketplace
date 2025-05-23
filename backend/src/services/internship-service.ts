@@ -78,7 +78,24 @@ export class InternshipService extends ServiceBase{
         return result?.internship_id ?? -1;
     }
 
-
+    public async updateInternship(i: IInternship): Promise<number>{
+        const stmt = await this.unit.prepare(`UPDATE internship 
+                                                                    set 
+                                                                        title = $1,
+                                                                        description = $2,
+                                                                        min_year = $3,
+                                                                        internship_creation_timestamp = $4,
+                                                                        salary = $5,
+                                                                        application_end = $6,
+                                                                        location_id = $7,
+                                                                        clicks = $8,
+                                                                        worktype_id = $9,
+                                                                        internship_duration_id = $10,
+                                                                        internship_application_link = $11`
+                                                            , [i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+        const result = await stmt.rows[0];
+        return result?.internship_id ?? -1;
+    }
 
     public async deleteInternship(id: number): Promise<number>{
         const stmt = await this.unit.prepare(`DELETE FROM internship 
