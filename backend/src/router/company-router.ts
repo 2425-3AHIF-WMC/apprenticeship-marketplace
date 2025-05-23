@@ -1,7 +1,5 @@
 import express, {Request, Response} from "express";
-
 import {ICompany, ICompanySmall} from "../model";
-
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -41,7 +39,6 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as JwtPayload;
-
         try {
             const service = new CompanyService(unit);
             const companySmall: ICompanySmall | null = await service.getByIdSmall(decoded.company_id);
@@ -55,15 +52,13 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
             res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
         } finally {
             await unit.complete();
-
         }
     } catch (err) {
         res.status(StatusCodes.UNAUTHORIZED).json({error: "Invalid token"});
-
     }
 });
 
-
+companyRouter.post("/login", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const {email, password} = req.body;
 
@@ -71,87 +66,42 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
         const service = new CompanyService(unit);
         const company: ICompany | null = await service.getByEmail(email);
 
-
         if (company) {
             res.status(StatusCodes.OK).json(company);
 
+            const isMatch: boolean = await argon2.verify(company.password, password);
+            if (isMatch) {
+                // Acesstoken & Refreshtoken erstellen
+                const payload = {
+                    company_id: company.company_id,
+                    admin_verified: company.admin_verified,
+                    email_verified: company.email_verified
+                }
 
-        // Acesstoken & Refreshtoken erstellen
-        const payload = {
-            company_id: company.company_id,
-            admin_verified: company.admin_verified,
-            email_verified: company.email_verified
+                const newAccessToken = generateAccessToken(payload);
+                const newRefreshToken = generateRefreshToken(payload);
+
+                res.cookie('refreshToken', newRefreshToken, {
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    secure: false, // für Testzwecke; wird später geändert
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                })
+                    .header('Authorization', `Bearer ${newAccessToken}`)
+                    .status(StatusCodes.OK)
+                    .json({accessToken: newAccessToken});
+            } else {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+            }
+        } else {
+            res.sendStatus(StatusCodes.NOT_FOUND);
+            // Lukas wollte hier 401 schicken, wenn result.rows.length im service 0 gewesen wäre, weiß nicht wieso
         }
-        const newAccessToken = generateAccessToken(payload);
-        const newRefreshToken = generateRefreshToken(payload);
-
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false, // for testing purposes, changing later
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-            .header('Authorization', `Bearer ${newAccessToken}`)
-            .status(StatusCodes.OK)
-            .json({accessToken: newAccessToken});
-        return;
-    } catch (err) {
-        res.status(500).json({error: err});
-    }
-});
-
-companyRouter.post("/register", async (req: Request, res: Response) => {
-    const {name, companyNumber, email, phoneNumber, website, password} = req.body;
-    try {
-        const result = await pool.query(
-            `SELECT c.*
-             FROM company c
-             WHERE c.email = $1`,
-            [email]
-        );
-
-        if (result.rows.length != 0) {
-            res.status(409).json({error: "E-Mail is already in Use"});
-            return;
-        }
-        const hashedPassword = await argon2.hash(password, {
-            algorithm: argon2.Algorithm.Argon2id,
-            memoryCost: 2 ** 16,
-            timeCost: 3,
-            parallelism: 2,
-        });
-
-        const timestampInSeconds = Date.now() / 1000;
-        const insertResult  = await  pool.query(`
-            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
-            RETURNING company_id, admin_verified, email_verified`,
-            [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
-
-        const company : ICompanyPayload = insertResult.rows[0];
-
-        const payload = {
-            company_id: company.company_id,
-            admin_verified: company.admin_verified,
-            email_verified: company.email_verified,
-        };
-
-        const newAccessToken = generateAccessToken(payload);
-        const newRefreshToken = generateRefreshToken(payload);
-
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-            .header('Authorization', `Bearer ${newAccessToken}`)
-            .status(201)
-            .json({accessToken: newAccessToken});
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({Error: err})
-
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
     }
 });
 
@@ -213,7 +163,6 @@ companyRouter.post("/logout", (req: Request, res: Response) => {
 
 companyRouter.get("/unverified_admin", async (_, res: Response) => {
     const unit: Unit = await Unit.create(true);
-
     try {
         const service = new CompanyService(unit);
         const companies: ICompany[] = await service.getByUnverifiedAdmin();
@@ -260,8 +209,10 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
 });
 
 companyRouter.put("", async (req: Request, res: Response) => {
+    const id: number = req.body.company_id === undefined ? -1 : parseInt(req.body.company_id);
+
     const company: ICompany = {
-        company_id: parseInt(req.body.company_id),
+        company_id: id,
         name: req.body.name,
         company_number: req.body.company_number,
         company_info: req.body.company_info,
@@ -281,8 +232,6 @@ companyRouter.put("", async (req: Request, res: Response) => {
     };
     const unit: Unit = await Unit.create(false);
 
-    console.log(company);
-
     try {
         const service = new CompanyService(unit);
         const companyExists: boolean = await service.getByIdSmall(company.company_id) ? true : false;
@@ -292,9 +241,11 @@ companyRouter.put("", async (req: Request, res: Response) => {
         const validVerifications: boolean = allowedBooleanString.includes(company.email_verified.toLowerCase()) && allowedBooleanString.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
-            && isValidId(company.company_id) && isValidCompanyNumber(company.company_number)
-            && isValidDate(company.company_registration_timestamp)
-            && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true)) { // some complex validation, because these timestamps can be null
+        && isValidCompanyNumber(company.company_number)
+        && isValidDate(company.company_registration_timestamp)
+        && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
+        && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
+
             const success: boolean = await (companyExists ? service.update(company) : service.insert(company));
 
             if (success) {
@@ -330,5 +281,3 @@ function isValidCompanyNumber(number: string): boolean {
 
     return !isNaN(nums) && isNaN(letter);
 }
-
-

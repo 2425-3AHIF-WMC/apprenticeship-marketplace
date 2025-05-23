@@ -1,0 +1,22 @@
+@BaseUrl = http://localhost:5000/api/internship/
+
+### Delete a specific internship
+DELETE {{BaseUrl}}delete/20 HTTP/1.1
+
+### create a new internship
+POST {{BaseUrl}}/ HTTP/1.1
+Content-Type:application/json
+
+{
+  "title": "KI Chatbot Entwicklung",
+  "description": "Entwicklung und Training eines Chatbots mit NLP-Technologien",
+  "min_year": 3,
+  "internship_creation_timestamp": "2025-05-23T00:00:00Z",
+  "salary": 950.00,
+  "application_end": "2025-08-05",
+  "location_id": 5,
+  "clicks": 6,
+  "worktype_id": 1,
+  "internship_duration_id": 2,
+  "internship_application_link": "https://ai-solutions.at/karriere/ki-chatbot-entwicklung"
+}
