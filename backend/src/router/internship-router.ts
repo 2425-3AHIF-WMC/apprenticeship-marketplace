@@ -131,7 +131,6 @@ internshipRouter.delete("/delete/:id", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     const id : number = parseInt(req.params.id);
 
-
     if(!Number.isInteger(id) || id < 0 || id === null){
         res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
         return;

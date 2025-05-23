@@ -8,13 +8,43 @@ import {StatusCodes} from "http-status-codes";
 
 export const studentRouter = express.Router();
 
-
 const pool = new Pool({
     user: "postgres",
     host: "postgres",
     database: "cruddb",
     password: "postgres",
     port: 5432,
+});
+
+studentRouter.get("/favourites/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const id : number = parseInt(req.params.id);
+
+    if(!Number.isInteger(id) || id < 0 || id === null){
+        res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
+        return;
+    }
+
+    try{
+        const doesIdExist = await unit.prepare(`SELECT student_id 
+                                                                    FROM student
+                                                                    WHERE student_id=$1`,[id]);
+        let rowNumb = doesIdExist.rowCount?? -1;
+        if(rowNumb <= 0){
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+        }
+
+        const service = new StudentService(unit);
+        const internshipIds = await service.getAllFavourites(id);
+
+        res.status(StatusCodes.OK).json(internshipIds);
+
+    }catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        return;
+    }finally {
+        await unit.complete();
+    }
 });
 
 studentRouter.get("/", async (req: Request, res: Response) => {
