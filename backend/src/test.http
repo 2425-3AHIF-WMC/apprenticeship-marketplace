@@ -1,14 +1,6 @@
 @BaseUrl = http://localhost:5000/api/
 
-### Delete a specific car
+### Delete a specific internship
 DELETE {{BaseUrl}}/internship/delete/20 HTTP/1.1
 
-
-POST {{BaseUrl}}company/login
-Content-Type: application/json
-
-{
-  "email": "info@technova.at",
-  "password": "pass123"
-}
 

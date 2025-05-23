@@ -209,8 +209,10 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
 });
 
 companyRouter.put("", async (req: Request, res: Response) => {
+    const id: number = req.body.company_id === undefined ? -1 : parseInt(req.body.company_id);
+
     const company: ICompany = {
-        company_id: parseInt(req.body.company_id),
+        company_id: id,
         name: req.body.name,
         company_number: req.body.company_number,
         company_info: req.body.company_info,
@@ -241,9 +243,11 @@ companyRouter.put("", async (req: Request, res: Response) => {
         const validVerifications: boolean = allowedBooleanString.includes(company.email_verified.toLowerCase()) && allowedBooleanString.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
-            && isValidId(company.company_id) && isValidCompanyNumber(company.company_number)
-            && isValidDate(company.company_registration_timestamp)
-            && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true)) { // some complex validation, because these timestamps can be null
+        && isValidCompanyNumber(company.company_number)
+        && isValidDate(company.company_registration_timestamp)
+        && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
+        && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
+
             const success: boolean = await (companyExists ? service.update(company) : service.insert(company));
 
             if (success) {
