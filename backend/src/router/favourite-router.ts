@@ -20,7 +20,7 @@ favouriteRouter.post("/create", async (req: Request, res: Response) => {
 
 });
 
-favouriteRouter.delete("/delete:", async (req: Request, res: Response) => {
+favouriteRouter.delete("/delete", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const internship_id : number = parseInt(req.body.internship_id);
     const student_id : number = parseInt(req.body.student_id);
