@@ -4,6 +4,7 @@ import {Pool} from 'pg';
 import {Unit} from '../unit.js';
 import {FavouriteService} from "../services/favourite-service.js";
 import {StatusCodes} from "http-status-codes";
+import {IFavourite} from "../model";
 
 export const favouriteRouter = express.Router();
 
@@ -43,8 +44,19 @@ favouriteRouter.post("/create", async (req: Request, res: Response) => {
             return;
         }
 
+        let id_s = student_id.toString();
+        let id_i = internship_id.toString();
+
+        let timestamp: Date = new Date();
+        let favourite: IFavourite = {
+            student_id: id_s,
+            internship_id: id_i,
+            added: timestamp
+        }
+
         const service = new FavouriteService(unit);
-        const addedSuccessful = await service.deleteFavourite(internship_id, student_id);
+        const addedSuccessful = await service.insertFavourite(favourite);
+
         if(addedSuccessful != -1){
             res.status(StatusCodes.OK).send("deleted successfully");
             return;
@@ -105,8 +117,8 @@ favouriteRouter.delete("/delete", async (req: Request, res: Response) => {
         }
 
         const service = new FavouriteService(unit);
-        const addedSuccessful = await service.deleteFavourite(internship_id, student_id);
-        if(addedSuccessful != -1){
+        const deletedSuccessful = await service.deleteFavourite(internship_id, student_id);
+        if(deletedSuccessful != -1){
             res.status(StatusCodes.OK).send("deleted successfully");
             return;
 
