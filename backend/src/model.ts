@@ -6,6 +6,14 @@ export interface IStudent{
     added: Date;
     personType: string;
 }
+//----------------------------------
+//Internship Interfaces
+
+export interface IFavourite{
+    studentId: string;
+    internshipId: string;
+    added: Date;
+}
 
 //----------------------------------
 //Internship Interfaces

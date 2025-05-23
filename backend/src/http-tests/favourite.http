@@ -1,0 +1,10 @@
+@BaseUrl = http://localhost:5000/api/favourite/
+
+### Delete a specific internship
+DELETE {{BaseUrl}}delete HTTP/1.1
+Content-Type:application/json
+
+{
+  "internship_id": 1,
+  "student_id": 1
+}
