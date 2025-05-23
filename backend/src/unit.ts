@@ -201,17 +201,20 @@ export async function insertSampleData(unit: Unit): Promise<void> {
 
     async function insert(): Promise<void> {
         await pool.query(`
+        
         INSERT INTO WorkType (worktype_id, name, description) VALUES
         (1, 'Hybrid', 'keine Arbeit aus dem Homeoffice möglich'),
         (2, 'On-Site', 'teilweise Arbeit aus dem Homeoffice möglich'),
         (3, 'Remote', 'Arbeit aus dem Homeoffice möglich');
         
+        -- Praktikadauern
         INSERT INTO internship_duration (internship_duration_id, description) VALUES
         (1, '4 Wochen'),
         (2, '8 Wochen'),
         (3, 'variabel');
         
-        INSERT INTO City (plz, name) VALUES
+        -- Städte
+        INSERT INTO city (plz, name) VALUES
         (1010, 'Wien'),
         (4020, 'Linz'),
         (5020, 'Salzburg'),
@@ -220,9 +223,16 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (3100, 'St. Pölten'),
         (9020, 'Klagenfurt'),
         (4463, 'Großraming');
+
+        -- Abteilungen
+        INSERT INTO department (department_id, name) VALUES 
+        (1, 'Informatik'),
+        (2, 'Medientechnik'),
+        (3, 'Elektronik'),
+        (4, 'Medizintechnik');
         
         -- Firmen
-        INSERT INTO Company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
+        INSERT INTO company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
         ('TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
         ('GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
         ('MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
@@ -232,7 +242,7 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         ('DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
         
         -- Standorte
-        INSERT INTO Site (location_id, address, name, company_id, plz) VALUES
+        INSERT INTO site (location_id, address, name, company_id, plz) VALUES
         (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010),
         (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020),
         (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020),
@@ -242,7 +252,7 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
         
         -- Praktika
-        INSERT INTO Internship (internship_id, title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) VALUES
+        INSERT INTO internship (internship_id, title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) VALUES
         (1, 'Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
         (2, 'Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
         (3, 'Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
@@ -263,7 +273,38 @@ export async function insertSampleData(unit: Unit): Promise<void> {
         (18, 'CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
         (19, 'Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
         (20, 'SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
-        `)
+
+        -- Abteilungen zu Praktika
+        INSERT INTO internship_department_map (internship_id, department_id) VALUES
+        (1, 1),
+        (1, 2),
+        (2, 1),
+        (2, 2),
+        (3, 1),
+        (4, 1),
+        (4, 2),
+        (5, 4),
+        (6, 2),
+        (7, 1),
+        (8, 3),
+        (9, 3),
+        (10, 2),
+        (11, 1),
+        (11, 2),
+        (11, 3),
+        (11, 4),
+        (12, 2),
+        (13, 1),
+        (14, 1),
+        (15, 1),
+        (15, 2),
+        (16, 2),
+        (17, 1),
+        (18, 1),
+        (19, 1),
+        (20, 2);
+
+        `);
     }
 
     for (let i = 0; i < tables.length; i++) {
