@@ -73,7 +73,6 @@ const InternshipDescription = () => {
         if (!res.ok) throw new Error('Fehler beim Laden des Praktikas');
         const data = await res.json();
         setInternship(mapBackendToInternshipDetailsProps(data));
-        console.log(data);
       } catch (err: any) {
         setError(err.message || 'Unbekannter Fehler');
       } finally {

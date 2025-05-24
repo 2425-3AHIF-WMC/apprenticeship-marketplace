@@ -1,73 +1,89 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building, Mail, Phone, Globe} from 'lucide-react';
+import { Building, Mail, Phone, Globe, Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import InternshipCard from '@/components/InternshipCard';
-import { CompanyUIProps, InternshipUIProps } from '@/utils/interfaces';
-
-// Mock company data
-const company: CompanyUIProps = {
-  company_id: 1,
-  company_name: 'LT-Studios',
-  company_info: 'LT-Studios ist ein innovatives Unternehmen mit Fokus auf Medientechnik und Informatik. Wir bieten spannende Praktika für Schüler:innen und Studierende.',
-  website: 'https://ltstudios.at',
-  email: 'kontakt@ltstudios.at',
-  phone_number: '+43 987 654321',
-  password: '',
-  company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-  company_number: 'LT-12345',
-  internships: [2, 3],
-};
-
-// Mock internships for this company
-const internships: InternshipUIProps[] = [
-  {
-    id: '2',
-    title: 'Marketing Assistent',
-    company_name: 'LT-Studios',
-    application_end: '2025-07-30',
-    min_year: '4. Schulstufe',
-    location: 'Graz',
-    work_type: 'Hybrid',
-    company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-    duration: '6 Wochen',
-    added: '2025-03-29',
-    views: 89,
-    department: ['Medientechnik', 'Informatik'],
-    company_link: 'https://ltstudios.at',
-    internship_link: 'https://ltstudios.at/internship/2',
-  },
-  {
-    id: '3',
-    title: 'Software Developer Praktikum',
-    company_name: 'LT-Studios',
-    application_end: '2025-08-15',
-    min_year: '3. Schulstufe',
-    location: 'Linz',
-    work_type: 'Vor Ort',
-    company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-    duration: '8 Wochen',
-    added: '2025-04-01',
-    views: 120,
-    department: ['Informatik'],
-    company_link: 'https://ltstudios.at',
-    internship_link: 'https://ltstudios.at/internship/3',
-  },
-];
+import { CompanyUIPropsAdmin, InternshipUIProps } from '@/utils/interfaces';
+import { useLocation, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { mapBackendToCompanyUIPropsAdmin, mapBackendToInternshipProps } from '@/utils/utils';
 
 const CompanyDetails = () => {
-  // const { id } = useParams();
-  // TODO: Fetch company and internships by id
+  const { id } = useParams<{ id: string }>();
+  const { state } = useLocation();
+  const [company, setCompany] = useState(state?.company || null);
+  const [companyLoading, setCompanyLoading] = useState(!state?.company);
+  const [companyError, setCompanyError] = useState<string | null>(null);
+
+  const [internships, setInternships] = useState<InternshipUIProps[]>([]);
+  const [internshipsLoading, setInternshipsLoading] = useState(true);
+  const [internshipsError, setInternshipsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      setCompanyLoading(true);
+      setCompanyError(null);
+      try {
+        if (!id) throw new Error('Keine Unternehmens-ID in der URL gefunden');
+        const res = await fetch(`http://localhost:5000/api/company/${id}`);
+        if (!res.ok) throw new Error('Fehler beim Laden des Unternehmens');
+        const data = await res.json();
+        setCompany(mapBackendToCompanyUIPropsAdmin(data));
+      } catch (err: any) {
+        setCompanyError(err.message || 'Unbekannter Fehler');
+      } finally {
+        setCompanyLoading(false);
+      }
+    };
+    fetchCompany();
+  }, [id]);
+
+  useEffect(() => {
+    if (!company) return;
+    setInternshipsLoading(true);
+    setInternshipsError(null);
+    fetch(`http://localhost:5000/api/company/${id}/internships`)
+      .then(res => {
+        if (!res.ok) throw new Error('Fehler beim Laden der Praktika');
+        return res.json();
+      })
+      .then(data => {
+        console.log(data);
+        setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
+      })
+      .catch(err => setInternshipsError(err.message || 'Unbekannter Fehler'))
+      .finally(() => setInternshipsLoading(false));
+  }, [company]);
+
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
+      {companyLoading ? (
+          <div className="text-center py-20">
+            <FadeIn>
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
+                <Search className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
+            </FadeIn>
+          </div>
+        ) : companyError ? (
+          <div className="text-center py-20">
+            <FadeIn>
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
+                <Search className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">{companyError}</p>
+            </FadeIn>
+          </div>
+        ) : ( company && (
         <div className="container-xl">
           <FadeIn>
             <div className="mb-6 text-left">
-            
               <div className="flex items-start gap-6 flex-wrap">
                 {company.company_logo ? (
                   <div className="h-20 w-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
@@ -83,7 +99,7 @@ const CompanyDetails = () => {
                   </div>
                 )}
                 <div>
-                  <h1 className="heading-md mb-2">{company.company_name}</h1>
+                  <h1 className="heading-md mb-2">{company.company_name || company.name}</h1>
                   <div className="flex flex-col gap-1 text-muted-foreground">
                     <span className="flex items-center text-xs text-muted-foreground">Firmenbuchnummer: {company.company_number}</span>
                   </div>
@@ -119,13 +135,36 @@ const CompanyDetails = () => {
 
           <FadeIn delay={100}>
             <h2 className="heading-md mb-4">Praktika dieses Unternehmens</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {internships.map((internship) => (
-                <InternshipCard key={internship.id} internship={internship} />
-              ))}
-            </div>
+            {internshipsLoading ? (
+              <div className="text-center py-10">Lade Praktika...</div>
+            ) : internshipsError ? (
+              <div className="text-center py-10 text-red-600">{internshipsError}</div>
+            ) : internships.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {internships.map((internship, index) => (
+                      <FadeIn key={internship.id} delay={index * 50}>
+                          <InternshipCard internship={internship}/>
+                      </FadeIn>
+                  ))}
+              </div>
+          ) : (
+              <div className="text-center py-20">
+                  <FadeIn>
+                      <div
+                          className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
+                          <Search className="h-8 w-8"/>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">Keine Praktika gefunden</h3>
+                      <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                          Wir konnten keine Praktika finden, die deinen Kriterien entsprechen. Versuche,
+                          deine Filter anzupassen oder andere Suchbegriffe zu verwenden.
+                      </p>
+                  </FadeIn>
+              </div>
+          )}
           </FadeIn>
         </div>
+        ))}
       </main>
       <Footer />
     </div>
