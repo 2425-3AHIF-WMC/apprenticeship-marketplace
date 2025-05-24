@@ -69,11 +69,30 @@ export class InternshipService extends ServiceBase{
     }
 
     public async newInternship(i: IInternship): Promise<number>{
-        const stmt = await this.unit.prepare(`INSERT INTO internship (internship_id, title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
-                                                                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+        const stmt = await this.unit.prepare(`INSERT INTO internship (title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
+                                                                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
                                                                    RETURNING internship_id;`
-                                                            , [i.internship_id, i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+                                                            , [ i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
 
+        const result = await stmt.rows[0];
+        return result?.internship_id ?? -1;
+    }
+
+    public async updateInternship(i: IInternship): Promise<number>{
+        const stmt = await this.unit.prepare(`UPDATE internship 
+                                                                    set 
+                                                                        title = $1,
+                                                                        description = $2,
+                                                                        min_year = $3,
+                                                                        internship_creation_timestamp = $4,
+                                                                        salary = $5,
+                                                                        application_end = $6,
+                                                                        location_id = $7,
+                                                                        clicks = $8,
+                                                                        worktype_id = $9,
+                                                                        internship_duration_id = $10,
+                                                                        internship_application_link = $11`
+                                                            , [i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
