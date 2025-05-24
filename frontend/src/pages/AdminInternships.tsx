@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Search, ExternalLink, BookmarkX, BriefcaseBusiness } from 'lucide-react';
+import { Search, BriefcaseBusiness, X } from 'lucide-react';
 import {
     Card,
     CardContent,
@@ -11,26 +9,25 @@ import {
 } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from '@/utils/interfaces';
-import { cn } from '@/lib/utils';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import InternshipFilter from '@/components/InternshipFilter';
+import InternshipCard from '@/components/InternshipCard';
 
 const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
-    id: item._id || item.id,
+    id: item.internship_id,
     title: item.title,
     company_name: item.company_name,
-    location: item.site,
+    location: item.location,
     duration: item.duration,
     application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
     added: item.added || '',
-    views: item.clicks || 0,
+    views: item.views || 0,
     work_type: item.work_type,
     company_logo: item.company_logo,
-    department: Array.isArray(item.department) ? item.department : [item.department],
+    department: Array.isArray(item.category) ? item.category : [item.category],
     min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
     company_link: item.companyLink || '',
-    internship_link: 'https://random-company.com/ltstudios'
-
+    internship_link: item.internship_link || '',
 });
 
 
@@ -61,7 +58,13 @@ const AdminInternships = () => {
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
 
-    const filteredInternships = internships.filter((internship) => {
+    // Helper to extract the year as a number from min_year string
+    const getYearNumber = (minYear: string) => {
+        const match = minYear.match(/(\d)\. Schulstufe/);
+        return match ? parseInt(match[1], 10) : null;
+    };
+
+    let filteredInternships = internships.filter((internship) => {
         const matchesSearch = searchTerm === '' ||
             internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             internship.company_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -86,29 +89,57 @@ const AdminInternships = () => {
             matchesDuration &&
             matchesSchoolYear
         );
-    }).sort((a, b) => {
-        if (sortBy === 'Abgelaufen') {
-            return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
-        }
-        if (sortBy === 'Neueste') {
-            return new Date(b.added).getTime() - new Date(a.added).getTime();
-        }
-        if (sortBy === 'Beliebteste') {
-            return b.views - a.views;
-        }
-        if (sortBy === 'Aktuell Aktiv') {
-            return new Date(b.application_end).getTime() - new Date(a.application_end).getTime();
-        }
-        return 0;
     });
 
-    const getCategoryClasses = (category: string) => {
-        return `tag-${category}`;
-    };
+    // Default: sort by school year if no other sort is selected
+    if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {
+        const selectedYear = getYearNumber(selectedSchoolYear);
+        if (selectedYear !== null) {
+            filteredInternships = filteredInternships.sort((a, b) => {
+                const yearA = getYearNumber(a.min_year) ?? 0;
+                const yearB = getYearNumber(b.min_year) ?? 0;
+                // First, internships for the selected year, then lower years
+                if (yearA === selectedYear && yearB !== selectedYear) return -1;
+                if (yearB === selectedYear && yearA !== selectedYear) return 1;
+                // Then by year descending (3, 2, 1)
+                return yearB - yearA;
+            });
+        }
+    } else {
+        // Admin-specific sort options
+        const sortFn = (a: InternshipUIProps, b: InternshipUIProps) => {
+            if (sortBy === 'Abgelaufen') {
+                return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
+            }
+            if (sortBy === 'Neueste') {
+                return new Date(b.added).getTime() - new Date(a.added).getTime();
+            }
+            if (sortBy === 'Beliebteste') {
+                return b.views - a.views;
+            }
+            if (sortBy === 'Aktuell Aktiv') {
+                return new Date(b.application_end).getTime() - new Date(a.application_end).getTime();
+            }
+            return 0;
+        };
+        filteredInternships = filteredInternships.sort(sortFn);
+    }
     const isDeadlineExpired = (deadline: string) => {
         const today = new Date();
         const deadlineDate = new Date(deadline);
         return deadlineDate < today;
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/internship/delete/${id}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Fehler beim Löschen des Praktikums');
+            setInternships((prev) => prev.filter((i) => i.id !== id));
+        } catch (err) {
+            alert('Fehler beim Löschen des Praktikums');
+        }
     };
 
     useEffect(() => {
@@ -208,68 +239,25 @@ const AdminInternships = () => {
                                     </div>
                                 ) :
                                     filteredInternships.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {filteredInternships.map((internship) => (
-                                                <div
-                                                    key={internship.id}
-                                                    className={cn(
-                                                        "flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors",
-                                                        isDeadlineExpired(internship.application_end) && "bg-gray-100 hover:bg-gray-200"
-                                                    )}
-                                                >
-                                                    <div className="flex-1">
-                                                        <h3 className="font-semibold text-left  ">{internship.title}</h3>
-                                                        <div
-                                                            className="flex flex-col md:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
-                                                            <span>{internship.company_name}</span>
-                                                            <span>{internship.location}</span>
-                                                            <span>Frist: {internship.application_end}</span>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-2 mt-2">
-                                                            {Array.isArray(internship.department) ? (
-                                                                internship.department.map((dep, index) => (
-                                                                    <span
-                                                                        key={`${dep}-${index}`}
-                                                                        className={cn(
-                                                                            'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                            getCategoryClasses(dep)
-                                                                        )}
-                                                                    >
-                                                                        {dep}
-                                                                    </span>
-
-                                                                ))
-                                                            ) : (
-                                                                <span className={cn(
-                                                                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                    getCategoryClasses(internship.department)
-                                                                )}>
-                                                                    {internship.department}
-                                                                </span>
-                                                            )}
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                                {internship.work_type}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-row gap-2 self-end md:self-auto">
-                                                        <Button variant="outline" size="sm" asChild>
-                                                            <Link to={`/internships/${internship.id}`}>
-                                                                <ExternalLink className="h-4 w-4 mr-1" />
-                                                                Details
-                                                            </Link>
-                                                        </Button>
-                                                        <Button
-                                                            variant="destructive"
-                                                            size="sm"
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                            {filteredInternships.map((internship, index) => (
+                                                <FadeIn key={internship.id} delay={index * 50}>
+                                                    <div
+                                                        className={
+                                                            `relative ${isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200' : ''}`
+                                                        }
+                                                    >
+                                                        <button
+                                                            onClick={() => handleDelete(internship.id)}
+                                                            className="absolute top-3 right-3 z-10 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow-md"
+                                                            title="Praktikum löschen"
                                                         >
-                                                            <BookmarkX className="h-4 w-4 mr-1" />
-                                                            Entfernen
-                                                        </Button>
+                                                            <X className="w-5 h-5" />
+                                                        </button>
+                                                        <InternshipCard internship={internship} />
                                                     </div>
-                                                </div>
-                                            )
-                                            )}
+                                                </FadeIn>
+                                            ))}
                                         </div>
                                     ) :
                                         (
@@ -282,7 +270,7 @@ const AdminInternships = () => {
                                                         </div>
                                                         <h3 className="text-lg font-medium mb-2">Keine Ergebnisse gefunden</h3>
                                                         <p className="text-muted-foreground">
-                                                            Keine Favoriten entsprechen deiner Suche nach "{searchTerm}".
+                                                            Keine Praktia entsprechen deiner Suche nach "{searchTerm}".
                                                         </p>
                                                     </>
                                                 ) : (
