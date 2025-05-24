@@ -74,7 +74,13 @@ const Internships = () => {
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
 
-    const filteredInternships = internships.filter((internship) => {
+    // Helper to extract the year as a number from min_year string
+    const getYearNumber = (minYear: string) => {
+        const match = minYear.match(/(\d)\. Schulstufe/);
+        return match ? parseInt(match[1], 10) : null;
+    };
+
+    let filteredInternships = internships.filter((internship) => {
         const deadlineDate = new Date(internship.application_end);
         const today = new Date();
 
@@ -94,28 +100,60 @@ const Internships = () => {
         const matchesDuration =
             selectedDuration === 'Alle' || internship.duration === selectedDuration;
 
-        const matchesSchoolYear =
-            selectedSchoolYear === 'Alle Schulstufen' || internship.min_year === selectedSchoolYear;
-
+        // For school year, we filter only if a specific year is selected
+        if (selectedSchoolYear !== 'Alle Schulstufen') {
+            const selectedYear = getYearNumber(selectedSchoolYear);
+            const internshipYear = getYearNumber(internship.min_year);
+            // Only show internships for the selected year or below
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesWorkMode &&
+                matchesDuration &&
+                internshipYear !== null &&
+                selectedYear !== null &&
+                internshipYear <= selectedYear
+            );
+        }
+        // Default: show all
         return (
             matchesSearch &&
             matchesCategory &&
             matchesWorkMode &&
-            matchesDuration &&
-            matchesSchoolYear
+            matchesDuration
         );
-    }).sort((a, b) => {
-        if (sortBy === 'Bewerbungsfrist') {
-            return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
-        }
-        if (sortBy === 'Neueste') {
-            return new Date(b.added).getTime() - new Date(a.added).getTime();
-        }
-        if (sortBy === 'Beliebteste') {
-            return b.views - a.views;
-        }
-        return 0;
     });
+
+    // Default: sort by school year if no other sort is selected
+    if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {
+        const selectedYear = getYearNumber(selectedSchoolYear);
+        if (selectedYear !== null) {
+            filteredInternships = filteredInternships.sort((a, b) => {
+                const yearA = getYearNumber(a.min_year) ?? 0;
+                const yearB = getYearNumber(b.min_year) ?? 0;
+                // First, internships for the selected year, then lower years
+                if (yearA === selectedYear && yearB !== selectedYear) return -1;
+                if (yearB === selectedYear && yearA !== selectedYear) return 1;
+                // Then by year descending (3, 2, 1)
+                return yearB - yearA;
+            });
+        }
+    } else {
+        // Sortierfunktion für das gewählte Kriterium
+        const sortFn = (a: InternshipUIProps, b: InternshipUIProps) => {
+            if (sortBy === 'Bewerbungsfrist') {
+                return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
+            }
+            if (sortBy === 'Neueste') {
+                return new Date(b.added).getTime() - new Date(a.added).getTime();
+            }
+            if (sortBy === 'Beliebteste') {
+                return b.views - a.views;
+            }
+            return 0;
+        };
+        filteredInternships = filteredInternships.sort(sortFn);
+    }
 
     return (
         <div className="min-h-screen flex flex-col">
