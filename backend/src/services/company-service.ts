@@ -82,7 +82,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where admin_verified = 'no'`);
