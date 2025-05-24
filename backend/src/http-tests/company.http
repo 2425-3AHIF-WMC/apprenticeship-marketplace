@@ -68,7 +68,7 @@ Content-Type:application/json
   "admin_verified": "n"
 }
 
-### verify the admin of a company
+### verify the email of a company
 PATCH {{BaseUrl}}/9/verify_email HTTP/1.1
 Content-Type:application/json
 
@@ -76,7 +76,7 @@ Content-Type:application/json
   "email_verified": "1"
 }
 
-### unverify the admin of a company
+### unverify the email of a company
 PATCH {{BaseUrl}}/9/verify_email HTTP/1.1
 Content-Type:application/json
 
