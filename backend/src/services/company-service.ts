@@ -122,6 +122,22 @@ export class CompanyService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
+    public async verifyAdmin(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set admin_verified='true', admin_verification_timestamp=NOW() where company_id=$1`, [
+            company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async unverifyAdmin(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set admin_verified='false', admin_verification_timestamp=null where company_id=$1`, [
+            company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
     public async insert(company: ICompany): Promise<boolean> {
         const stmt = await this.unit.prepare(`INSERT INTO Company (name, company_number, company_info, website, email,
                                                                    phone_number, password, email_verified,
