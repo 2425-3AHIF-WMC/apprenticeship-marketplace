@@ -193,7 +193,7 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
         try {
             const service = new CompanyService(unit);
             if (await service.companyExists(company_id)) {
-                let success: boolean = false;
+                let success: boolean;
 
                 if (allowedBooleanTrueStrings.includes(adminVerified)) {
                     success = await service.verifyAdmin(company_id);
@@ -221,8 +221,48 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
     } else {
         res.status(StatusCodes.BAD_REQUEST).send("req body or param id was not valid");
     }
+});
+
+companyRouter.patch("/:id/verify_email", async (req: Request, res: Response) => {
+    const emailVerified: string = req.body.email_verified;
+    const company_id: number = parseInt(req.params.id);
+
+    if (allowedBooleanStrings.includes(emailVerified) && isValidId(company_id)) {
+        const unit: Unit = await Unit.create(false);
+        try {
+            const service = new CompanyService(unit);
+            if (await service.companyExists(company_id)) {
+                let success: boolean;
+
+                if (allowedBooleanTrueStrings.includes(emailVerified)) {
+                    success = await service.verifyEmail(company_id);
+                } else {
+                    success = await service.unverifyEmail(company_id);
+                }
+
+                if (success) {
+                    await unit.complete(true);
+                    res.status(StatusCodes.NO_CONTENT).send(`email_verified was set to ${emailVerified}`);
+                } else {
+                    await unit.complete(false);
+                    res.status(StatusCodes.CONFLICT).send("could not update email_verified")
+                }
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`company with id ${company_id} does not exist`);
+            }
+
+        } catch (e) {
+            console.log(e);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    } else {
+        res.status(StatusCodes.BAD_REQUEST).send("req body or param id was not valid");
+    }
 
 });
+
 
 companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
