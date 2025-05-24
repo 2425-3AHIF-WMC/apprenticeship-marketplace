@@ -41,7 +41,6 @@ export interface InternshipDetailsUIProps {
     views: number;
     category: string[];
     company_link: string;
-    start_date: string;
     salary: string;
     internship_link: string;
     company_id: string;

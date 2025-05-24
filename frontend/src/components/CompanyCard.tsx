@@ -1,5 +1,5 @@
 import { CheckCircle, XCircle, ShieldCheck, Building } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { CompanyUIPropsAdmin } from '@/utils/interfaces';
 
 export interface CompanyCardProps {
