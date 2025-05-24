@@ -1,6 +1,6 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
-import {IInternship, InternshipDetailsUIProps, InternshipUIProps} from "../model";
+import {ICompany, IInternship, IInternshipId, InternshipDetailsUIProps, InternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
@@ -66,6 +66,29 @@ export class InternshipService extends ServiceBase{
                                                                   group by i.internship_id, i.title, c.name, i.application_end, i.min_year, s.address, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
                         `, [id]);
         return stmt.rows[0] as InternshipDetailsUIProps;
+    }
+
+    public async getByCompanyId(company_id: number): Promise<IInternshipId[]> {
+        const stmt = await this.unit.prepare(`select i.internship_id,
+                                                     i.title,
+                                                     i.description,
+                                                     i.min_year,
+                                                     i.internship_creation_timestamp,
+                                                     i.salary,
+                                                     i.application_end,
+                                                     i.location_id,
+                                                     i.clicks,
+                                                     i.worktype_id,
+                                                     i.internship_duration_id,
+                                                     i.internship_application_link
+                                              from internship i
+                                              where i.location_id = ALL (select s.location_id
+                                                                         from site s
+                                                                         where s.company_id = (select c.company_id
+                                                                                               from company c
+                                                                                               where c.company_id=$1));`, [company_id]);
+
+        return stmt.rows as IInternshipId[];
     }
 
     public async newInternship(i: IInternship): Promise<number>{

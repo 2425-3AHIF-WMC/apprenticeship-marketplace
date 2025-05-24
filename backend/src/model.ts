@@ -1,15 +1,17 @@
 //TODO: Interface für jede Tabelle die wir brauchen
 
-export interface IStudent{
+//Student Interfaces
+export interface IStudent {
     studentId: string;
     username: string;
     added: Date;
     personType: string;
 }
-//----------------------------------
-//Internship Interfaces
 
-export interface IFavourite{
+//----------------------------------
+//Favourite Interfaces
+
+export interface IFavourite {
     student_id: string;
     internship_id: string;
     added: Date;
@@ -33,6 +35,7 @@ export interface InternshipUIProps {
     company_link: string;
     internship_link: string;
 }
+
 export interface InternshipDetailsUIProps {
     id: string;
     title: string;
@@ -53,7 +56,7 @@ export interface InternshipDetailsUIProps {
     pdf: string;
 }
 
-export interface IInternship{
+export interface IInternship {
     title: string,
     description: string,
     min_year: string,
@@ -66,10 +69,23 @@ export interface IInternship{
     internship_duration_id: string,
     internship_application_link: string;
 }
+
+export interface IInternshipId {
+    internship_id: string,
+    title: string,
+    description: string,
+    min_year: string,
+    internship_creation_timestamp: string,
+    salary: string,
+    application_end: string,
+    location_id: string,
+    clicks: string,
+    worktype_id: string,
+    internship_duration_id: string,
+    internship_application_link: string;
+}
+
 //----------------------------------
-
-
-
 
 export interface CompanyUIPropsAdmin {
     id: string;
@@ -89,7 +105,7 @@ export interface ICompany {
     company_info: string,
     website: string,
     email: string,
-    phone_number : string,
+    phone_number: string,
     password: string,
     email_verified: string,
     admin_verified: string,
@@ -101,7 +117,7 @@ export interface ICompany {
 export interface ICompanySmall {
     company_id: number,
     name: string,
-    email:string
+    email: string
     admin_verified: string
 }
 

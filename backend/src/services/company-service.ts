@@ -19,7 +19,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company`);
         return stmt.rows as ICompany[];
@@ -37,7 +37,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where company_id = $1`, [id]);
@@ -63,7 +63,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where email = $1`, [email]);
@@ -101,7 +101,7 @@ export class CompanyService extends ServiceBase {
                                                   email_verified=$8,
                                                   admin_verified=$9,
                                                   company_registration_timestamp=$10,
-                                                  email_verfication_timestamp=$11,
+                                                  email_verification_timestamp=$11,
                                                   admin_verification_timestamp=$12
                                               where company_id = $13`, [
             company.name,

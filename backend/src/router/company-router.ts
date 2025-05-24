@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall} from "../model";
+import {ICompany, ICompanySmall, IInternship, IInternshipId} from "../model";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
+import {InternshipService} from "../services/internship-service.js";
 
 dotenv.config();
 
@@ -263,7 +264,6 @@ companyRouter.patch("/:id/verify_email", async (req: Request, res: Response) => 
 
 });
 
-
 companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const {param_id} = req.params;
@@ -289,6 +289,36 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     } finally {
         await unit.complete();
     }
+});
+
+companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(false);
+    const companyService = new CompanyService(unit);
+    const internshipService = new InternshipService(unit);
+
+    try {
+
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const internships: IInternshipId[] = await internshipService.getByCompanyId(company_id);
+
+            if(internships.length > 0) {
+                res.status(StatusCodes.OK).json(internships);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`no internships for company with id ${company_id} found`);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+
 });
 
 // to insert and update a new company
