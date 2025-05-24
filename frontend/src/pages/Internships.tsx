@@ -7,23 +7,7 @@ import InternshipFilter from '@/components/InternshipFilter';
 import {Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
-
-const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
-    id: item.internship_id,
-    title: item.title,
-    company_name: item.company_name,
-    location: item.location,
-    duration: item.duration,
-    application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
-    added: item.added || '',
-    views: item.views || 0,
-    work_type: item.work_type,
-    company_logo: item.company_logo,
-    department: Array.isArray(item.category) ? item.category : [item.category],
-    min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
-    company_link: item.companyLink || '',
-    internship_link: item.internship_link || '',
-});
+import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
 
 const Internships = () => {
     const location = useLocation();
@@ -80,49 +64,22 @@ const Internships = () => {
         return match ? parseInt(match[1], 10) : null;
     };
 
-    let filteredInternships = internships.filter((internship) => {
+    // Pre-filter out expired internships
+    const validInternships = internships.filter((internship) => {
         const deadlineDate = new Date(internship.application_end);
         const today = new Date();
-
-        if (isNaN(deadlineDate.getTime()) || deadlineDate < today) return false;
-
-        const matchesSearch = searchTerm === '' ||
-            internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            internship.company_name.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesCategory =
-            selectedCategory === 'Alle' ||
-            (Array.isArray(internship.department) && internship.department.includes(selectedCategory));
-
-        const matchesWorkMode =
-            selectedWorkMode === 'Alle' || internship.work_type === selectedWorkMode;
-
-        const matchesDuration =
-            selectedDuration === 'Alle' || internship.duration === selectedDuration;
-
-        // For school year, we filter only if a specific year is selected
-        if (selectedSchoolYear !== 'Alle Schulstufen') {
-            const selectedYear = getYearNumber(selectedSchoolYear);
-            const internshipYear = getYearNumber(internship.min_year);
-            // Only show internships for the selected year or below
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesWorkMode &&
-                matchesDuration &&
-                internshipYear !== null &&
-                selectedYear !== null &&
-                internshipYear <= selectedYear
-            );
-        }
-        // Default: show all
-        return (
-            matchesSearch &&
-            matchesCategory &&
-            matchesWorkMode &&
-            matchesDuration
-        );
+        return !isNaN(deadlineDate.getTime()) && deadlineDate >= today;
     });
+
+    // Use shared filter utility
+    const filterOptions: InternshipFilterOptions = {
+        searchTerm,
+        selectedCategory,
+        selectedWorkMode,
+        selectedDuration,
+        selectedSchoolYear,
+    };
+    let filteredInternships = filterInternships(validInternships, filterOptions);
 
     // Default: sort by school year if no other sort is selected
     if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {

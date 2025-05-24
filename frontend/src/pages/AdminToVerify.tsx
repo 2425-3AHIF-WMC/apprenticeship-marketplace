@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import CompanyCard from '@/components/CompanyCard';
 import { CompanyUIPropsAdmin } from '@/utils/interfaces';
+import { mapBackendToCompanyUIPropsAdmin, getCompanyStatus } from '@/utils/utils';
 
 const AdminToVerify = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +108,7 @@ const AdminToVerify = () => {
                   <div className="space-y-4">
                     {filteredCompanies.map((company) => (
                       <CompanyCard key={company.company_id} company={company}>
-                        {getStatus(company) === 'nur_email' ? (
+                        {getCompanyStatus(company) === 'nur_email' ? (
                           <Button variant="default" size="sm">
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Akzeptieren
@@ -145,31 +146,5 @@ const AdminToVerify = () => {
     </div>
   );
 };
-
-function getStatus(company: any) {
-  if (company.admin_verified && company.email_verified) return 'vollständig';
-  if (company.email_verified) return 'nur_email';
-  return 'keine';
-}
-
-function mapBackendToCompanyUIPropsAdmin(item: any): CompanyUIPropsAdmin {
-    return {
-        company_id: item.company_id,
-        name: item.name,
-        company_info: item.company_info ?? '',
-        website: item.website ?? '',
-        email: item.email ?? '',
-        phone_number: item.phone_number ?? '',
-        password: item.password ?? '',
-        email_verified: item.email_verified === true || item.email_verified === 'true' || item.email_verified === 1,
-        admin_verified: item.admin_verified === true || item.admin_verified === 'true' || item.admin_verified === 1,
-        company_registration_timestamp: item.company_registration_timestamp ? new Date(item.company_registration_timestamp).toISOString() : '',
-        email_verification_timestamp: item.email_verification_timestamp ? new Date(item.email_verification_timestamp).toISOString() : '',
-        admin_verification_timestamp: item.admin_verification_timestamp ? new Date(item.admin_verification_timestamp).toISOString() : '',
-        company_logo: item.company_logo ?? '',
-        company_number: item.company_number ?? '',
-        internships: Array.isArray(item.internships) ? item.internships : [],
-    };
-}
 
 export default AdminToVerify; 

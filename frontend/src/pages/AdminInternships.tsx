@@ -12,24 +12,7 @@ import { InternshipUIProps } from '@/utils/interfaces';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import InternshipFilter from '@/components/InternshipFilter';
 import InternshipCard from '@/components/InternshipCard';
-
-const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
-    id: item.internship_id,
-    title: item.title,
-    company_name: item.company_name,
-    location: item.location,
-    duration: item.duration,
-    application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
-    added: item.added || '',
-    views: item.views || 0,
-    work_type: item.work_type,
-    company_logo: item.company_logo,
-    department: Array.isArray(item.category) ? item.category : [item.category],
-    min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
-    company_link: item.companyLink || '',
-    internship_link: item.internship_link || '',
-});
-
+import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
 
 const AdminInternships = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -64,32 +47,15 @@ const AdminInternships = () => {
         return match ? parseInt(match[1], 10) : null;
     };
 
-    let filteredInternships = internships.filter((internship) => {
-        const matchesSearch = searchTerm === '' ||
-            internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            internship.company_name.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesCategory =
-            selectedCategory === 'Alle' ||
-            (Array.isArray(internship.department) && internship.department.includes(selectedCategory));
-
-        const matchesWorkMode =
-            selectedWorkMode === 'Alle' || internship.work_type === selectedWorkMode;
-
-        const matchesDuration =
-            selectedDuration === 'Alle' || internship.duration === selectedDuration;
-
-        const matchesSchoolYear =
-            selectedSchoolYear === 'Alle Schulstufen' || internship.min_year === selectedSchoolYear;
-
-        return (
-            matchesSearch &&
-            matchesCategory &&
-            matchesWorkMode &&
-            matchesDuration &&
-            matchesSchoolYear
-        );
-    });
+    // Use shared filter utility
+    const filterOptions: InternshipFilterOptions = {
+        searchTerm,
+        selectedCategory,
+        selectedWorkMode,
+        selectedDuration,
+        selectedSchoolYear,
+    };
+    let filteredInternships = filterInternships(internships, filterOptions);
 
     // Default: sort by school year if no other sort is selected
     if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {

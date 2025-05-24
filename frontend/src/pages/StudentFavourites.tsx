@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from '@/utils/interfaces';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import StudentDashboardSidebar from "@/components/StudentDashboardSidebar.tsx";
 
 const StudentFavourites = () => {

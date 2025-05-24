@@ -29,6 +29,7 @@ import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { InternshipDetailsUIProps } from '@/utils/interfaces';
+import { mapBackendToInternshipDetailsProps } from '@/utils/utils';
 import { useEffect, useState } from 'react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -43,25 +44,7 @@ const formatDepartment = (department: string | string[]): string => {
   return department;
 };
 
-const mapBackendToInternshipProps = (item: any): InternshipDetailsUIProps => ({
-  id: item.internship_id,
-  title: item.title,
-  company_name: item.company_name,
-  location: item.location,
-  duration: item.duration,
-  application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
-  salary: item.salary,
-  added: item.added,
-  views: item.views,
-  work_type: item.work_type,
-  company_logo: item.company_logo,
-  category: Array.isArray(item.category) ? item.category : [item.category],
-  min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
-  company_link: item.company_link,
-  internship_link: item.internship_link,
-  company_id: item.company_id,
-  pdf: '/job_postings/2.pdf'
-});
+
 
 const InternshipDescription = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,7 +72,7 @@ const InternshipDescription = () => {
         const res = await fetch(`http://localhost:5000/api/internship/${id}`);
         if (!res.ok) throw new Error('Fehler beim Laden des Praktikas');
         const data = await res.json();
-        setInternship(mapBackendToInternshipProps(data));
+        setInternship(mapBackendToInternshipDetailsProps(data));
         console.log(data);
       } catch (err: any) {
         setError(err.message || 'Unbekannter Fehler');
