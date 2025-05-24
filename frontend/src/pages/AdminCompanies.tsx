@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Search, CheckCircle, ExternalLink, BookmarkX } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,110 +7,36 @@ import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import CompanyCard from '@/components/CompanyCard';
-
-
-
-// Mock data for companies
-const ALL_COMPANIES = [
-    {
-        company_id: 1,
-        name: 'CarlaCo Enterprises',
-        company_info: 'Innovatives Unternehmen für moderne Lösungen.',
-        website: 'https://carlaco.com',
-        email: 'info@carlaco.com',
-        phone_number: '+43 123 456789',
-        password: '',
-        email_verified: true,
-        admin_verified: true,
-        company_registration_timestamp: '2024-01-01T10:00:00Z',
-        email_verification_timestamp: '2024-01-02T10:00:00Z',
-        admin_verification_timestamp: '2024-01-03T10:00:00Z',
-        company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-        company_number: 'C-12345',
-        internships: [1, 2],
-    },
-    {
-        company_id: 2,
-        name: 'LT-Studios',
-        company_info: 'Fokus auf Medientechnik und Informatik.',
-        website: 'https://ltstudios.at',
-        email: 'kontakt@ltstudios.at',
-        phone_number: '+43 987 654321',
-        password: '',
-        email_verified: true,
-        admin_verified: false,
-        company_registration_timestamp: '2024-02-01T10:00:00Z',
-        email_verification_timestamp: '2024-02-02T10:00:00Z',
-        admin_verification_timestamp: '',
-        company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-        company_number: 'LT-12345',
-        internships: [3],
-    },
-    {
-        company_id: 3,
-        name: 'ITMedia Solutions',
-        company_info: 'IT-Dienstleistungen und Medien.',
-        website: 'https://itmedia.at',
-        email: 'office@itmedia.at',
-        phone_number: '+43 555 123456',
-        password: '',
-        email_verified: false,
-        admin_verified: false,
-        company_registration_timestamp: '2024-03-01T10:00:00Z',
-        email_verification_timestamp: '',
-        admin_verification_timestamp: '',
-        company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-        company_number: 'IT-98765',
-        internships: [],
-    },
-    {
-        company_id: 4,
-        name: 'Elektronic Design',
-        company_info: 'Elektroniklösungen für Unternehmen.',
-        website: 'https://elektronicdesign.at',
-        email: 'info@elektronicdesign.at',
-        phone_number: '+43 222 333444',
-        password: '',
-        email_verified: true,
-        admin_verified: true,
-        company_registration_timestamp: '2024-04-01T10:00:00Z',
-        email_verification_timestamp: '2024-04-02T10:00:00Z',
-        admin_verification_timestamp: '2024-04-03T10:00:00Z',
-        company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-        company_number: 'ED-54321',
-        internships: [4],
-    },
-    {
-        company_id: 5,
-        name: 'MeliCorp',
-        company_info: 'Innovative Lösungen für Unternehmen.',
-        website: 'https://melicorp.com',
-        email: 'kontakt@melicorp.com',
-        phone_number: '+43 111 222333',
-        password: '',
-        email_verified: false,
-        admin_verified: false,
-        company_registration_timestamp: '2024-05-01T10:00:00Z',
-        email_verification_timestamp: '',
-        admin_verification_timestamp: '',
-        company_logo: '/assets/company-logos/LT-Studios_Logo.png',
-        company_number: 'MC-67890',
-        internships: [],
-    },
-];
-
-const getStatus = (company: any) => {
-    if (company.admin_verified && company.email_verified) return 'vollständig';
-    if (company.email_verified) return 'nur_email';
-    return 'keine';
-};
-
+import { CompanyUIPropsAdmin } from '@/utils/interfaces';
 
 const AdminCompanies = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('Nichts');
+    const [companies, setCompanies] = useState<CompanyUIPropsAdmin[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    let filteredCompanies = ALL_COMPANIES.filter((company) => {
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const res = await fetch('http://localhost:5000/api/company/');
+                if (!res.ok) throw new Error('Fehler beim Laden der Unternehmen');
+                const data = await res.json();
+                // Map backend data to CompanyUIPropsAdmin if needed
+                console.log(data);
+                setCompanies(Array.isArray(data) ? data.map(mapBackendToCompanyUIPropsAdmin) : []);
+            } catch (err: any) {
+                setError(err.message || 'Unbekannter Fehler');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCompanies();
+    }, []);
+
+    let filteredCompanies = companies.filter((company) => {
         const term = searchTerm.toLowerCase();
         return (
             company.name.toLowerCase().includes(term) ||
@@ -179,11 +105,29 @@ const AdminCompanies = () => {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {filteredCompanies.length > 0 ? (
+                                {isLoading ? (
+                                    <div className="text-center py-20">
+                                        <FadeIn>
+                                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
+                                                <Search className="h-8 w-8" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold mb-2">Lade Unternehmen...</h3>
+                                        </FadeIn>
+                                    </div>
+                                ) : error ? (
+                                    <div className="text-center py-20">
+                                        <FadeIn>
+                                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
+                                                <Search className="h-8 w-8" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Unternehmen</h3>
+                                            <p className="text-muted-foreground max-w-md mx-auto mb-6">{error}</p>
+                                        </FadeIn>
+                                    </div>
+                                ) : filteredCompanies.length > 0 ? (
                                     <div className="space-y-4">
                                         {filteredCompanies.map((company) => (
                                             <CompanyCard key={company.company_id} company={company}>
-                                                
                                                 {getStatus(company) === 'nur_email' ? (
                                                     <Button variant="default" size="sm">
                                                         <CheckCircle className="h-4 w-4 mr-1" />
@@ -222,5 +166,31 @@ const AdminCompanies = () => {
         </div>
     );
 };
+
+function getStatus(company: any) {
+    if (company.admin_verified && company.email_verified) return 'vollständig';
+    if (company.email_verified) return 'nur_email';
+    return 'keine';
+}
+
+function mapBackendToCompanyUIPropsAdmin(item: any): CompanyUIPropsAdmin {
+    return {
+        company_id: item.company_id,
+        name: item.name,
+        company_info: item.company_info ?? '',
+        website: item.website ?? '',
+        email: item.email ?? '',
+        phone_number: item.phone_number ?? '',
+        password: item.password ?? '',
+        email_verified: item.email_verified === true || item.email_verified === 'true' || item.email_verified === 1,
+        admin_verified: item.admin_verified === true || item.admin_verified === 'true' || item.admin_verified === 1,
+        company_registration_timestamp: item.company_registration_timestamp ? new Date(item.company_registration_timestamp).toISOString() : '',
+        email_verification_timestamp: item.email_verification_timestamp ? new Date(item.email_verification_timestamp).toISOString() : '',
+        admin_verification_timestamp: item.admin_verification_timestamp ? new Date(item.admin_verification_timestamp).toISOString() : '',
+        company_logo: item.company_logo ?? '',
+        company_number: item.company_number ?? '',
+        internships: Array.isArray(item.internships) ? item.internships : [],
+    };
+}
 
 export default AdminCompanies; 
