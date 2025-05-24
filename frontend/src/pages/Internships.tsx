@@ -9,20 +9,20 @@ import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
 
 const mapBackendToInternshipProps = (item: any): InternshipUIProps => ({
-    id: item._id || item.id,
+    id: item.internship_id,
     title: item.title,
     company_name: item.company_name,
-    location: item.site,
+    location: item.location,
     duration: item.duration,
     application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
     added: item.added || '',
-    views: item.clicks || 0,
+    views: item.views || 0,
     work_type: item.work_type,
     company_logo: item.company_logo,
-    department: Array.isArray(item.department) ? item.department : [item.department],
+    department: Array.isArray(item.category) ? item.category : [item.category],
     min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
     company_link: item.companyLink || '',
-    internship_link: 'https://random-company.com/ltstudios'
+    internship_link: item.internship_link || '',
 });
 
 const Internships = () => {

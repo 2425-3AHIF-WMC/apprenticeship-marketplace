@@ -5,7 +5,7 @@ import {Input} from '@/components/ui/input';
 
 const CATEGORIES = ['Alle', 'Informatik', 'Medientechnik', 'Medizintechnik', 'Elektronik'];
 const WORK_MODE = ['Alle', 'Remote', 'Hybrid', 'On-Site'];
-const DURATIONS = ['Alle', '4 Wochen', '6 Wochen', '8 Wochen', 'variabel'];
+const DURATIONS = ['Alle', '4 Wochen', '8 Wochen', 'variabel'];
 const SCHOOL_YEARS = ['Alle Schulstufen', '2. Schulstufe', '3. Schulstufe', '4. Schulstufe'];
 
 type Props = {
