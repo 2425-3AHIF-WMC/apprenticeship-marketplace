@@ -12,7 +12,7 @@ import { mapBackendToCompanyUIPropsAdmin, mapBackendToInternshipProps } from '@/
 const CompanyDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { state } = useLocation();
-  const [company, setCompany] = useState(state?.company || null);
+  const [company, setCompany] = useState<CompanyUIPropsAdmin | null>(null);
   const [companyLoading, setCompanyLoading] = useState(!state?.company);
   const [companyError, setCompanyError] = useState<string | null>(null);
 
@@ -49,7 +49,6 @@ const CompanyDetails = () => {
         return res.json();
       })
       .then(data => {
-        console.log(data);
         setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
       })
       .catch(err => setInternshipsError(err.message || 'Unbekannter Fehler'))
@@ -89,7 +88,7 @@ const CompanyDetails = () => {
                   <div className="h-20 w-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
                     <img
                       src={company.company_logo}
-                      alt={`${company.company_name} Logo`}
+                      alt={`${company.name} Logo`}
                       className="h-full w-full object-contain"
                     />
                   </div>
@@ -99,7 +98,7 @@ const CompanyDetails = () => {
                   </div>
                 )}
                 <div>
-                  <h1 className="heading-md mb-2">{company.company_name || company.name}</h1>
+                  <h1 className="heading-md mb-2">{company.name}</h1>
                   <div className="flex flex-col gap-1 text-muted-foreground">
                     <span className="flex items-center text-xs text-muted-foreground">Firmenbuchnummer: {company.company_number}</span>
                   </div>
