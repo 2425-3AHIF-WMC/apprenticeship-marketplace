@@ -11,6 +11,9 @@ import {CompanyService} from "../services/company-service.js";
 dotenv.config();
 
 export const companyRouter = express.Router();
+const allowedBooleanStrings: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
+const allowedBooleanTrueStrings: string[] = ['true', 't', 'y', 'yes', '1'];
+const allowedBooleanFalseStrings: string[] = ['false', 'f', 'n', 'no', '0'];
 
 companyRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
@@ -181,6 +184,46 @@ companyRouter.get("/unverified_admin", async (_, res: Response) => {
     }
 });
 
+companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => {
+    const adminVerified: string = req.body.admin_verified;
+    const company_id: number = parseInt(req.params.id);
+
+    if (allowedBooleanStrings.includes(adminVerified) && isValidId(company_id)) {
+        const unit: Unit = await Unit.create(false);
+        try {
+            const service = new CompanyService(unit);
+            if (await service.companyExists(company_id)) {
+                let success: boolean = false;
+
+                if (allowedBooleanTrueStrings.includes(adminVerified)) {
+                    success = await service.verifyAdmin(company_id);
+                } else {
+                    success = await service.unverifyAdmin(company_id);
+                }
+
+                if (success) {
+                    await unit.complete(true);
+                    res.status(StatusCodes.NO_CONTENT).send(`admin_verified was set to ${adminVerified}`);
+                } else {
+                    await unit.complete(false);
+                    res.status(StatusCodes.CONFLICT).send("could not update admin_verified")
+                }
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`company with id ${company_id} does not exist`);
+            }
+
+        } catch (e) {
+            console.log(e);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    } else {
+        res.status(StatusCodes.BAD_REQUEST).send("req body or param id was not valid");
+    }
+
+});
+
 companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const {param_id} = req.params;
@@ -208,6 +251,7 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     }
 });
 
+// to insert and update a new company
 companyRouter.put("", async (req: Request, res: Response) => {
     const id: number = req.body.company_id === undefined ? -1 : parseInt(req.body.company_id);
 
@@ -234,11 +278,10 @@ companyRouter.put("", async (req: Request, res: Response) => {
 
     try {
         const service = new CompanyService(unit);
-        const companyExists: boolean = await service.getByIdSmall(company.company_id) ? true : false;
+        const companyExists: boolean = await service.companyExists(company.company_id);
         const validWebsite: boolean = company.website.substring(0, 8) === "https://";
         const validEmail: boolean = company.email.includes('@');
-        const allowedBooleanString: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
-        const validVerifications: boolean = allowedBooleanString.includes(company.email_verified.toLowerCase()) && allowedBooleanString.includes(company.admin_verified.toLowerCase());
+        const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
         && isValidCompanyNumber(company.company_number)
@@ -265,6 +308,40 @@ companyRouter.put("", async (req: Request, res: Response) => {
     } finally {
         await unit.complete(false);
     }
+});
+
+companyRouter.delete("/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(false);
+    try {
+        const company_id: number = parseInt(req.params.id);
+        const service = new CompanyService(unit);
+
+        const companyExists: boolean = await service.companyExists(company_id);
+
+        if (isValidId(company_id)) {
+            if (!companyExists) {
+                res.status(StatusCodes.OK).send("Nothing to delete; id was not found");
+            } else {
+                const success: boolean = await service.delete(company_id);
+                if (success) {
+                    await unit.complete(true);
+                    res.status(StatusCodes.OK).send(`company with id ${company_id} was deleted`);
+                } else {
+                    await unit.complete(false);
+                    res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                }
+            }
+        } else {
+            res.sendStatus(StatusCodes.BAD_REQUEST);
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+
 });
 
 function isValidId(id: number): boolean {
