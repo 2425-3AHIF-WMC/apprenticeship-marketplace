@@ -49,6 +49,7 @@ const CompanyDetails = () => {
         return res.json();
       })
       .then(data => {
+        console.log(data);
         setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
       })
       .catch(err => setInternshipsError(err.message || 'Unbekannter Fehler'))
@@ -66,7 +67,7 @@ const CompanyDetails = () => {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
                 <Search className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
+              <h3 className="text-xl font-semibold mb-2">Lade Unternehmen...</h3>
             </FadeIn>
           </div>
         ) : companyError ? (
@@ -75,7 +76,7 @@ const CompanyDetails = () => {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
                 <Search className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
+              <h3 className="text-xl font-semibold mb-2">Fehler beim Laden des Unternehmens</h3>
               <p className="text-muted-foreground max-w-md mx-auto mb-6">{companyError}</p>
             </FadeIn>
           </div>
@@ -135,9 +136,24 @@ const CompanyDetails = () => {
           <FadeIn delay={100}>
             <h2 className="heading-md mb-4">Praktika dieses Unternehmens</h2>
             {internshipsLoading ? (
-              <div className="text-center py-10">Lade Praktika...</div>
+              <div className="text-center py-10">
+                <FadeIn>
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
+                    <Search className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
+                </FadeIn>
+              </div>
             ) : internshipsError ? (
-              <div className="text-center py-10 text-red-600">{internshipsError}</div>
+              <div className="text-center py-10">
+                <FadeIn>
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
+                    <Search className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6">{internshipsError}</p>
+                </FadeIn>
+              </div>
             ) : internships.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {internships.map((internship, index) => (

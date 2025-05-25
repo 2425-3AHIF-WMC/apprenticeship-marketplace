@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, CheckCircle, ExternalLink, BookmarkX } from 'lucide-react';
+import { Search, CheckCircle, ExternalLink, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
@@ -29,11 +29,23 @@ const AdminCompanies = () => {
             } catch (err: any) {
                 setError(err.message || 'Unbekannter Fehler');
             } finally {
-                setIsLoading(false);
+                setIsLoading(false);        
             }
         };
         fetchCompanies();
     }, []);
+
+    const handleDelete = async (id: string) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/company/${id}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
+            setCompanies((prev) => prev.filter((i) => i.company_id.toString() !== id));
+        } catch (err) {
+            alert('Fehler beim Löschen des Unternehmens');
+        }
+    };
 
     let filteredCompanies = companies.filter((company) => {
         const term = searchTerm.toLowerCase();
@@ -133,9 +145,11 @@ const AdminCompanies = () => {
                                                         Akzeptieren
                                                     </Button>
                                                 ) : null}
-                                                <Button variant="destructive" size="sm">
-                                                    <BookmarkX className="h-4 w-4 mr-1" />
-                                                    Entfernen
+                                                <Button variant="destructive" size="sm"
+                                                    onClick={() => handleDelete(company.company_id.toString())}
+                                                    title="Unternehmen löschen"
+                                                >
+                                                    <X className="w-5 h-5" />
                                                 </Button>
                                                 <Button variant="outline" size="sm" asChild>
                                                     <Link to={`/companies/${company.company_id}`}>
@@ -152,9 +166,11 @@ const AdminCompanies = () => {
                                             <Search className="h-6 w-6" />
                                         </div>
                                         <h3 className="text-lg font-medium mb-2">Keine Unternehmen gefunden</h3>
-                                        <p className="text-muted-foreground">
-                                            Keine Unternehmen entsprechen deiner Suche nach "{searchTerm}".
-                                        </p>
+                                        {searchTerm.length > 0 ? (
+                                            <p className="text-muted-foreground">
+                                                Keine Unternehmen entsprechen deiner Suche nach "{searchTerm}".
+                                            </p>
+                                        ) : null}
                                     </div>
                                 )}
                             </CardContent>
