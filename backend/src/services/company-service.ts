@@ -19,7 +19,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company`);
         return stmt.rows as ICompany[];
@@ -37,7 +37,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where company_id = $1`, [id]);
@@ -63,7 +63,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where email = $1`, [email]);
@@ -82,7 +82,7 @@ export class CompanyService extends ServiceBase {
                                                      email_verified,
                                                      admin_verified,
                                                      company_registration_timestamp,
-                                                     email_verfication_timestamp,
+                                                     email_verification_timestamp,
                                                      admin_verification_timestamp
                                               from company
                                               where admin_verified = 'no'`);
@@ -101,7 +101,7 @@ export class CompanyService extends ServiceBase {
                                                   email_verified=$8,
                                                   admin_verified=$9,
                                                   company_registration_timestamp=$10,
-                                                  email_verfication_timestamp=$11,
+                                                  email_verification_timestamp=$11,
                                                   admin_verification_timestamp=$12
                                               where company_id = $13`, [
             company.name,
@@ -117,6 +117,38 @@ export class CompanyService extends ServiceBase {
             company.email_verification_timestamp?.toISOString() ?? null,
             company.admin_verification_timestamp?.toISOString() ?? null,
             company.company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async verifyAdmin(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set admin_verified='true', admin_verification_timestamp=NOW() where company_id=$1`, [
+            company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async unverifyAdmin(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set admin_verified='false', admin_verification_timestamp=null where company_id=$1`, [
+            company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async verifyEmail(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set email_verified='true', email_verification_timestamp=NOW() where company_id=$1`, [
+            company_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async unverifyEmail(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company set email_verified='false', email_verification_timestamp=null where company_id=$1`, [
+            company_id
         ]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
@@ -144,5 +176,18 @@ export class CompanyService extends ServiceBase {
         ]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async delete(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`DELETE FROM company WHERE company_id = $1`, [id]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async companyExists(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select count(company_id) from company where company_id=$1`, [id])
+        const count: number = parseInt(stmt.rows[0].count, 10);
+
+        return count === 1;
     }
 }
