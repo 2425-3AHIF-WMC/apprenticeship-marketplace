@@ -8,6 +8,8 @@ import { CompanyUIPropsAdmin, InternshipUIProps } from '@/utils/interfaces';
 import { useLocation, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { mapBackendToCompanyUIPropsAdmin, mapBackendToInternshipProps } from '@/utils/utils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const CompanyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -62,24 +64,9 @@ const CompanyDetails = () => {
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
       {companyLoading ? (
-          <div className="text-center py-20">
-            <FadeIn>
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
-                <Search className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Lade Unternehmen...</h3>
-            </FadeIn>
-          </div>
+          <LoadingIndicator message="Lade Unternehmen..." />
         ) : companyError ? (
-          <div className="text-center py-20">
-            <FadeIn>
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
-                <Search className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Fehler beim Laden des Unternehmens</h3>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">{companyError}</p>
-            </FadeIn>
-          </div>
+          <ErrorIndicator message="Fehler beim Laden des Unternehmens" error={companyError} />
         ) : ( company && (
         <div className="container-xl">
           <FadeIn>
@@ -136,24 +123,9 @@ const CompanyDetails = () => {
           <FadeIn delay={100}>
             <h2 className="heading-md mb-4">Praktika dieses Unternehmens</h2>
             {internshipsLoading ? (
-              <div className="text-center py-10">
-                <FadeIn>
-                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
-                    <Search className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
-                </FadeIn>
-              </div>
+              <LoadingIndicator message="Lade Praktika..." className="py-10" />
             ) : internshipsError ? (
-              <div className="text-center py-10">
-                <FadeIn>
-                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
-                    <Search className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto mb-6">{internshipsError}</p>
-                </FadeIn>
-              </div>
+              <ErrorIndicator message="Fehler beim Laden der Praktika" error={internshipsError} className="py-10" />
             ) : internships.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {internships.map((internship, index) => (

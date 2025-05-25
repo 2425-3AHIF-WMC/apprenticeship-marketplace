@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import CompanyCard from '@/components/CompanyCard';
 import { CompanyUIPropsAdmin } from '@/utils/interfaces';
 import { mapBackendToCompanyUIPropsAdmin, getCompanyStatus } from '@/utils/utils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const AdminCompanies = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -117,24 +119,9 @@ const AdminCompanies = () => {
                             </CardHeader>
                             <CardContent>
                                 {isLoading ? (
-                                    <div className="text-center py-20">
-                                        <FadeIn>
-                                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
-                                                <Search className="h-8 w-8" />
-                                            </div>
-                                            <h3 className="text-xl font-semibold mb-2">Lade Unternehmen...</h3>
-                                        </FadeIn>
-                                    </div>
+                                    <LoadingIndicator message="Lade Unternehmen..." />
                                 ) : error ? (
-                                    <div className="text-center py-20">
-                                        <FadeIn>
-                                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
-                                                <Search className="h-8 w-8" />
-                                            </div>
-                                            <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Unternehmen</h3>
-                                            <p className="text-muted-foreground max-w-md mx-auto mb-6">{error}</p>
-                                        </FadeIn>
-                                    </div>
+                                    <ErrorIndicator message="Fehler beim Laden der Unternehmen" error={error} />
                                 ) : filteredCompanies.length > 0 ? (
                                     <div className="space-y-4">
                                         {filteredCompanies.map((company) => (

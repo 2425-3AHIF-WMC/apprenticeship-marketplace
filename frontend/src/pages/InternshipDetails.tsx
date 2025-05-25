@@ -31,6 +31,8 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { InternshipDetailsUIProps } from '@/utils/interfaces';
 import { mapBackendToInternshipDetailsProps } from '@/utils/utils';
 import { useEffect, useState } from 'react';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -87,24 +89,9 @@ const InternshipDescription = () => {
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
         {isLoading ? (
-          <div className="text-center py-20">
-            <FadeIn>
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
-                <Search className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
-            </FadeIn>
-          </div>
+          <LoadingIndicator message="Lade Praktika..." />
         ) : error ? (
-          <div className="text-center py-20">
-            <FadeIn>
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
-                <Search className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">{error}</p>
-            </FadeIn>
-          </div>
+          <ErrorIndicator message="Fehler beim Laden der Praktika" error={error} />
         ) : internship ? (
           <div className="container-xl">
 

@@ -8,6 +8,8 @@ import {Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
 import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const Internships = () => {
     const location = useLocation();
@@ -172,24 +174,9 @@ const Internships = () => {
                             </div>
                         </div>
                         {isLoading ? (
-                            <div className="text-center py-20">
-                                <FadeIn>
-                                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted text-muted-foreground mb-4">
-                                        <Search className="h-8 w-8"/>
-                                    </div>
-                                    <h3 className="text-xl font-semibold mb-2">Lade Praktika...</h3>
-                                </FadeIn>
-                            </div>
+                            <LoadingIndicator message="Lade Praktika..." />
                         ) : error ? (
-                            <div className="text-center py-20">
-                                <FadeIn>
-                                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-4">
-                                        <Search className="h-8 w-8"/>
-                                    </div>
-                                    <h3 className="text-xl font-semibold mb-2">Fehler beim Laden der Praktika</h3>
-                                    <p className="text-muted-foreground max-w-md mx-auto mb-6">{error}</p>
-                                </FadeIn>
-                            </div>
+                            <ErrorIndicator message="Fehler beim Laden der Praktika" error={error} />
                         ) : filteredInternships.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {filteredInternships.map((internship, index) => (
