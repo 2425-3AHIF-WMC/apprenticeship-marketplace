@@ -175,7 +175,7 @@ companyRouter.get("/unverified_admin", async (_, res: Response) => {
         if (companies.length > 0) {
             res.status(StatusCodes.OK).json(companies);
         } else {
-            res.sendStatus(StatusCodes.NOT_FOUND);
+            res.status(StatusCodes.NOT_FOUND).json([]);
         }
     } catch (e) {
         console.log(e);
