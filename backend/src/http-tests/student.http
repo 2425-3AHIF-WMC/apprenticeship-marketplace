@@ -9,4 +9,4 @@ Content-Type: application/json
 }
 
 ### Delete a student
-DELETE {{BaseUrl}}/2
+DELETE {{BaseUrl}}/4

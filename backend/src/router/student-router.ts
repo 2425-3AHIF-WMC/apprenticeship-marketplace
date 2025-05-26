@@ -55,15 +55,20 @@ studentRouter.post("/", async (req: Request, res: Response) => {
 
     try {
         const service = new StudentService(unit);
-        const success: boolean = await service.insert(username);
+        if(!(await service.studentExistsByUser(username))) {
+            const success: boolean = await service.insert(username);
 
-        if (success) {
-            res.status(StatusCodes.CREATED).send("User creation successful");
-            await unit.complete(true);
+            if (success) {
+                res.status(StatusCodes.CREATED).send("User creation successful");
+                await unit.complete(true);
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("User creation unsuccessful");
+                await unit.complete(false);
+            }
         } else {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("User creation unsuccessful");
-            await unit.complete(false);
+            res.status(StatusCodes.CONFLICT).send("User already exists.");
         }
+
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);

@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps, isValidId, isValidDate} from "../model";
+import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps, isValidId, isValidDate} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";

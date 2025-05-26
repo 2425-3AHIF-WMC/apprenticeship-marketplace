@@ -54,4 +54,11 @@ export class StudentService extends ServiceBase{
 
         return count === 1;
     }
+
+    public async studentExistsByUser(username: string): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select count(person_id) from person where username=$1 and persontype='Student'`, [username]);
+        const count: number = parseInt(stmt.rows[0].count, 10);
+
+        return count === 1;
+    }
 }
