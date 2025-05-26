@@ -2,7 +2,7 @@ import express, {Request, Response} from "express";
 import {Unit} from "../unit.js";
 import {StatusCodes} from "http-status-codes";
 import {InternshipService} from "../services/internship-service.js";
-import {IInternship, InternshipUIProps} from "../model";
+import {IInternship, IInternshipUIProps} from "../model";
 
 export const internshipRouter = express.Router();
 

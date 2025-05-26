@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall, IInternship, IInternshipId} from "../model";
+import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps} from "../model";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -293,19 +293,19 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
 
 companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
     const company_id: number = parseInt(req.params.id);
-    const unit: Unit = await Unit.create(false);
+    const unit: Unit = await Unit.create(true);
     const companyService = new CompanyService(unit);
     const internshipService = new InternshipService(unit);
 
     try {
 
         if (isValidId(company_id) && await companyService.companyExists(company_id)) {
-            const internships: IInternshipId[] = await internshipService.getByCompanyId(company_id);
+            const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
             if(internships.length > 0) {
                 res.status(StatusCodes.OK).json(internships);
             } else {
-                res.status(StatusCodes.NOT_FOUND).send(`no internships for company with id ${company_id} found`);
+                res.status(StatusCodes.NOT_FOUND).json([]);
             }
 
         } else {

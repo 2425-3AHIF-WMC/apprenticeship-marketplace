@@ -19,7 +19,7 @@ export interface IFavourite {
 
 //----------------------------------
 //Internship Interfaces
-export interface InternshipUIProps {
+export interface IInternshipUIProps {
     id: string;
     title: string;
     company_name: string;
@@ -36,7 +36,7 @@ export interface InternshipUIProps {
     internship_link: string;
 }
 
-export interface InternshipDetailsUIProps {
+export interface IInternshipDetailsUIProps {
     id: string;
     title: string;
     company_name: string;
