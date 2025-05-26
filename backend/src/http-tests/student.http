@@ -1,0 +1,9 @@
+@BaseUrl = http://localhost:5000/api/student/
+
+### Post a new student
+POST {{BaseUrl}}/
+Content-Type: application/json
+
+{
+  "username": "if220197"
+}

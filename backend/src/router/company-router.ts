@@ -253,7 +253,7 @@ companyRouter.put("", async (req: Request, res: Response) => {
                 res.status(companyExists ? StatusCodes.NO_CONTENT : StatusCodes.CREATED).json(company)
             } else {
                 await unit.complete(false);
-                res.status(StatusCodes.BAD_REQUEST).send("updating or creating was not successful");
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("updating or creating was not successful");
             }
         } else {
             res.status(StatusCodes.BAD_REQUEST).send("verification failed");
