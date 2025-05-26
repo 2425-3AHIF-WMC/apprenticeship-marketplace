@@ -35,6 +35,7 @@ export interface IInternshipUIProps {
     company_link: string;
     internship_link: string;
 }
+
 export interface IInternshipDetailsUIProps {
     id: string;
     title: string;
@@ -85,10 +86,7 @@ export interface IInternshipId {
 }
 
 //----------------------------------
-
-
-
-
+// Company Interfaces
 export interface CompanyUIPropsAdmin {
     id: string;
     name: string;
