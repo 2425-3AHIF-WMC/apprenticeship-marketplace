@@ -43,5 +43,15 @@ export class StudentService extends ServiceBase{
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
+    public async delete(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`DELETE FROM person WHERE person_id=$1`, [id]);
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
 
+    public async studentExists(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select count(student_id) from student where student_id=$1`, [id])
+        const count: number = parseInt(stmt.rows[0].count, 10);
+
+        return count === 1;
+    }
 }

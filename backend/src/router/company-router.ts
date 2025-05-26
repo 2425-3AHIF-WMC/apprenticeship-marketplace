@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall} from "../model";
+import {ICompany, ICompanySmall, isValidId, isValidDate} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -267,13 +267,7 @@ companyRouter.put("", async (req: Request, res: Response) => {
     }
 });
 
-function isValidId(id: number): boolean {
-    return !isNaN(id) && id > 0 && id !== null && id !== undefined;
-}
 
-function isValidDate(date: Date): boolean {
-    return date.toString() !== 'Invalid Date';
-}
 
 function isValidCompanyNumber(number: string): boolean {
     const nums: number = parseInt(number.substring(0, 6));

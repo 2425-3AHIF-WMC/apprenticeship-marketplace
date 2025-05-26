@@ -1,16 +1,10 @@
-//TODO: Interface für jede Tabelle die wir brauchen
+// Interfaces ------------------------------------------------------------------------------------------------------
 
 export interface IStudent {
     studentId: string;
     username: string;
     added: Date;
     personType: string;
-}
-
-export enum PersonType {
-    Admin="Admin",
-    Person="Person",
-    Student="Student"
 }
 
 //----------------------------------
@@ -116,4 +110,22 @@ export interface ICompanyPayload {
     company_id: number,
     email_verified: string,
     admin_verified: string,
+}
+
+// Enums --------------------------------------------------------------------------------------------------------------
+
+export enum PersonType {
+    Admin="Admin",
+    Person="Person",
+    Student="Student"
+}
+
+// Functions ---------------------------------------------------------------------------------------------------------
+
+export function isValidId(id: number): boolean {
+    return !isNaN(id) && id > 0 && id !== null && id !== undefined;
+}
+
+export function isValidDate(date: Date): boolean {
+    return date.toString() !== 'Invalid Date';
 }

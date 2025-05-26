@@ -1,40 +1,35 @@
 import express from 'express';
 import {Request, Response} from 'express';
-import {Pool} from 'pg';
 import {Unit} from '../unit.js';
 import {StudentService} from "../services/student-service.js";
-import {IStudent, PersonType} from "../model.js";
+import {IStudent, isValidId} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 
 export const studentRouter = express.Router();
 
 studentRouter.get("/favourites/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const id : number = parseInt(req.params.id);
+    const id: number = parseInt(req.params.id);
 
-    if(!Number.isInteger(id) || id < 0 || id === null){
+    if (!Number.isInteger(id) || id < 0 || id === null) {
         res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
         return;
     }
 
-    try{
-        const doesIdExist = await unit.prepare(`SELECT student_id 
-                                                                    FROM student
-                                                                    WHERE student_id=$1`,[id]);
-        let rowNumb = doesIdExist.rowCount?? -1;
-        if(rowNumb <= 0){
-            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
-        }
-
+    try {
         const service = new StudentService(unit);
+        if (await service.studentExists(id)) {
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+            return;
+        }
         const internshipIds = await service.getAllFavourites(id);
 
         res.status(StatusCodes.OK).json(internshipIds);
 
-    }catch (e) {
+    } catch (e) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
         return;
-    }finally {
+    } finally {
         await unit.complete();
     }
 });
@@ -53,8 +48,8 @@ studentRouter.get("/", async (req: Request, res: Response) => {
     }
 });
 
-studentRouter.post("/", async(req: Request, res: Response) => {
-   const username = req.body.username;
+studentRouter.post("/", async (req: Request, res: Response) => {
+    const username = req.body.username;
 
     const unit: Unit = await Unit.create(false);
 
@@ -62,14 +57,14 @@ studentRouter.post("/", async(req: Request, res: Response) => {
         const service = new StudentService(unit);
         const success: boolean = await service.insert(username);
 
-        if(success){
-            res.status(StatusCodes.CREATED).send("User created successfully");
+        if (success) {
+            res.status(StatusCodes.CREATED).send("User creation successful");
             await unit.complete(true);
         } else {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Could not create user");
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("User creation unsuccessful");
             await unit.complete(false);
         }
-    } catch(e) {
+    } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
     } finally {
@@ -80,19 +75,19 @@ studentRouter.post("/", async(req: Request, res: Response) => {
 
 studentRouter.get("/:paramId", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const { paramId } = req.params;
-    const id:number = parseInt(paramId);
+    const {paramId} = req.params;
+    const id: number = parseInt(paramId);
 
-    if(isNaN(id) || id <= 0 || id === null){
+    if (isNaN(id) || id <= 0 || id === null) {
         res.sendStatus(StatusCodes.BAD_REQUEST);
         return;
     }
 
-    try{
+    try {
         const service = new StudentService(unit);
-        const student:IStudent = await service.getById(id);
+        const student: IStudent = await service.getById(id);
 
-        if(student){
+        if (student) {
             res.status(StatusCodes.OK).json(student);
         } else {
             res.sendStatus(StatusCodes.NOT_FOUND);
@@ -105,3 +100,29 @@ studentRouter.get("/:paramId", async (req: Request, res: Response) => {
     }
 });
 
+studentRouter.delete("/:id", async (req: Request, res: Response) => {
+    const id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(false);
+    const service = new StudentService(unit);
+
+    try {
+        if (isValidId(id) && await service.studentExists(id)) {
+            const success: boolean = await service.delete(id);
+            if(success) {
+                res.status(StatusCodes.OK).send("User deletion successful");
+                await unit.complete(true);
+            } else {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("User deletion unsuccessful");
+                await unit.complete(false);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+        }
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+});

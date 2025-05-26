@@ -7,3 +7,6 @@ Content-Type: application/json
 {
   "username": "if220197"
 }
+
+### Delete a student
+DELETE {{BaseUrl}}/2
