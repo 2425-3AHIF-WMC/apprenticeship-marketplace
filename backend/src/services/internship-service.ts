@@ -105,6 +105,18 @@ export class InternshipService extends ServiceBase{
         return stmt.rows as IInternshipUIProps[];
     }
 
+    public async getIdByCompanyId(company_id: number): Promise<number[]> {
+        const stmt = await this.unit.prepare(`select i.internship_id
+                                              from internship i
+                                              where i.location_id = ALL (select s.location_id
+                                                                         from site s
+                                                                         where s.company_id = (select c.company_id
+                                                                                               from company c
+                                                                                               where c.company_id = $1));`, [company_id]);
+
+        return stmt.rows.map(row => row.internship_id) as number[];
+    }
+
     public async newInternship(i: IInternship): Promise<number>{
         const stmt = await this.unit.prepare(`INSERT INTO internship (title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
                                                                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
@@ -141,5 +153,12 @@ export class InternshipService extends ServiceBase{
                                                               , [id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
+    }
+
+    public async internshipExists(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select count(internship_id) from internship where internship_id=$1`, [id])
+        const count: number = parseInt(stmt.rows[0].count, 10);
+
+        return count === 1;
     }
 }
