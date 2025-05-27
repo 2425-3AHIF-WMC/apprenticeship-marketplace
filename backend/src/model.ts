@@ -1,4 +1,4 @@
-//TODO: Interface für jede Tabelle die wir brauchen
+// Interfaces ------------------------------------------------------------------------------------------------------
 
 //Student Interfaces
 export interface IStudent {
@@ -9,9 +9,9 @@ export interface IStudent {
 }
 
 //----------------------------------
-//Favourite Interfaces
+//Internship Interfaces
 
-export interface IFavourite {
+export interface IFavourite{
     student_id: string;
     internship_id: string;
     added: Date;
@@ -56,7 +56,7 @@ export interface IInternshipDetailsUIProps {
     pdf: string;
 }
 
-export interface IInternship {
+export interface IInternship{
     title: string,
     description: string,
     min_year: string,
@@ -86,7 +86,7 @@ export interface IInternshipId {
 }
 
 //----------------------------------
-
+// Company Interfaces
 export interface CompanyUIPropsAdmin {
     id: string;
     name: string;
@@ -105,7 +105,7 @@ export interface ICompany {
     company_info: string,
     website: string,
     email: string,
-    phone_number: string,
+    phone_number : string,
     password: string,
     email_verified: string,
     admin_verified: string,
@@ -117,7 +117,7 @@ export interface ICompany {
 export interface ICompanySmall {
     company_id: number,
     name: string,
-    email: string
+    email:string
     admin_verified: string
 }
 
@@ -125,4 +125,22 @@ export interface ICompanyPayload {
     company_id: number,
     email_verified: string,
     admin_verified: string,
+}
+
+// Enums --------------------------------------------------------------------------------------------------------------
+
+export enum PersonType {
+    Admin="Admin",
+    Person="Person",
+    Student="Student"
+}
+
+// Functions ---------------------------------------------------------------------------------------------------------
+
+export function isValidId(id: number): boolean {
+    return !isNaN(id) && id > 0 && id !== null && id !== undefined;
+}
+
+export function isValidDate(date: Date): boolean {
+    return date.toString() !== 'Invalid Date';
 }
