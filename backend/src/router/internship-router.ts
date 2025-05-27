@@ -142,7 +142,22 @@ internshipRouter.get("/isOfCompany", async (req: Request, res: Response) => {
     }
 });
 
-internshipRouter.get("/", async (req, res) => {
+internshipRouter.get("/created/last30days", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const service = new InternshipService(unit);
+
+    try {
+        const count: number = await service.getCountCreatedTheLast30Days();
+        res.status(StatusCodes.OK).json({ count });
+    }catch (e) {
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
+internshipRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
         const service = new InternshipService(unit);
@@ -158,7 +173,7 @@ internshipRouter.get("/", async (req, res) => {
     }
 });
 
-internshipRouter.delete("/delete/:id", async (req, res) => {
+internshipRouter.delete("/delete/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const id: number = parseInt(req.params.id);
 
