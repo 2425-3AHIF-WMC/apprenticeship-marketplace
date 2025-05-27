@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from '@/utils/interfaces';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import StudentDashboardSidebar from "@/components/StudentDashboardSidebar.tsx";
 
 const StudentFavourites = () => {
@@ -51,7 +51,7 @@ const StudentFavourites = () => {
         favorite.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         favorite.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         favorite.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        categoryIncludesSearchTerm(favorite.category, searchTerm)
+        categoryIncludesSearchTerm(favorite.department, searchTerm)
     );
 
     return (
@@ -110,25 +110,25 @@ const StudentFavourites = () => {
                                                         <span>Frist: {favourite.application_end}</span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2 mt-2">
-                                                        {Array.isArray(favourite.category) ? (
-                                                            favourite.category.map((cat, index) => (
+                                                        {Array.isArray(favourite.department) ? (
+                                                            favourite.department.map((dep, index) => (
                                                                 <span
-                                                                    key={`${cat}-${index}`}
+                                                                    key={`${dep}-${index}`}
                                                                     className={cn(
                                                                         'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                        getCategoryClasses(cat)
+                                                                        getCategoryClasses(dep)
                                                                     )}
                                                                 >
-                                                                    {cat}
+                                                                    {dep}
                                                                 </span>
 
                                                             ))
                                                         ) : (
                                                             <span className={cn(
                                                                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                getCategoryClasses(favourite.category)
+                                                                getCategoryClasses(favourite.department)
                                                             )}>
-                                                                {favourite.category}
+                                                                {favourite.department}
                                                             </span>
                                                         )}
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">

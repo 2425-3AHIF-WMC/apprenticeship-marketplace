@@ -1,7 +1,7 @@
 import { Clock, Building, CalendarDays, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { useState } from 'react';
 import { InternshipUIProps } from '@/utils/interfaces';
 
@@ -28,7 +28,7 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
-        <div className="flex items-start justify-between mb-4 min-h-20">
+        <div className="flex items-start mb-4 min-h-20">
             {internship.company_logo ? <div
                 className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50 ">
                 <img
@@ -40,9 +40,9 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
                 className="h-10 w-10 mr-3 rounded-md bg-primary/10 text-primary flex items-center justify-center">
                 <Building className="h-5 w-5" />
             </div>}
-            <div className="flex items-center">
+            <div className="flex items-center ">
                 <div>
-                    <h3 className="font-semibold text-lg transition-colors group-hover:text-primary line-clamp-2 max-w-72 text-left">
+                    <h3 className="font-semibold text-lg text-left transition-colors group-hover:text-primary line-clamp-2 max-w-72">
                         {internship.title}
                     </h3>
                     <p className="text-sm text-muted-foreground text-left">{internship.company_name}</p>
@@ -65,15 +65,15 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3">
-                {internship.category.map((cat, index) => (
+                {internship.department.map((dep, index) => (
                     <span
-                        key={`${cat}-${index}`}
+                        key={`${dep}-${index}`}
                         className={cn(
                             'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                            getCategoryClasses(cat)
+                            getCategoryClasses(dep)
                         )}
                     >
-                        {cat}
+                        {dep}
                     </span>
                 ))}
                 {internship.location && internship.work_type != "Remote" && (

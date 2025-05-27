@@ -1,83 +1,59 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Search, CheckCircle, ExternalLink, BookmarkX } from 'lucide-react';
+import { Search, CheckCircle, ExternalLink, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import CompanyCard from '@/components/CompanyCard';
-
-const ALL_COMPANIES = [
-  {
-    id: '1',
-    name: 'CarlaCo Enterprises',
-    email: 'info@carlaco.com',
-    website: 'https://carlaco.com',
-    phone_number: '+43 123 456789',
-    email_verified: true,
-    admin_verified: true,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
-  },
-  {
-    id: '2',
-    name: 'LT-Studios',
-    email: 'kontakt@ltstudios.at',
-    website: 'https://ltstudios.at',
-    phone_number: '+43 987 654321',
-    email_verified: true,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
-  },
-  {
-    id: '3',
-    name: 'ITMedia Solutions',
-    email: 'office@itmedia.at',
-    website: 'https://itmedia.at',
-    phone_number: '+43 555 123456',
-    email_verified: false,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
-  },
-  {
-    id: '4',
-    name: 'Elektronic Design',
-    email: 'info@elektronicdesign.at',
-    website: 'https://elektronicdesign.at',
-    phone_number: '+43 222 333444',
-    email_verified: true,
-    admin_verified: true,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-
-  },
-  {
-    id: '5',
-    name: 'MeliCorp',
-    email: 'kontakt@melicorp.com',
-    website: 'https://melicorp.com',
-    phone_number: '+43 111 222333',
-    email_verified: false,
-    admin_verified: false,
-    logo: '/assets/company-logos/LT-Studios_Logo.png'
-  },
-];
-
-const getStatus = (company: any) => {
-  if (company.admin_verified && company.email_verified) return 'vollständig';
-  if (company.email_verified) return 'nur_email';
-  return 'keine';
-};
-
+import { CompanyUIPropsAdmin } from '@/utils/interfaces';
+import { mapBackendToCompanyUIPropsAdmin, getCompanyStatus } from '@/utils/utils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const AdminToVerify = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [companies, setCompanies] = useState<CompanyUIPropsAdmin[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('http://localhost:5000/api/company/unverified_admin');
+        if (res.status === 404) {
+          setCompanies([]);
+          return;
+        }
+        if (!res.ok) throw new Error('Fehler beim Laden der Unternehmen');
+        const data = await res.json();
+        setCompanies(Array.isArray(data) ? data.map(mapBackendToCompanyUIPropsAdmin) : []);
+      } catch (err: any) {
+        setError(err.message || 'Unbekannter Fehler');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/company/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
+      setCompanies((prev) => prev.filter((i) => i.company_id.toString() !== id));
+    } catch (err) {
+      alert('Fehler beim Löschen des Unternehmens');
+    }
+  };
 
   // Only companies that are not fully verified
-  const filteredCompanies = ALL_COMPANIES.filter((company) => {
-    if (company.admin_verified && company.email_verified || !company.email_verified) return false;
+  const filteredCompanies = companies.filter((company) => {
     const term = searchTerm.toLowerCase();
     return (
       company.name.toLowerCase().includes(term) ||
@@ -127,25 +103,31 @@ const AdminToVerify = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {filteredCompanies.length > 0 ? (
+                {isLoading ? (
+                  <LoadingIndicator message="Lade Unternehmen..." />
+                ) : error ? (
+                  <ErrorIndicator message="Fehler beim Laden der Unternehmen" error={error} />
+                ) : filteredCompanies.length > 0 ? (
                   <div className="space-y-4">
                     {filteredCompanies.map((company) => (
-                      <CompanyCard key={company.id} company={company}>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/companies/${company.id}`}>
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Details
-                          </Link>
-                        </Button>
-                        {getStatus(company) === 'nur_email' ? (
+                      <CompanyCard key={company.company_id} company={company}>
+                        {getCompanyStatus(company) === 'nur_email' ? (
                           <Button variant="default" size="sm">
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Akzeptieren
                           </Button>
                         ) : null}
-                        <Button variant="destructive" size="sm">
-                          <BookmarkX className="h-4 w-4 mr-1" />
-                          Entfernen
+                        <Button variant="destructive" size="sm"
+                          onClick={() => handleDelete(company.company_id.toString())}
+                          title="Unternehmen löschen"
+                        >
+                          <X className="w-5 h-5" />
+                        </Button>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/companies/${company.company_id}`}>
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Details
+                          </Link>
                         </Button>
                       </CompanyCard>
                     ))}
@@ -156,9 +138,11 @@ const AdminToVerify = () => {
                       <Search className="h-6 w-6" />
                     </div>
                     <h3 className="text-lg font-medium mb-2">Keine Unternehmen gefunden</h3>
-                    <p className="text-muted-foreground">
-                      Keine Unternehmen entsprechen deiner Suche nach "{searchTerm}".
-                    </p>
+                    {searchTerm.length > 0 ? (
+                      <p className="text-muted-foreground">
+                        Keine Unternehmen entsprechen deiner Suche nach "{searchTerm}".
+                      </p>
+                    ) : null}
                   </div>
                 )}
               </CardContent>

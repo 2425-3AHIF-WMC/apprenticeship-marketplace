@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
-import InternshipDescription from "./pages/InternshipDescription";
+import InternshipDescription from "./pages/InternshipDetails";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
@@ -18,6 +18,7 @@ import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
 import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 import AdminToVerify from "@/pages/AdminToVerify";
 import CompanyInternshipCreation from "@/pages/CompanyInternshipCreation.tsx";
+import CompanyDetails from "@/pages/CompanyDetails";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -49,7 +50,7 @@ function App() {
                     <Internships />
                 </ProtectedRoute>
             } />
-            <Route path="/internships/1" element={
+            <Route path="/internships/:id" element={
                 <ProtectedRoute>
                     <InternshipDescription />
                 </ProtectedRoute>
@@ -100,6 +101,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <AdminToVerify />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/companies/:id"
+                element={
+                    <ProtectedRoute>
+                        <CompanyDetails />
                     </ProtectedRoute>
                 }
             />

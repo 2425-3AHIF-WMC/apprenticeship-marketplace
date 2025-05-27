@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import {favouriteRouter} from "./router/favourite-router.js";
 
 const app = express();
 
@@ -15,10 +16,13 @@ app.use(cors({
     exposedHeaders: ['Authorization']
 }));
 app.use(bodyParser.json());
+app.use(express.json());
 app.use(cookieParser());
+
 app.use("/api/student", studentRouter);
 app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);
+app.use("/api/favourite", favouriteRouter);
 
 app.listen(5000, async () => {
     const unit: Unit = await Unit.create(false);
