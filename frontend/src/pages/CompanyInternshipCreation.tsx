@@ -11,7 +11,6 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form"
-import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card";
 import {Input} from "@/components/ui/input.tsx";
 import {
     Select,
@@ -89,12 +88,7 @@ const CompanyInternshipCreation = () => {
                                     Erstellen von Praktikas, oder Hinzufügen von bereits erstellten.
                                 </p>
                             </div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Praktikumsdetails</CardTitle>
-                                    <CardDescription>Geben Sie die wichtigsten Informationen zum Praktikum ein</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
+
                                     <Form {...form}>
                                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <FormField
@@ -223,8 +217,7 @@ const CompanyInternshipCreation = () => {
                                             </div>
                                         </form>
                                     </Form>
-                                </CardContent>
-                            </Card>
+
                             <div className="flex items-center gap-2 mt-4 md:mt-0">
                                 <div className="relative flex-1">
                                     <ReactQuill
