@@ -3,9 +3,55 @@ import FadeIn from "@/components/FadeIn.tsx";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import {useState} from "react";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from "@/components/ui/form"
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card";
+import {Input} from "@/components/ui/input.tsx";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {Checkbox} from "@/components/ui/checkbox.tsx";
+import {useForm} from "react-hook-form";
+import * as z from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+    title: z.string().min(1),
+    internshipDescription: z.string().min(1),
+    minYear: z.string(),
+    workType: z.string(),
+    departments: z.array(z.string()).min(1)
+});
 
 const CompanyInternshipCreation = () => {
     const [description, setDescription] = useState('');
+
+    const form = useForm<{
+        title: string;
+        internshipDescription: string;
+        minYear: string;
+        workType: string;
+        departments: string[];
+    }>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: '',
+            internshipDescription: '',
+            minYear: '',
+            workType: '',
+            departments: []
+        }
+    });
     const modules = {
         toolbar: [
             [{ 'font': [] }, { 'size': [] }],
@@ -26,7 +72,6 @@ const CompanyInternshipCreation = () => {
         'blockquote', 'header', 'indent', 'list', 'align', 'code-block',
         'image', 'video'
     ];
-    console.log(description);
     return (
         <div className="flex min-h-screen">
             <CompanyDashboardSidebar/>
@@ -40,6 +85,137 @@ const CompanyInternshipCreation = () => {
                                     Erstellen von Praktikas, oder Hinzufügen von bereits erstellten.
                                 </p>
                             </div>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Praktikumsdetails</CardTitle>
+                                    <CardDescription>Geben Sie die wichtigsten Informationen zum Praktikum ein</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <Form {...form}>
+                                        <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="title"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Stellenbezeichnung</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="z.B. Frontend-Entwickler Praktikum" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="internshipDescription"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Kurzbeschreibung</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="z.B. IT-Entwicklung" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="minYear"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Minimale Schulstufe</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Wählen Sie die minimale Schulstufe" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="1">1. Jahrgang</SelectItem>
+                                                                <SelectItem value="2">2. Jahrgang</SelectItem>
+                                                                <SelectItem value="3">3. Jahrgang</SelectItem>
+                                                                <SelectItem value="4">4. Jahrgang</SelectItem>
+                                                                <SelectItem value="5">5. Jahrgang</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="workType"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Arbeitstyp</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Wählen Sie den Arbeitstyp" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                                                                <SelectItem value="remote">Remote</SelectItem>
+                                                                <SelectItem value="onsite">On Site</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="departments"
+                                                render={() => (
+                                                    <FormItem>
+                                                        <FormLabel>Abteilungen</FormLabel>
+                                                        <div className="flex flex-col space-y-1">
+                                                            {['Informatik', 'Medientechnik', 'Medizintechnik', 'Elektronik'].map((dept) => (
+                                                                <FormField
+                                                                    key={dept}
+                                                                    control={form.control}
+                                                                    name="departments"
+                                                                    render={({ field }) => {
+                                                                        return (
+                                                                            <FormItem
+                                                                                key={dept}
+                                                                                className="flex flex-row items-start space-x-3 space-y-0"
+                                                                            >
+                                                                                <FormControl>
+                                                                                    <Checkbox
+                                                                                        checked={field.value?.includes(dept)}
+                                                                                        onCheckedChange={(checked) => {
+                                                                                            if (checked) {
+                                                                                                field.onChange([...(field.value || []), dept]);
+                                                                                            } else {
+                                                                                                field.onChange(field.value?.filter((v) => v !== dept));
+                                                                                            }
+                                                                                        }}
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <FormLabel className="font-normal">
+                                                                                    {dept}
+                                                                                </FormLabel>
+                                                                            </FormItem>
+                                                                        )
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </form>
+                                    </Form>
+                                </CardContent>
+                            </Card>
                             <div className="flex items-center gap-2 mt-4 md:mt-0">
                                 <div className="relative flex-1">
                                     <ReactQuill
