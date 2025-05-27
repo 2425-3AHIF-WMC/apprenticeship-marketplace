@@ -24,13 +24,24 @@ import {useForm} from "react-hook-form";
 import * as z from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Button} from "@/components/ui/button.tsx";
+import { Calendar } from "@/components/ui/calendar"
+import {cn} from "@/lib/utils.ts";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {CalendarIcon} from "lucide-react";
+import {format} from "date-fns";
+import {de} from "date-fns/locale";
 
 const formSchema = z.object({
-    title: z.string().min(1, "Bitte geben Sie einen Titel ein"),
-    internshipDescription: z.string().min(5, "Bitte geben Sie eine kurze Beschreibung ein"),
-    minYear: z.string(),
-    workType: z.string().min(1, "Eine Arbeitsart muss ausgewählt werden"),
-    departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt werden")
+    title: z.string().min(1, "Ein Titel muss vorhanden sein"),
+    internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
+    minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
+    workType: z.string().min(1, "Eine Arbeitsart muss ausgewählt sein"),
+    departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
+    deadline: z.date({message: "Eine Bewerbungsfrist muss ausgewählt sein"})
 });
 
 const CompanyInternshipCreation = () => {
@@ -45,6 +56,7 @@ const CompanyInternshipCreation = () => {
         minYear: string;
         workType: string;
         departments: string[];
+        deadline: Date;
     }>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -128,7 +140,7 @@ const CompanyInternshipCreation = () => {
                                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                             <FormControl>
                                                                 <SelectTrigger>
-                                                                    <SelectValue placeholder="Wählen Sie die minimale Schulstufe" />
+                                                                    <SelectValue placeholder="Minimale Schulstufe auswählen" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
@@ -153,7 +165,7 @@ const CompanyInternshipCreation = () => {
                                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                             <FormControl>
                                                                 <SelectTrigger>
-                                                                    <SelectValue placeholder="Wählen Sie den Arbeitstyp" />
+                                                                    <SelectValue placeholder="Arbeitstyp wählen" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
@@ -206,6 +218,45 @@ const CompanyInternshipCreation = () => {
                                                                 />
                                                             ))}
                                                         </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="deadline"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Bewerbungsfrist</FormLabel>
+                                                        <Popover>
+                                                            <PopoverTrigger asChild>
+                                                                <FormControl>
+                                                                    <Button
+                                                                        variant={"outline"}
+                                                                        className={cn(
+                                                                            "pl-3 text-left font-normal",
+                                                                            !field.value && "text-muted-foreground"
+                                                                        )}
+                                                                    >
+                                                                        {field.value ? (
+                                                                            format(field.value, "PPP", { locale: de })
+                                                                        ) : (
+                                                                            <span>Datum auswählen</span>
+                                                                        )}
+                                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-auto p-0" align="start">
+                                                                <Calendar
+                                                                    mode="single"
+                                                                    selected={field.value}
+                                                                    onSelect={field.onChange}
+                                                                    initialFocus
+                                                                    className={cn("p-3 pointer-events-auto")}
+                                                                />
+                                                            </PopoverContent>
+                                                        </Popover>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
