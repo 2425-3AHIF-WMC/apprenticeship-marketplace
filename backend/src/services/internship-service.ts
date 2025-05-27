@@ -161,4 +161,11 @@ export class InternshipService extends ServiceBase{
 
         return count === 1;
     }
+
+    public async getCountCreatedTheLast30Days(): Promise<number> {
+        const stmt = await this.unit.prepare(`SELECT COUNT(*)
+                                                                    FROM internship
+                                                                    WHERE internship_creation_timestamp >= NOW() - INTERVAL '30 days';`);
+        return parseInt(stmt.rows[0].count ?? 0, 10);
+    }
 }
