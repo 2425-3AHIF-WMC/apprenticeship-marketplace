@@ -24,17 +24,21 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {useForm} from "react-hook-form";
 import * as z from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
+import {Button} from "@/components/ui/button.tsx";
 
 const formSchema = z.object({
-    title: z.string().min(1),
-    internshipDescription: z.string().min(1),
+    title: z.string().min(1, "Bitte geben Sie einen Titel ein"),
+    internshipDescription: z.string().min(5, "Bitte geben Sie eine kurze Beschreibung ein"),
     minYear: z.string(),
-    workType: z.string(),
-    departments: z.array(z.string()).min(1)
+    workType: z.string().min(1, "Eine Arbeitsart muss ausgewählt werden"),
+    departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt werden")
 });
 
 const CompanyInternshipCreation = () => {
     const [description, setDescription] = useState('');
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values);
+    }
 
     const form = useForm<{
         title: string;
@@ -92,7 +96,7 @@ const CompanyInternshipCreation = () => {
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <Form {...form}>
-                                        <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <FormField
                                                 control={form.control}
                                                 name="title"
@@ -212,6 +216,11 @@ const CompanyInternshipCreation = () => {
                                                     </FormItem>
                                                 )}
                                             />
+                                            <div className="flex justify-end">
+                                                <Button type="submit" className="w-full md:w-auto">
+                                                    Praktikum erstellen
+                                                </Button>
+                                            </div>
                                         </form>
                                     </Form>
                                 </CardContent>
