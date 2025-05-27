@@ -66,6 +66,7 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT pk_student PRIMARY KEY (student_id),
             CONSTRAINT fk_student_person FOREIGN KEY (student_id)
             REFERENCES person(person_id)
+            ON DELETE CASCADE
             );
 
         CREATE TABLE IF NOT EXISTS admin (
@@ -73,6 +74,7 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
             CONSTRAINT fk_admin_person FOREIGN KEY (admin_id)
             REFERENCES person(person_id)
+            ON DELETE CASCADE
             );
 
         CREATE TABLE IF NOT EXISTS city (

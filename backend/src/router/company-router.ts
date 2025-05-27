@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall, IInternship, IInternshipId} from "../model";
+import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps, isValidId, isValidDate} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -175,7 +175,7 @@ companyRouter.get("/unverified_admin", async (_, res: Response) => {
         if (companies.length > 0) {
             res.status(StatusCodes.OK).json(companies);
         } else {
-            res.sendStatus(StatusCodes.NOT_FOUND);
+            res.status(StatusCodes.NOT_FOUND).json([]);
         }
     } catch (e) {
         console.log(e);
@@ -293,19 +293,19 @@ companyRouter.get("/:param_id", async (req: Request, res: Response) => {
 
 companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
     const company_id: number = parseInt(req.params.id);
-    const unit: Unit = await Unit.create(false);
+    const unit: Unit = await Unit.create(true);
     const companyService = new CompanyService(unit);
     const internshipService = new InternshipService(unit);
 
     try {
 
         if (isValidId(company_id) && await companyService.companyExists(company_id)) {
-            const internships: IInternshipId[] = await internshipService.getByCompanyId(company_id);
+            const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
             if(internships.length > 0) {
                 res.status(StatusCodes.OK).json(internships);
             } else {
-                res.status(StatusCodes.NOT_FOUND).send(`no internships for company with id ${company_id} found`);
+                res.status(StatusCodes.NOT_FOUND).json([]);
             }
 
         } else {
@@ -413,14 +413,6 @@ companyRouter.delete("/:id", async (req: Request, res: Response) => {
     }
 
 });
-
-function isValidId(id: number): boolean {
-    return !isNaN(id) && id > 0 && id !== null && id !== undefined;
-}
-
-function isValidDate(date: Date): boolean {
-    return date.toString() !== 'Invalid Date';
-}
 
 function isValidCompanyNumber(number: string): boolean {
     const nums: number = parseInt(number.substring(0, 6));
