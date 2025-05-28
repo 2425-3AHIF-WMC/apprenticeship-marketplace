@@ -34,6 +34,8 @@ import {
 import {CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {de} from "date-fns/locale";
+import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
+
 
 const formSchema = z.object({
     title: z.string().min(1, "Ein Titel muss vorhanden sein"),
@@ -299,33 +301,30 @@ const CompanyInternshipCreation = () => {
                                         render={({field}) => (
                                             <FormItem>
                                                 <FormLabel>Gehaltsangabe</FormLabel>
-                                                <div
-                                                    className="flex flex-col space-y-6">
-                                                    <div className="flex flex-col space-y-1">
-                                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                                            <FormControl>
-                                                                <input
-                                                                    type="radio"
-                                                                    value="salary"
-                                                                    checked={field.value === 'salary'}
-                                                                    onChange={() => field.onChange('salary')}
-                                                                />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal">Gehalt
-                                                                angeben</FormLabel>
-                                                        </FormItem>
-                                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                                            <FormControl>
-                                                                <input
-                                                                    type="radio"
-                                                                    value="not_specified"
-                                                                    checked={field.value === 'not_specified'}
-                                                                    onChange={() => field.onChange('not_specified')}
-                                                                />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal">Keine Angabe</FormLabel>
-                                                        </FormItem>
-                                                    </div>
+                                                <div className="flex flex-col space-y-6">
+                                                    <FormControl>
+                                                        <RadioGroup
+                                                            onValueChange={field.onChange}
+                                                            defaultValue={field.value}
+                                                            value={field.value}
+                                                            className="flex flex-col space-y-1"
+                                                        >
+                                                            <div className="flex items-center space-x-3">
+                                                                <RadioGroupItem value="salary" id="salary"/>
+                                                                <FormLabel htmlFor="salary" className="font-normal">
+                                                                    Gehalt angeben
+                                                                </FormLabel>
+                                                            </div>
+                                                            <div className="flex items-center space-x-3">
+                                                                <RadioGroupItem value="not_specified"
+                                                                                id="not_specified"/>
+                                                                <FormLabel htmlFor="not_specified"
+                                                                           className="font-normal">
+                                                                    Keine Angabe
+                                                                </FormLabel>
+                                                            </div>
+                                                        </RadioGroup>
+                                                    </FormControl>
 
                                                     {watchSalaryType === 'salary' && (
                                                         <FormField
@@ -335,10 +334,8 @@ const CompanyInternshipCreation = () => {
                                                                 <FormItem>
                                                                     <FormLabel>Gehalt in EUR</FormLabel>
                                                                     <FormControl>
-                                                                        <Input
-                                                                            type="number" {...field}
-                                                                            onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                                                                            value={field.value ?? ''}/>
+                                                                        <Input type="number"
+                                                                               placeholder="z.B. 800" {...field} />
                                                                     </FormControl>
                                                                     <FormMessage/>
                                                                 </FormItem>
