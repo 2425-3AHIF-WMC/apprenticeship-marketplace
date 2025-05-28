@@ -4,8 +4,8 @@ import {Unit} from "../unit.js";
 import {StatusCodes} from "http-status-codes";
 import {AdminService} from "../services/admin-service.js";
 import {StudentService} from "../services/student-service";
-import {WorktypeService} from "../services/worktype-service";
-import {InternshipDurationService} from "../services/internship_duration-service";
+import {WorktypeService} from "../services/worktype-service.js";
+import {InternshipDurationService} from "../services/internship_duration-service.js";
 
 export const standardRouter: Router = express.Router();
 
@@ -43,7 +43,7 @@ standardRouter.get('/worktypes', async (req: Request, res: Response) => {
     }
 })
 
-standardRouter.get('internshipDuration', async (req : Request, res : Response) => {
+standardRouter.get('/internshipDuration', async (req : Request, res : Response) => {
     const unit: Unit = await Unit.create(true);
     try {
         const service = new InternshipDurationService(unit);

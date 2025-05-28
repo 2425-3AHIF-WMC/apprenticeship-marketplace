@@ -2,7 +2,7 @@ import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import FadeIn from "@/components/FadeIn.tsx";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
     Form,
     FormControl, FormDescription,
@@ -42,6 +42,7 @@ const formSchema = z.object({
     internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
     minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
     workType: z.string().min(1, "Eine Arbeitsart muss ausgewählt sein"),
+    duration: z.string().min(1, "Eine Dauer muss ausgewählt sein"),
     departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
     deadline: z.date({message: "Eine Bewerbungsfrist muss ausgewählt sein"}),
     salaryType: z.enum(['salary', 'not_specified'], {
@@ -70,6 +71,27 @@ const formSchema = z.object({
 
 const CompanyInternshipCreation = () => {
     const [description, setDescription] = useState('');
+    const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description:string }>>([]);
+    const [durations, setDurations] = useState<Array<{ internship_duration_id: number, description: string }>>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const workTypesResponse = await fetch('http://localhost:5000/api/worktypes');
+                const workTypesData = await workTypesResponse.json();
+                setWorkTypes(workTypesData);
+
+                const durationsResponse = await fetch('http://localhost:5000/api/internshipDuration');
+                const durationsData = await durationsResponse.json();
+                setDurations(durationsData);
+            } catch (error) {
+                console.error('Fehler beim Laden der Daten:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);
@@ -84,7 +106,9 @@ const CompanyInternshipCreation = () => {
         deadline: Date;
         salary: number;
         salaryType: 'salary' | 'not_specified',
-        salaryReason: string
+        salaryReason: string,
+        duration : string,
+
     }>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -202,9 +226,11 @@ const CompanyInternshipCreation = () => {
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value="hybrid">Hybrid</SelectItem>
-                                                        <SelectItem value="remote">Remote</SelectItem>
-                                                        <SelectItem value="onsite">On Site</SelectItem>
+                                                        {workTypes.map((type) => (
+                                                            <SelectItem key={type.worktype_id} value={type.worktype_id}>
+                                                                {type.name}
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage/>
@@ -363,6 +389,31 @@ const CompanyInternshipCreation = () => {
                                                         />
                                                     )}
                                                 </div>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="internship_duration"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <FormLabel>Praktikumsdauer</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Praktikumsdauer wählen"/>
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {durations.map((type) => (
+                                                            <SelectItem key={type.internship_duration_id} value={type.internship_duration_id}>
+                                                                {type.description}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}
