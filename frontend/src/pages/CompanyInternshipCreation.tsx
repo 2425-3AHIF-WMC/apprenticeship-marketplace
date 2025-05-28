@@ -396,7 +396,7 @@ const CompanyInternshipCreation = () => {
 
                                     <FormField
                                         control={form.control}
-                                        name="internship_duration"
+                                        name="duration"
                                         render={({field}) => (
                                             <FormItem>
                                                 <FormLabel>Praktikumsdauer</FormLabel>
@@ -407,9 +407,9 @@ const CompanyInternshipCreation = () => {
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {durations.map((type) => (
-                                                            <SelectItem key={type.internship_duration_id} value={type.internship_duration_id}>
-                                                                {type.description}
+                                                        {durations.map((duration) => (
+                                                            <SelectItem key={duration.internship_duration_id} value={duration.internship_duration_id.toString()}>
+                                                                {duration.description}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
