@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { Button } from '@/components/ui/button';
 import {
     LayoutDashboard,

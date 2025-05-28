@@ -20,8 +20,7 @@ import {
   Share,
   FileText,
   Mail,
-  Euro,
-  Search
+  Euro
 } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { Document, Page } from 'react-pdf';
@@ -61,6 +60,7 @@ const InternshipDescription = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
+      console.log(err);
       // Optionally handle error
     }
   };
@@ -75,8 +75,9 @@ const InternshipDescription = () => {
         if (!res.ok) throw new Error('Fehler beim Laden des Praktikas');
         const data = await res.json();
         setInternship(mapBackendToInternshipDetailsProps(data));
-      } catch (err: any) {
-        setError(err.message || 'Unbekannter Fehler');
+      } catch (err) {
+        console.log(err);
+        setError('Unbekannter Fehler');
       } finally {
         setIsLoading(false);
       }
