@@ -50,23 +50,22 @@ const formSchema = z.object({
     }),
     salary: z.number().nullable().optional(),
     salaryReason: z.string().optional()
-}).refine((data) => {
-    if (data.salaryType === 'salary') {
-        return data.salary !== null && data.salary !== undefined && data.salary > 0;
+}).superRefine((data, ctx) => {
+    if (data.salaryType === 'salary' && (!data.salary || data.salary <= 0)) {
+        ctx.addIssue({
+            path: ['salary'],
+            message: "Gehalt muss > 0 sein",
+            code: z.ZodIssueCode.custom
+        });
     }
-    return true;
-}, {
-    message: "Gehalt > 0 muss angegeben werden",
-    path: ["salary"]
-}).refine((data) => {
-    if (data.salaryType === 'not_specified') {
-        return data.salaryReason && data.salaryReason.length >= 10;
-    }
-    return true;
-}, {
-    message: "Bitte geben Sie eine Begründung an (mindestens 10 Zeichen)",
-    path: ["salaryReason"]
 
+    if (data.salaryType === 'not_specified' && (!data.salaryReason || data.salaryReason.length < 10)) {
+        ctx.addIssue({
+            path: ['salaryReason'],
+            message: "Begründung benötigt (min. 10 Zeichen)",
+            code: z.ZodIssueCode.custom
+        });
+    }
 });
 
 const CompanyInternshipCreation = () => {
@@ -115,9 +114,10 @@ const CompanyInternshipCreation = () => {
             title: '',
             internshipDescription: '',
             minYear: '',
-            workType: '',
             departments: [],
-            salaryType: 'salary'
+            salaryType: 'salary',
+            duration: undefined,
+            workType: undefined
         }
     });
     const watchSalaryType = form.watch('salaryType');
@@ -227,7 +227,7 @@ const CompanyInternshipCreation = () => {
                                                     </FormControl>
                                                     <SelectContent>
                                                         {workTypes.map((type) => (
-                                                            <SelectItem key={type.worktype_id} value={type.worktype_id}>
+                                                            <SelectItem key={type.worktype_id} value={type.worktype_id.toString()}>
                                                                 {type.name}
                                                             </SelectItem>
                                                         ))}
@@ -361,7 +361,10 @@ const CompanyInternshipCreation = () => {
                                                                     <FormLabel>Gehalt in EUR</FormLabel>
                                                                     <FormControl>
                                                                         <Input type="number"
-                                                                               placeholder="z.B. 800" {...field} />
+                                                                               placeholder="z.B. 800" {...field}
+                                                                               onChange={(e) => field.onChange(e.target.valueAsNumber)
+                                                                        }
+                                                                               value={field.value ?? ""}/>
                                                                     </FormControl>
                                                                     <FormMessage/>
                                                                 </FormItem>
