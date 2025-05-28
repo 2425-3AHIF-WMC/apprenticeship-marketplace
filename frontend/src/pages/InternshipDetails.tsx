@@ -21,7 +21,6 @@ import {
   FileText,
   Mail,
   Euro,
-  Search
 } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { Document, Page } from 'react-pdf';

@@ -1,4 +1,14 @@
 services:
+  data:
+    build:
+      context: ./data
+      dockerfile: Dockerfile
+    networks:
+      - florasCoolesNetzwerk
+    restart: always
+    volumes:
+      - bilder:/app/pictures
+
   postgres:
     image: postgres:17
     healthcheck:
@@ -45,6 +55,7 @@ services:
 
 volumes:
   pgdata:
+  bilder:
 
 networks:
   florasCoolesNetzwerk:
