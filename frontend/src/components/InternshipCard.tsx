@@ -62,7 +62,7 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
                 onClick={() => onToggleFavourite && onToggleFavourite(Number(internship.id))}
             >
                 {isFavourite ? (
-                    <BookmarkCheck className="h-5 w-5 text-primary" />
+                    <BookmarkCheck className="h-5 w-5" />
                 ) : (
                     <BookmarkPlus className="h-5 w-5" />
                 )}

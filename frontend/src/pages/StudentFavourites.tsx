@@ -1,58 +1,138 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Bookmark, BookmarkX, Search, ExternalLink } from 'lucide-react';
+import { Search, BriefcaseBusiness } from 'lucide-react';
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle
 } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from '@/utils/interfaces';
-import { cn } from '@/utils/utils';
 import StudentDashboardSidebar from "@/components/StudentDashboardSidebar.tsx";
+import { useAuth } from '@/context/AuthContext';
+import { mapBackendToInternshipProps } from '@/utils/utils';
+import InternshipFilter from '@/components/InternshipFilter';
+import InternshipCard from '@/components/InternshipCard';
+import { filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import { getYearNumber } from '@/utils/filterUtils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const StudentFavourites = () => {
-    const [favourites, setFavourites] = useState<InternshipUIProps[]>([]);
+    const [favoriteInternships, setFavoriteInternships] = useState<InternshipUIProps[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const { studentId } = useAuth();
+    const [selectedCategory, setSelectedCategory] = useState('Alle');
+    const [selectedWorkMode, setSelectedWorkMode] = useState('Alle');
+    const [selectedDuration, setSelectedDuration] = useState('Alle');
+    const [selectedSchoolYear, setSelectedSchoolYear] = useState('Alle Schulstufen');
+    const [filtersVisible, setFiltersVisible] = useState(false);
+    const [sortBy, setSortBy] = useState('Nichts');
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-
-    // TODO
-    // get favourites from backend
     useEffect(() => {
+        const fetchFavourites = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                if (!studentId) return;
+                // 1. Get favourite internship IDs
+                const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+                if (!res.ok) throw new Error('Fehler beim Laden der Favoriten-IDs');
+                const favIds = await res.json();
+                // 2. Fetch each internship by ID
+                const internshipPromises = favIds.map(async (id: number) => {
+                    const res = await fetch(`http://localhost:5000/api/internship/${id}`);
+                    if (!res.ok) throw new Error('Fehler beim Laden eines Praktikums');
+                    const data = await res.json();
+                    return mapBackendToInternshipProps(data);
+                });
+                const internships = (await Promise.all(internshipPromises)).filter(Boolean);
+                setFavoriteInternships(internships);
+            } catch (err: any) {
+                setError(err.message || 'Unbekannter Fehler');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchFavourites();
+    }, [studentId]);
 
-    }, []);
 
-    // TODO
-    // delete backend function
-    const removeFromFavourites = (id: string) => {
-        const updatedFavourites = favourites.filter(favorite => favorite.id !== id);
-        setFavourites(updatedFavourites);
-
+    const clearFilters = () => {
+        setSearchTerm('');
+        setSelectedCategory('Alle');
+        setSelectedWorkMode('Alle');
+        setSelectedDuration('Alle');
+        setSelectedSchoolYear('Alle Schulstufen');
     };
 
-    // Helper function to check if a category (string or array) includes a search term
-    const categoryIncludesSearchTerm = (category: string | string[], term: string): boolean => {
-        if (Array.isArray(category)) {
-            return category.some(cat => cat.toLowerCase().includes(term.toLowerCase()));
+    const hasActiveFilters =
+        searchTerm !== '' ||
+        selectedCategory !== 'Alle' ||
+        selectedWorkMode !== 'Alle' ||
+        selectedDuration !== 'Alle' ||
+        selectedSchoolYear !== 'Alle Schulstufen';
+
+    // Pre-filter out expired internships
+    const validInternships = favoriteInternships.filter((internship) => {
+        const deadlineDate = new Date(internship.application_end);
+        const today = new Date();
+        return !isNaN(deadlineDate.getTime()) && deadlineDate >= today;
+    });
+
+    // Use shared filter utility
+    const filterOptions: InternshipFilterOptions = {
+        searchTerm,
+        selectedCategory,
+        selectedWorkMode,
+        selectedDuration,
+        selectedSchoolYear,
+    };
+    let filteredInternships = filterInternships(validInternships, filterOptions);
+
+    // Default: sort by school year if no other sort is selected
+    if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {
+        const selectedYear = getYearNumber(selectedSchoolYear);
+        if (selectedYear !== null) {
+            filteredInternships = filteredInternships.sort((a, b) => {
+                const yearA = getYearNumber(a.min_year) ?? 0;
+                const yearB = getYearNumber(b.min_year) ?? 0;
+                // First, internships for the selected year, then lower years
+                if (yearA === selectedYear && yearB !== selectedYear) return -1;
+                if (yearB === selectedYear && yearA !== selectedYear) return 1;
+                // Then by year descending (3, 2, 1)
+                return yearB - yearA;
+            });
         }
-        return category.toLowerCase().includes(term.toLowerCase());
-    };
+    } else {
+        // Sortierfunktion für das gewählte Kriterium
+        const sortFn = (a: InternshipUIProps, b: InternshipUIProps) => {
+            if (sortBy === 'Bewerbungsfrist') {
+                return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
+            }
+            if (sortBy === 'Neueste') {
+                return new Date(b.added).getTime() - new Date(a.added).getTime();
+            }
+            if (sortBy === 'Beliebteste') {
+                return b.views - a.views;
+            }
+            return 0;
+        };
+        filteredInternships = filteredInternships.sort(sortFn);
+    }
 
-    const getCategoryClasses = (category: string) => {
-        return `tag-${category}`;
-    };
-
-    const filteredFavorites = favourites.filter(favorite =>
-        favorite.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        favorite.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        favorite.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        categoryIncludesSearchTerm(favorite.department, searchTerm)
-    );
+    const removeFromFavourites = async (internshipId: string) => {
+        if (!studentId) return;
+            await fetch('http://localhost:5000/api/favourite/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+            });
+            setFavoriteInternships((prev) => prev.filter((internship) => internship.id !== internshipId));
+        }
 
     return (
         <div className="flex min-h-screen">
@@ -64,147 +144,107 @@ const StudentFavourites = () => {
                             <div>
                                 <h1 className="heading-md text-left">Meine Favoriten</h1>
                                 <p className="text-muted-foreground text-left">
-                                    Verwalte deine gespeicherten Praktikumsangebote
+                                    Übersicht deiner Favoriten
                                 </p>
-                            </div>
-                            <div className="relative w-full md:w-64">
-                                <Search
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Favoriten durchsuchen..."
-                                    className="pl-9"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
                             </div>
                         </div>
                     </FadeIn>
 
+                    <InternshipFilter
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        selectedCategory={selectedCategory}
+                        setSelectedCategory={setSelectedCategory}
+                        selectedWorkMode={selectedWorkMode}
+                        setSelectedWorkMode={setSelectedWorkMode}
+                        selectedDuration={selectedDuration}
+                        setSelectedDuration={setSelectedDuration}
+                        selectedSchoolYear={selectedSchoolYear}
+                        setSelectedSchoolYear={setSelectedSchoolYear}
+                        filtersVisible={filtersVisible}
+                        setFiltersVisible={setFiltersVisible}
+                        clearFilters={clearFilters}
+                        hasActiveFilters={hasActiveFilters}
+                    />
                     <FadeIn delay={100}>
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Bookmark className="h-5 w-5" />
-                                    <span>Favorisierte Praktika</span>
+                                    <span>Favourisierte Praktika</span>
                                 </CardTitle>
-                                <CardDescription>
-                                    {favourites.length === 0
-                                        ? "Du hast noch keine Praktika als Favoriten gespeichert."
-                                        : `${favourites.length} Praktika gespeichert`}
+                                <CardDescription className="text-left flex items-center justify-between">
+                                    {filteredInternships.length} {filteredInternships.length === 1 ? 'Praktikum' : 'Praktika'} gespeichert
+                                    <div className="flex items-center">
+                                        <span className="text-sm text-muted-foreground mr-2">Sortieren nach:</span>
+                                        <select
+                                            value={sortBy}
+                                            onChange={(e) => setSortBy(e.target.value)}
+                                            className="rounded-lg border border-input p-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none bg-background text-foreground"
+                                        >
+                                            <option value="Nichts">Nichts</option>
+                                            <option value="Aktuell Aktiv">Aktuell Aktiv</option>
+                                            <option value="Neueste">Neueste</option>
+                                            <option value="Abgelaufen">Abgelaufen</option>
+                                            <option value="Beliebteste">Beliebteste</option>
+                                        </select>
+
+                                    </div>
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {filteredFavorites.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {filteredFavorites.map((favourite) => (
-                                            <div
-                                                key={favourite.id}
-                                                className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                                            >
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold">{favourite.title}</h3>
+                                {isLoading ? (
+                                    <LoadingIndicator message="Lade Praktika..." />
+                                ) : error ? (
+                                    <ErrorIndicator message="Fehler beim Laden der Praktika" error={error} />
+                                ) :
+                                    filteredInternships.length > 0 ? (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                            {filteredInternships.map((internship, index) => (
+                                                <FadeIn key={internship.id} delay={index * 50}>
                                                     <div
-                                                        className="flex flex-col md:flex-row gap-1 md:gap-4 text-sm text-muted-foreground">
-                                                        <span>{favourite.company_name}</span>
-                                                        <span>{favourite.location}</span>
-                                                        <span>Frist: {favourite.application_end}</span>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-2 mt-2">
-                                                        {Array.isArray(favourite.department) ? (
-                                                            favourite.department.map((dep, index) => (
-                                                                <span
-                                                                    key={`${dep}-${index}`}
-                                                                    className={cn(
-                                                                        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                        getCategoryClasses(dep)
-                                                                    )}
-                                                                >
-                                                                    {dep}
-                                                                </span>
-
-                                                            ))
-                                                        ) : (
-                                                            <span className={cn(
-                                                                'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                                                getCategoryClasses(favourite.department)
-                                                            )}>
-                                                                {favourite.department}
-                                                            </span>
-                                                        )}
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                            {favourite.work_type}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-row gap-2 self-end md:self-auto">
-                                                    <Button variant="outline" size="sm" asChild>
-                                                        <Link to={`/internships/${favourite.id}`}>
-                                                            <ExternalLink className="h-4 w-4 mr-1" />
-                                                            Details
-                                                        </Link>
-                                                    </Button>
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={() => removeFromFavourites(favourite.id)}
+                                                        className="relative"
                                                     >
-                                                        <BookmarkX className="h-4 w-4 mr-1" />
-                                                        Entfernen
-                                                    </Button>
-                                                </div>
+                                                        <InternshipCard internship={internship} isFavourite={true} onToggleFavourite={() => removeFromFavourites(internship.id)} />
+                                                    </div>
+                                                </FadeIn>
+                                            ))}
+                                        </div>
+                                    ) :
+                                        (
+                                            <div className="text-center py-8">
+                                                {searchTerm ? (
+                                                    <>
+                                                        <div
+                                                            className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted text-muted-foreground mb-4">
+                                                            <Search className="h-6 w-6" />
+                                                        </div>
+                                                        <h3 className="text-lg font-medium mb-2">Keine Ergebnisse gefunden</h3>
+                                                        <p className="text-muted-foreground">
+                                                            Keine Praktia entsprechen deiner Suche nach "{searchTerm}".
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div
+                                                            className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-4">
+                                                            <BriefcaseBusiness className="h-6 w-6" />
+                                                        </div>
+                                                        <h3 className="text-lg font-medium mb-2">Keine Praktika vorhanden</h3>
+                                                        <p className="text-muted-foreground mb-4">
+                                                            Es wurden noch keine Praktika erstellt.
+                                                        </p>
+                                                    </>
+                                                )}
                                             </div>
                                         )
-                                        )}
-                                    </div>
-                                ) :
-                                    (
-                                        <div className="text-center py-8">
-                                            {searchTerm ? (
-                                                <>
-                                                    <div
-                                                        className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted text-muted-foreground mb-4">
-                                                        <Search className="h-6 w-6" />
-                                                    </div>
-                                                    <h3 className="text-lg font-medium mb-2">Keine Ergebnisse gefunden</h3>
-                                                    <p className="text-muted-foreground">
-                                                        Keine Favoriten entsprechen deiner Suche nach "{searchTerm}".
-                                                    </p>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div
-                                                        className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-4">
-                                                        <Bookmark className="h-6 w-6" />
-                                                    </div>
-                                                    <h3 className="text-lg font-medium mb-2">Keine Favoriten vorhanden</h3>
-                                                    <p className="text-muted-foreground mb-4">
-                                                        Du hast noch keine Praktika als Favoriten gespeichert.
-                                                    </p>
-                                                    <Button asChild>
-                                                        <Link to="/internships">Praktika durchsuchen</Link>
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    )
                                 }
                             </CardContent>
-                            {
-                                favourites.length > 0 && (
-                                    <CardFooter className="border-t pt-6 flex justify-center">
-                                        <Button asChild variant="outline">
-                                            <Link to="/internships">Weitere Praktika durchsuchen</Link>
-                                        </Button>
-                                    </CardFooter>
-                                )
-                            }
                         </Card>
                     </FadeIn>
                 </main>
             </div>
         </div>
-    )
-        ;
+    );
 };
 
 export default StudentFavourites;

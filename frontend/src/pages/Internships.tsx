@@ -8,6 +8,7 @@ import {Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
 import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import { getYearNumber } from '@/utils/filterUtils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
 import { useAuth } from '@/context/AuthContext';
@@ -96,12 +97,6 @@ const Internships = () => {
         selectedWorkMode !== 'Alle' ||
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
-
-    // Helper to extract the year as a number from min_year string
-    const getYearNumber = (minYear: string) => {
-        const match = minYear.match(/(\d)\. Schulstufe/);
-        return match ? parseInt(match[1], 10) : null;
-    };
 
     // Pre-filter out expired internships
     const validInternships = internships.filter((internship) => {

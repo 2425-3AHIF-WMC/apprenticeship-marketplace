@@ -8,22 +8,44 @@ import { InternshipUIProps } from "@/utils/interfaces";
 import { useAuth } from '@/context/AuthContext';
 import StudentDashboardSidebar from '@/components/StudentDashboardSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { mapBackendToInternshipProps } from '@/utils/utils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
 
 const StudentDashboard = () => {
-  const [favoriteInternships] = useState<InternshipUIProps[]>([]);
-  const { studentName } = useAuth();
+  const [favoriteInternships, setFavoriteInternships] = useState<InternshipUIProps[]>([]);
+  const { studentName, studentId } = useAuth();
   const isMobile = useIsMobile();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-
-  // TODO: Implement the following:
-  // - Fetch the student's favorites from the backend
-  // - Fetch the student's applications from the backend
-  // - Fetch the student's upcoming deadlines from the backend
-  // - Fetch the student's statistics from the backend
-  // - Fetch the student's profile information from the backend
-  useEffect(() => {    
-    
-  }, []);
+  useEffect(() => {
+    const fetchFavourites = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        if (!studentId) return;
+        // 1. Get favourite internship IDs
+        const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+        if (!res.ok) throw new Error('Fehler beim Laden der Favoriten-IDs');
+        const favIds = await res.json();
+        // 2. Fetch each internship by ID
+        const internshipPromises = favIds.map(async (id: number) => {
+          const res = await fetch(`http://localhost:5000/api/internship/${id}`);
+          if (!res.ok) throw new Error('Fehler beim Laden eines Praktikums');
+          const data = await res.json();
+          return mapBackendToInternshipProps(data);
+        });
+        const internships = (await Promise.all(internshipPromises)).filter(Boolean);
+        setFavoriteInternships(internships);
+      } catch (err: any) {
+        setError(err.message || 'Unbekannter Fehler');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchFavourites();
+  }, [studentId]);
 
   // Beispielstatistiken
   const viewedCount = Math.floor(Math.random() * 20) + 5;
@@ -81,7 +103,7 @@ const StudentDashboard = () => {
                 <FadeIn delay={200}>
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
+                      <div className="text-left">
                         <CardTitle>Meine Favoriten</CardTitle>
                         <CardDescription>Praktika, die du gespeichert hast</CardDescription>
                       </div>
@@ -93,7 +115,18 @@ const StudentDashboard = () => {
                       </Button>
                     </CardHeader>
                     <CardContent>
-                      {favoriteInternships.length > 0 ? (
+                      {
+                      isLoading ? (
+                        <div className="text-center py-8">
+                          <LoadingIndicator />
+                        </div>
+                      ) : 
+                      error ? (
+                        <div className="text-center py-8">
+                          <ErrorIndicator />
+                        </div>
+                      ) :
+                      favoriteInternships.length > 0 ? (
                         <div className="space-y-4">
                           {favoriteInternships.slice(0, 3).map((internship) => (
                             <div key={internship.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
