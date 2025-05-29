@@ -16,7 +16,7 @@ import {useAuth} from '@/context/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import {Input} from "@/components/ui/input.tsx";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
-import {ShieldAlert} from "lucide-react";
+import {MailWarning, ShieldAlert} from "lucide-react";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +26,7 @@ const Login = () => {
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEmailExistsDialogOpen, setEmailExistsDialogOpen] = useState(false);
     const [nameRegistration, setNameRegistration] = useState('');
     const [companyNumberRegistration, setCompanyNumberRegistration] = useState('');
     const [emailRegistration, setEmailRegistration] = useState('');
@@ -111,15 +112,19 @@ const Login = () => {
                     password: passwordRegistration
                 })
             });
-            if (!res.ok) {
+            if(!res.ok) {
+                setEmailExistsDialogOpen(true);
                 return;
             }
+
             const data = await res.json();
 
             localStorage.setItem("companyAccessToken", data.accessToken);
             navigate('/company/dashboard');
         } catch (err) {
             console.log(err);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -327,6 +332,22 @@ const Login = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <Button onClick={() => setIsDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isEmailExistsDialogOpen} onOpenChange={open => setEmailExistsDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <MailWarning className="text-yellow-300 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Registrierung fehlgeschlagen</DialogTitle>
+                            <DialogDescription>
+                                E-Mail ist bereits in Verwendung.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setEmailExistsDialogOpen(false)} className="mt-4 w-full max-w-xs">
                             Verstanden
                         </Button>
                     </div>

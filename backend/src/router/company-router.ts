@@ -7,7 +7,7 @@ import {
     IInternshipUIProps,
     isValidId,
     isValidDate,
-    ISite
+    ISite, ICompanyPayload
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
@@ -18,8 +18,17 @@ import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
-
+import {Pool} from "pg";
 dotenv.config();
+
+const pool = new Pool({
+    user: "postgres",
+    host: "postgres",
+    database: "cruddb",
+    password: "postgres",
+    port: 5432,
+});
+
 
 export const companyRouter = express.Router();
 const allowedBooleanStrings: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
@@ -81,7 +90,6 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
         const company: ICompany | null = await service.getByEmail(email);
 
         if (company) {
-            res.status(StatusCodes.OK).json(company);
 
             const isMatch: boolean = await argon2.verify(company.password, password);
             if (isMatch) {
@@ -141,6 +149,58 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
             .json({accessToken: newAccessToken})
     } catch (err) {
         res.status(500).json({error: "Internal server error"});
+    }
+});
+
+companyRouter.post("/register", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const {name, companyNumber, email, phoneNumber, website, password} = req.body;
+    try {
+        const service = new CompanyService(unit);
+        const emailExists: ICompany | null = await service.getByEmail(email);
+        console.log(emailExists);
+        if (emailExists) {
+            res.status(409).json({error: "E-Mail is already in Use"});
+            return;
+        }
+        const hashedPassword = await argon2.hash(password, {
+            algorithm: argon2.Algorithm.Argon2id,
+            memoryCost: 2 ** 16,
+            timeCost: 3,
+            parallelism: 2,
+        });
+
+        const timestampInSeconds = Date.now() / 1000;
+        const insertResult  = await  pool.query(`
+            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
+            RETURNING company_id, admin_verified, email_verified`,
+            [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
+
+        const company : ICompanyPayload = insertResult.rows[0];
+
+        const payload = {
+            company_id: company.company_id,
+            admin_verified: company.admin_verified,
+            email_verified: company.email_verified,
+        };
+
+        const newAccessToken = generateAccessToken(payload);
+        const newRefreshToken = generateRefreshToken(payload);
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: false, // TODO: change at production to true
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+            .header('Authorization', `Bearer ${newAccessToken}`)
+            .status(201)
+            .json({accessToken: newAccessToken});
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({Error: err})
+
     }
 });
 

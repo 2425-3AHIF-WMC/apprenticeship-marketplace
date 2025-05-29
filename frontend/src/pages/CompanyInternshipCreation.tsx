@@ -35,47 +35,58 @@ import {CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {de} from "date-fns/locale";
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
+import {fetchCompanyProfile} from "@/lib/authUtils.ts";
 
-
-const formSchema = z.object({
-    title: z.string().min(1, "Ein Titel muss vorhanden sein"),
-    internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
-    minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
-    workType: z.string().min(1, "Eine Arbeitsart muss ausgewählt sein"),
-    duration: z.string().min(1, "Eine Dauer muss ausgewählt sein"),
-    departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
-    deadline: z.date({message: "Eine Bewerbungsfrist muss ausgewählt sein"}),
-    salaryType: z.enum(['salary', 'not_specified'], {
-        required_error: 'Bitte wählen Sie ein  Gehalts-Typ aus.',
+const salarySchema = z.discriminatedUnion('salaryType', [
+    z.object({
+        salaryType: z.literal('salary'),
+        salary: z.preprocess((val) => {
+            if (typeof val === 'number') return Number.isNaN(val) ? undefined : val;
+            if (typeof val === 'string') {
+                const trimmed = val.trim();
+                if (trimmed === '') return undefined;
+                const num = Number(trimmed);
+                return Number.isNaN(num) ? undefined : num;
+            }
+            return undefined;
+        }, z.number({ required_error: "Gehalt muss > 0 sein" }).positive("Gehalt muss > 0 sein")),
+        salaryReason: z.optional(z.string()),
     }),
-    salary: z.number().nullable().optional(),
-    salaryReason: z.string().optional()
-}).superRefine((data, ctx) => {
-    if (data.salaryType === 'salary' && (!data.salary || data.salary <= 0)) {
-        ctx.addIssue({
-            path: ['salary'],
-            message: "Gehalt muss > 0 sein",
-            code: z.ZodIssueCode.custom
-        });
-    }
+    z.object({
+        salaryType: z.literal('not_specified'),
+        salary: z.optional(z.number().nullable()),
+        salaryReason: z.string({required_error: "Begründung benötigt (min. 10 Zeichen)" }).min(10, "Begründung benötigt (min. 10 Zeichen)"),
+    }),
+]);
 
-    if (data.salaryType === 'not_specified' && (!data.salaryReason || data.salaryReason.length < 10)) {
-        ctx.addIssue({
-            path: ['salaryReason'],
-            message: "Begründung benötigt (min. 10 Zeichen)",
-            code: z.ZodIssueCode.custom
-        });
-    }
-});
+const formSchema = z
+    .object({
+        title: z.string().min(1, "Ein Titel muss vorhanden sein"),
+        internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
+        minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
+        workType: z.string({ required_error: "Eine Arbeitsart muss ausgewählt sein" }),
+        duration: z.string({ required_error: "Eine Dauer muss ausgewählt sein" }),
+        departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
+        deadline: z.date({ message: "Eine Bewerbungsfrist muss ausgewählt sein" }),
+        site: z.string({ required_error: "Bitte wählen Sie einen Standort aus." }),
+    })
+    .and(salarySchema);
 
 const CompanyInternshipCreation = () => {
     const [description, setDescription] = useState('');
     const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description:string }>>([]);
     const [durations, setDurations] = useState<Array<{ internship_duration_id: number, description: string }>>([]);
+    const [sites, setSites] = useState<Array<{location_id: number, address: string, name: string, company_id : number, plz : number }>>([]);
+    const [companyId, setCompanyId] = useState<number>(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+
+                const meResponse = await fetchCompanyProfile();
+                setCompanyId(meResponse?.company_id == undefined ? 0 : meResponse?.company_id)
+
                 const workTypesResponse = await fetch('http://localhost:5000/api/worktypes');
                 const workTypesData = await workTypesResponse.json();
                 setWorkTypes(workTypesData);
@@ -83,6 +94,9 @@ const CompanyInternshipCreation = () => {
                 const durationsResponse = await fetch('http://localhost:5000/api/internshipDuration');
                 const durationsData = await durationsResponse.json();
                 setDurations(durationsData);
+
+                setLoading(false);
+
             } catch (error) {
                 console.error('Fehler beim Laden der Daten:', error);
             }
@@ -90,11 +104,30 @@ const CompanyInternshipCreation = () => {
 
         fetchData();
     }, []);
+    useEffect(() => {
+        const fetchSites = async () => {
+            if (companyId == 0) {
+                return;
+            }
 
+            try {
+                const sitesResponse = await fetch(`http://localhost:5000/api/company/${companyId}/sites`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+                if (sitesResponse.ok) {
+                    const sitesData = await sitesResponse.json();
+                    setSites(sitesData);
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Standorte:', error);
+            }
+        };
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-    }
+        fetchSites();
+    }, [companyId]);
+
 
     const form = useForm<{
         title: string;
@@ -107,6 +140,7 @@ const CompanyInternshipCreation = () => {
         salaryType: 'salary' | 'not_specified',
         salaryReason: string,
         duration : string,
+        site : string,
 
     }>({
         resolver: zodResolver(formSchema),
@@ -117,9 +151,18 @@ const CompanyInternshipCreation = () => {
             departments: [],
             salaryType: 'salary',
             duration: undefined,
-            workType: undefined
+            workType: undefined,
         }
     });
+
+    if(loading) {
+        return null;
+    }
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values);
+    }
+
+
     const watchSalaryType = form.watch('salaryType');
 
     const modules = {
@@ -364,7 +407,7 @@ const CompanyInternshipCreation = () => {
                                                                                placeholder="z.B. 800" {...field}
                                                                                onChange={(e) => field.onChange(e.target.valueAsNumber)
                                                                         }
-                                                                               value={field.value ?? ""}/>
+                                                                               value={Number.isNaN(field.value) || field.value === undefined ? "" : field.value}/>
                                                                     </FormControl>
                                                                     <FormMessage/>
                                                                 </FormItem>
@@ -415,6 +458,35 @@ const CompanyInternshipCreation = () => {
                                                                 {duration.description}
                                                             </SelectItem>
                                                         ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="site"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <FormLabel>Standort</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Standort wählen"/>
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                         {sites.length > 0 ? sites.map((site) => (
+                                                            <SelectItem key={site.location_id} value={site.location_id.toString()}>
+                                                                {site.name} | {site.address} - {site.plz}
+                                                            </SelectItem>
+                                                        ))
+                                                        : (
+                                                        <SelectItem key={0} value={"0"} disabled>
+                                                            Kein Standort vorhanden
+                                                        </SelectItem>
+                                                             )}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage/>
