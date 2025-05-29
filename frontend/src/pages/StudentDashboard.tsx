@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookmarkIcon, Search, Calendar, FileCheck } from 'lucide-react';
+import { BookmarkIcon, Search, Calendar } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
 import { useAuth } from '@/context/AuthContext';
@@ -147,12 +147,6 @@ const StudentDashboard = () => {
                         <Link to="/schueler/favoriten">
                           <BookmarkIcon className="h-4 w-4 mr-2" />
                           Favoriten verwalten
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/schueler/bewerbungen">
-                          <FileCheck className="h-4 w-4 mr-2" />
-                          Bewerbungen prüfen
                         </Link>
                       </Button>
                     </CardContent>

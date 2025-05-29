@@ -1,4 +1,4 @@
-import { Clock, Building, CalendarDays, ArrowUpRight, ExternalLink } from 'lucide-react';
+import { Clock, Building, CalendarDays, ArrowUpRight, ExternalLink, BookmarkCheck, BookmarkPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/utils';
@@ -9,9 +9,11 @@ import { InternshipUIProps } from '@/utils/interfaces';
 interface InternshipCardProps {
     internship: InternshipUIProps;
     className?: string;
+    isFavourite?: boolean;
+    onToggleFavourite?: (internshipId: number) => void;
 }
 
-const InternshipCard = ({ internship, className }: InternshipCardProps) => {
+const InternshipCard = ({ internship, className, isFavourite = false, onToggleFavourite }: InternshipCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const getCategoryClasses = (category: string) => {
@@ -28,7 +30,8 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
-        <div className="flex items-start mb-4 min-h-20">
+        <div className="flex items-start justify-between mb-4 min-h-20">
+            <div className="flex items-center">
             {internship.company_logo ? <div
                 className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50 ">
                 <img
@@ -48,6 +51,25 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
                     <p className="text-sm text-muted-foreground text-left">{internship.company_name}</p>
                 </div>
             </div>
+            </div>
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className={cn(
+                    "transition-opacity",
+                    isFavourite ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+                onClick={() => onToggleFavourite && onToggleFavourite(Number(internship.id))}
+            >
+                {isFavourite ? (
+                    <BookmarkCheck className="h-5 w-5 text-primary" />
+                ) : (
+                    <BookmarkPlus className="h-5 w-5" />
+                )}
+                <span className="sr-only">
+                    {isFavourite ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+                </span>
+            </Button>
         </div>
 
         <div className="space-y-3 mb-5 flex-1">
