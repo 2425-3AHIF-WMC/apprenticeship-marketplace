@@ -40,15 +40,32 @@ const AdminToVerify = () => {
     fetchCompanies();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       const res = await fetch(`http://localhost:5000/api/company/${id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
-      setCompanies((prev) => prev.filter((i) => i.company_id.toString() !== id));
+      setCompanies((prev) => prev.filter((i) => i.company_id !== id));
     } catch (err) {
       alert('Fehler beim Löschen des Unternehmens');
+    }
+  };
+
+  const handleVerify = async (id: number) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/company/${id}/verify_admin`, {
+        method: 'PATCH',
+        body: JSON.stringify({ admin_verified: 'true' }),
+      });
+      if (!res.ok) throw new Error('Fehler beim Verifizieren des Unternehmens');
+      setCompanies((prev) =>
+        prev.map((c) =>
+          c.company_id === id ? { ...c, admin_verified: true } : c
+        )
+      );
+    } catch (err) {
+      alert('Fehler beim Verifizieren des Unternehmens');
     }
   };
 
@@ -112,13 +129,17 @@ const AdminToVerify = () => {
                     {filteredCompanies.map((company) => (
                       <CompanyCard key={company.company_id} company={company}>
                         {getCompanyStatus(company) === 'nur_email' ? (
-                          <Button variant="default" size="sm">
+                          <Button 
+                          variant="default" 
+                          size="sm" 
+                          onClick={() => handleVerify(company.company_id)}
+                          >
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Akzeptieren
                           </Button>
                         ) : null}
                         <Button variant="destructive" size="sm"
-                          onClick={() => handleDelete(company.company_id.toString())}
+                          onClick={() => handleDelete(company.company_id)}
                           title="Unternehmen löschen"
                         >
                           <X className="w-5 h-5" />
