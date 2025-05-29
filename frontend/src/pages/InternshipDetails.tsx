@@ -146,7 +146,7 @@ const InternshipDescription = () => {
                       {copied ? 'Link kopiert!' : 'Teilen'}
                     </Button>
                     <Button asChild>
-                      <Link to={internship.company_link} className="flex items-center gap-2">
+                      <Link to={internship.internship_link} className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
                         Jetzt bewerben
                       </Link>
@@ -245,14 +245,10 @@ const InternshipDescription = () => {
                           </div>
                         )}
                         <div>
-                          <h3 className="font-semibold">{internship.company_name}</h3>
-                          <p className="text-sm text-muted-foreground">{internship.location}</p>
+                          <h3 className="font-semibold text-left">{internship.company_name}</h3>
+                          <p className="text-sm text-muted-foreground text-left">{internship.location}</p>
                         </div>
                       </div>
-
-                      <p className="text-sm text-muted-foreground">
-                        {internship.company_name} Unternehmen in Leonding, Linz mit dem Fokus auf IT-Produkte.
-                      </p>
 
                       <Button variant="outline" className="w-full">
                         <Link to={internship.company_link}>

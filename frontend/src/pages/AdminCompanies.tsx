@@ -41,6 +41,9 @@ const AdminCompanies = () => {
         try {
           const res = await fetch(`http://localhost:5000/api/company/${id}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+              },
           });
           if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
           setCompanies((prev) => prev.filter((i) => i.company_id !== id));
@@ -54,6 +57,9 @@ const AdminCompanies = () => {
           const res = await fetch(`http://localhost:5000/api/company/${id}/verify_admin`, {
             method: 'PATCH',
             body: JSON.stringify({ admin_verified: 'true' }),
+            headers: {
+                'Content-Type': 'application/json',
+              },
           });
           if (!res.ok) throw new Error('Fehler beim Verifizieren des Unternehmens');
           setCompanies((prev) =>

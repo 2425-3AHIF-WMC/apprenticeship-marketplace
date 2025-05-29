@@ -100,12 +100,12 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
             </Button>
             <Button asChild size="sm">
                 <Link
-                    to={internship.company_link}
-                    target={internship.company_link ? "_blank" : undefined}
+                    to={internship.internship_link}
+                    target={internship.internship_link ? "_blank" : undefined}
                     className="flex items-center"
                 >
                     Bewerben
-                    {internship.company_link ? <ExternalLink className="ml-1 h-3 w-3" /> :
+                    {internship.internship_link ? <ExternalLink className="ml-1 h-3 w-3" /> :
                         <ArrowUpRight className="ml-1 h-3 w-3" />}
                 </Link>
             </Button>

@@ -32,6 +32,9 @@ async function refreshToken(): Promise<string | null> {
         const res = await fetch("http://localhost:5000/api/company/refresh", {
             method: "POST",
             credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
 
         if (!res.ok) {
