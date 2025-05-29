@@ -124,7 +124,15 @@ export interface ICompanySmall {
 export interface ICompanyPayload {
     company_id: number,
     email_verified: string,
-    admin_verified: string,
+    admin_verified: string
+}
+
+export interface ISite {
+    location_id: number,
+    address: string,
+    name: string,
+    company_id: number,
+    plz: number
 }
 
 // Worktype Interface

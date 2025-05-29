@@ -1,5 +1,14 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps, isValidId, isValidDate} from "../model.js";
+import {
+    ICompany,
+    ICompanySmall,
+    IInternship,
+    IInternshipId,
+    IInternshipUIProps,
+    isValidId,
+    isValidDate,
+    ISite
+} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -8,6 +17,7 @@ import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
+import {SiteService} from "../services/site-service.js";
 
 dotenv.config();
 
@@ -302,7 +312,7 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
         if (isValidId(company_id) && await companyService.companyExists(company_id)) {
             const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
-            if(internships.length > 0) {
+            if (internships.length > 0) {
                 res.status(StatusCodes.OK).json(internships);
             } else {
                 res.status(StatusCodes.NOT_FOUND).json([]);
@@ -319,6 +329,34 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
         await unit.complete();
     }
 
+});
+
+companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const sites: ISite[] = await siteService.getAllByCompanyId(company_id);
+
+            if (sites.length > 0) {
+                res.status(StatusCodes.OK).json(sites);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json([]);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 // to insert and update a new company
