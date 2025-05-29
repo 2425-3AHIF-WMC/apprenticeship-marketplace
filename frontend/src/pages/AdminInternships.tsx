@@ -13,6 +13,7 @@ import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import InternshipFilter from '@/components/InternshipFilter';
 import InternshipCard from '@/components/InternshipCard';
 import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import { getYearNumber } from '@/utils/filterUtils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
 
@@ -43,11 +44,6 @@ const AdminInternships = () => {
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
 
-    // Helper to extract the year as a number from min_year string
-    const getYearNumber = (minYear: string) => {
-        const match = minYear.match(/(\d)\. Schulstufe/);
-        return match ? parseInt(match[1], 10) : null;
-    };
 
     // Use shared filter utility
     const filterOptions: InternshipFilterOptions = {
