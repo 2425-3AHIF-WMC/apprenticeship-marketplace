@@ -117,10 +117,7 @@ const Login = () => {
                 return;
             }
 
-            const data = await res.json();
 
-            localStorage.setItem("companyAccessToken", data.accessToken);
-            navigate('/company/dashboard');
         } catch (err) {
             console.log(err);
         } finally {

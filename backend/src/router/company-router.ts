@@ -158,7 +158,6 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
     try {
         const service = new CompanyService(unit);
         const emailExists: ICompany | null = await service.getByEmail(email);
-        console.log(emailExists);
         if (emailExists) {
             res.status(409).json({error: "E-Mail is already in Use"});
             return;
@@ -178,28 +177,12 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
         const company : ICompanyPayload = insertResult.rows[0];
-
-        const payload = {
-            company_id: company.company_id,
-            admin_verified: company.admin_verified,
-            email_verified: company.email_verified,
-        };
-
-        const newAccessToken = generateAccessToken(payload);
-        const newRefreshToken = generateRefreshToken(payload);
-
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false, // TODO: change at production to true
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-            .header('Authorization', `Bearer ${newAccessToken}`)
-            .status(201)
-            .json({accessToken: newAccessToken});
+        await service.sendVerificationMail(email, company.company_id);
+        console.log("Email sent")
+        res.status(StatusCodes.OK)
     } catch (err) {
         console.log(err);
-        res.status(500).json({Error: err})
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({Error: err})
 
     }
 });
@@ -518,3 +501,65 @@ function isValidCompanyNumber(number: string): boolean {
 
     return !isNaN(nums) && isNaN(letter);
 }
+
+companyRouter.get("/verify_email/:token", async (req: Request, res: Response) => {
+    const token = req.params.token;
+
+
+    jwt.verify(token, process.env.JWT_EMAIL_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            console.log(err);
+            return res.status(StatusCodes.UNAUTHORIZED).send("Email verification failed.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+
+            if (await service.companyExists(company_id)) {
+                const success = await service.verifyEmail(company_id);
+
+                if (success) {
+                    await unit.complete(true);
+                    const payload = {
+                        company_id: decoded.company_id,
+                        admin_verified: decoded.admin_verified,
+                        email_verified: true,
+                    };
+
+                    const newAccessToken = generateAccessToken(payload);
+                    const newRefreshToken = generateRefreshToken(payload);
+
+                    res.cookie('refreshToken', newRefreshToken, {
+                        httpOnly: true,
+                        sameSite: 'strict',
+                        secure: false, // TODO: change at production to true
+                        maxAge: 7 * 24 * 60 * 60 * 1000
+                    })
+                        .header('Authorization', `Bearer ${newAccessToken}`)
+                        .status(StatusCodes.OK)
+                        .json({accessToken: newAccessToken});
+                } else {
+                    await unit.complete(false);
+                    res.status(StatusCodes.CONFLICT).send("E-Mail Konnte nicht geupadetet werden");
+                    return;
+                }
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
+                return;
+            }
+
+        } catch (e) {
+            console.log(e);
+            return res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});
