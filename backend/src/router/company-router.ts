@@ -93,6 +93,11 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
 
             const isMatch: boolean = await argon2.verify(company.password, password);
             if (isMatch) {
+                const emailVerified = Boolean(company.email_verified)
+                if(!emailVerified) {
+                    res.status(StatusCodes.FORBIDDEN).json("Email not verified");
+                    return;
+                }
                 // Acesstoken & Refreshtoken erstellen
                 const payload = {
                     company_id: company.company_id,
@@ -178,8 +183,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
 
         const company : ICompanyPayload = insertResult.rows[0];
         await service.sendVerificationMail(email, company.company_id);
-        console.log("Email sent")
-        res.status(StatusCodes.OK)
+        res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
     } catch (err) {
         console.log(err);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({Error: err})

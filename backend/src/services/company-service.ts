@@ -205,13 +205,13 @@ export class CompanyService extends ServiceBase {
                 company_id: company_id,
                 admin_verified: false,
                 email_verified: false
-            }, process.env.JWT_EMAIL_SECRET!, { expiresIn: '10m' }
+            }, process.env.JWT_EMAIL_SECRET!, { expiresIn: '7d' }
         );
 
         const mailConfigurations = {
             from: '"Apprenticeship Marketplace" <sample@mail.mail>',
             to: email,
-            subject: 'Email Bestätitgung',
+            subject: 'Email Bestätigung',
 
 
             html: `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify_email/${token}">hier</a> klicken.</p>`
