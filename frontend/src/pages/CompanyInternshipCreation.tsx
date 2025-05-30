@@ -59,6 +59,20 @@ const salarySchema = z.discriminatedUnion('salaryType', [
     }),
 ]);
 
+const descriptionSchema = z.discriminatedUnion('descriptionType', [
+    z.object({
+        descriptionType: z.literal('editor'),
+        editorContent: z.string({ required_error: "Die Beschreibung muss mindestens 30 Zeichen enthalten" }).min(30, {message: "Die Beschreibung muss mindestens 30 Zeichen enthalten"}),
+        pdfFile: z.undefined()
+    }),
+    z.object({
+        descriptionType: z.literal('pdf'),
+        editorContent: z.optional(z.string()),
+        pdfFile: z.instanceof(File, {message: "Eine PDF-Datei muss hochgeladen werden"})
+    })
+]);
+
+
 const formSchema = z
     .object({
         title: z.string().min(1, "Ein Titel muss vorhanden sein"),
@@ -69,13 +83,17 @@ const formSchema = z
         departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
         deadline: z.date({ message: "Eine Bewerbungsfrist muss ausgewählt sein" }),
         site: z.string({ required_error: "Bitte wählen Sie einen Standort aus." }),
+        salaryType: z.enum(['salary', 'not_specified']),
+        salary: z.number().nullable().optional(),
+        salaryReason: z.string().optional(),
         descriptionType: z.enum(['editor', 'pdf']),
-        pdfFile: z.optional(z.instanceof(File))
+        pdfFile: z.optional(z.instanceof(File)),
+        editorContent: z.string().optional()
     })
-    .and(salarySchema);
+    .and(salarySchema)
+    .and(descriptionSchema);
 
 const CompanyInternshipCreation = () => {
-    const [description, setDescription] = useState('');
     const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description:string }>>([]);
     const [durations, setDurations] = useState<Array<{ internship_duration_id: number, description: string }>>([]);
     const [sites, setSites] = useState<Array<{location_id: number, address: string, name: string, company_id : number, plz : number }>>([]);
@@ -131,22 +149,8 @@ const CompanyInternshipCreation = () => {
     }, [companyId]);
 
 
-    const form = useForm<{
-        title: string;
-        internshipDescription: string;
-        minYear: string;
-        workType: string;
-        departments: string[];
-        deadline: Date;
-        salary: number;
-        salaryType: 'salary' | 'not_specified',
-        salaryReason: string,
-        duration : string,
-        site : string,
-        descriptionType : 'editor' | 'pdf',
-        pdfFile : File | undefined,
-
-    }>({
+    const form = useForm<z.infer<typeof formSchema>>
+    ({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: '',
@@ -156,6 +160,7 @@ const CompanyInternshipCreation = () => {
             salaryType: 'salary',
             duration: undefined,
             workType: undefined,
+            descriptionType: 'pdf'
         }
     });
 
@@ -411,7 +416,7 @@ const CompanyInternshipCreation = () => {
                                                                                placeholder="z.B. 800" {...field}
                                                                                onChange={(e) => field.onChange(e.target.valueAsNumber)
                                                                         }
-                                                                               value={Number.isNaN(field.value) || field.value === undefined ? "" : field.value}/>
+                                                                               value={Number.isNaN(field.value) || field.value === null || field.value === undefined ? "" : field.value}/>
                                                                     </FormControl>
                                                                     <FormMessage/>
                                                                 </FormItem>
@@ -507,7 +512,6 @@ const CompanyInternshipCreation = () => {
                                                     onValueChange={field.onChange}
                                                     value={field.value}
                                                     className="flex space-x-4"
-                                                    defaultValue="pdf"
                                                 >
                                                     <div className="flex items-center space-x-2">
                                                         <RadioGroupItem value="pdf" id="pdf" />
@@ -524,18 +528,27 @@ const CompanyInternshipCreation = () => {
                                     />
 
                                     {form.watch('descriptionType') === 'editor' ? (
-                                        <div className="col-span-1 md:col-span-2 w-full">
-                                            <FormLabel>Praktikumsausschreibung</FormLabel>
-                                            <div className="w-full">
-                                            <ReactQuill
-                                                    value={description}
-                                                    onChange={setDescription}
-                                                    modules={modules}
-                                                    formats={formats}
-                                                    className="bg-primary-foreground text-black"
-                                                />
-                                            </div>
-                                        </div>
+                                        <FormField
+                                            control={form.control}
+                                            name="editorContent"
+                                            render={({field}) => (
+                                                <FormItem className="col-span-1 md:col-span-2 w-full">
+                                                    <FormLabel>Beschreibung</FormLabel>
+                                                    <FormControl>
+                                                        <div className="w-full">
+                                                            <ReactQuill
+                                                                value={field.value}
+                                                                onChange={(content) => {field.onChange(content);}}
+                                                                modules={modules}
+                                                                formats={formats}
+                                                                className="bg-primary-foreground text-black"
+                                                            />
+                                                        </div>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     ) : (
                                         <FormField
                                             control={form.control}
