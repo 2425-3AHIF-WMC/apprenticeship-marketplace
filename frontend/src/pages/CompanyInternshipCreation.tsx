@@ -69,6 +69,8 @@ const formSchema = z
         departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
         deadline: z.date({ message: "Eine Bewerbungsfrist muss ausgewählt sein" }),
         site: z.string({ required_error: "Bitte wählen Sie einen Standort aus." }),
+        descriptionType: z.enum(['editor', 'pdf']),
+        pdfFile: z.optional(z.instanceof(File))
     })
     .and(salarySchema);
 
@@ -141,6 +143,8 @@ const CompanyInternshipCreation = () => {
         salaryReason: string,
         duration : string,
         site : string,
+        descriptionType : 'editor' | 'pdf',
+        pdfFile : File | undefined,
 
     }>({
         resolver: zodResolver(formSchema),
@@ -493,25 +497,72 @@ const CompanyInternshipCreation = () => {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="flex justify-end">
-                                        <Button type="submit" className="w-full md:w-auto">
+                                    <FormField
+                                        control={form.control}
+                                        name="descriptionType"
+                                        render={({ field }) => (
+                                            <FormItem className="col-span-1 md:col-span-2 w-full">
+                                                <FormLabel>Praktikumsausschreibung</FormLabel>
+                                                <RadioGroup
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                    className="flex space-x-4"
+                                                    defaultValue="pdf"
+                                                >
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="pdf" id="pdf" />
+                                                        <FormLabel htmlFor="pdf">Eigenes PDF hochladen</FormLabel>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="editor" id="editor" />
+                                                        <FormLabel htmlFor="editor">PDF erstellen</FormLabel>
+                                                    </div>
+                                                </RadioGroup>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {form.watch('descriptionType') === 'editor' ? (
+                                        <div className="col-span-1 md:col-span-2 w-full">
+                                            <FormLabel>Praktikumsausschreibung</FormLabel>
+                                            <div className="w-full">
+                                            <ReactQuill
+                                                    value={description}
+                                                    onChange={setDescription}
+                                                    modules={modules}
+                                                    formats={formats}
+                                                    className="bg-primary-foreground text-black"
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <FormField
+                                            control={form.control}
+                                            name="pdfFile"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>PDF Datei</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="file"
+                                                            accept=".pdf"
+                                                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )}
+                                    <div className="col-span-1 md:col-span-2 w-full mt-4 flex justify-center">
+                                        <Button type="submit" className="md:w-auto">
                                             Praktikum erstellen
                                         </Button>
                                     </div>
+
                                 </form>
                             </Form>
-
-                            <div className="flex items-center gap-2 mt-4 md:mt-0">
-                                <div className="relative flex-1">
-                                    <ReactQuill
-                                        value={description}
-                                        onChange={setDescription}
-                                        modules={modules}
-                                        formats={formats}
-                                        className="bg-primary-foreground text-black"
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </FadeIn>
                 </main>
