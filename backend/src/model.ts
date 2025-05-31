@@ -53,6 +53,7 @@ export interface IInternshipDetailsUIProps {
     salary: string;
     internship_link: string;
     company_id: string;
+    company_info: string;
     pdf: string;
 }
 

@@ -51,11 +51,11 @@ export class InternshipService extends ServiceBase{
 
     public async getById(id: number): Promise<IInternshipDetailsUIProps>{
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address  as location,
-                                                                         w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added",
+                                                                         w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added", i.description as "pdf",
                                                                          (select count(*)
                                                                           from viewed_internships vi
                                                                           where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
-                                                                         c.website as "company_link", i.salary, i.internship_application_link as "internship_link", c.company_id, c.company_info as "pdf"
+                                                                         c.website as "company_link", i.salary, i.internship_application_link as "internship_link", c.company_id, c.company_info
                                                                   from internship i
                                                                            join site s on (i.location_id = s.location_id)
                                                                            join city ci on (s.plz = ci.plz)
