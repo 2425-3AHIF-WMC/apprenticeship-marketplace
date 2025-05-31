@@ -76,4 +76,10 @@ export interface CompanyUIProps {
     company_logo: string;
     company_number: string;
     internships: number[];
-} 
+}
+
+export interface ICompanyPayload {
+    company_id: number,
+    email_verified: boolean,
+    admin_verified: boolean
+}

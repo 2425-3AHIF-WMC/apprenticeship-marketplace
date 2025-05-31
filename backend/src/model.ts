@@ -135,6 +135,19 @@ export interface ISite {
     plz: number
 }
 
+// Worktype Interface
+export interface IWorktype {
+    worktype_id: number,
+    name: string,
+    description: string,
+}
+
+// InternshipDuration Interface
+export interface IInternShipDuration {
+    internship_duration_id : number,
+    description : string
+}
+
 // Enums --------------------------------------------------------------------------------------------------------------
 
 export enum PersonType {
