@@ -7,7 +7,7 @@ services:
       - florasCoolesNetzwerk
     restart: always
     volumes:
-      - bilder:/app/pictures
+      - ./bilder:/app/pictures
 
   postgres:
     image: postgres:17
