@@ -1,6 +1,6 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
-import {IStudent, PersonType} from "../model.js";
+import {IInternshipUIProps, IStudent, PersonType} from "../model.js";
 
 export class StudentService extends ServiceBase{
     constructor(unit: Unit) {
@@ -24,6 +24,10 @@ export class StudentService extends ServiceBase{
         );
 
         return stmt.rows[0].array_agg ?? [];
+    }
+
+    public async getAllDetailedFavourites(id: number): Promise<IInternshipUIProps>{
+
     }
 
     public async insert(username: string): Promise<boolean> {
