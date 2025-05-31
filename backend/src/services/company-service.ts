@@ -220,4 +220,12 @@ export class CompanyService extends ServiceBase {
             console.log(info);
         });
     }
+
+    public async resetPassword(company : ICompany, new_password: string): Promise<boolean> {
+        const stmt = await this.unit.prepare(`update company
+                                              set password=$1
+                                              where company_id = $2`, [new_password, company.company_id]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
 }

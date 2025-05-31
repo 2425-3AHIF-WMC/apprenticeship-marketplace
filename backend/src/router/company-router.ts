@@ -575,3 +575,61 @@ companyRouter.get("/verify_email/:token", async (req: Request, res: Response) =>
         }
     });
 });
+
+companyRouter.get("/reset-password", async (req: Request, res: Response) => {
+    const { oldpassword, newpassword } = req.params;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({error: "No token"});
+        return;
+    }
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, process.env.JWT_ACCESS_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            console.log(err);
+            return res.status(StatusCodes.UNAUTHORIZED).send("Password Reset failed.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+
+            if (await service.companyExists(company_id)) {
+                const company: ICompany | null = await service.getById(company_id);
+                if (company) {
+                    const isMatch: boolean = await argon2.verify(company.password, oldpassword);
+                    if (isMatch) {
+                        const success = await service.resetPassword(company, newpassword);
+                        if (success) {
+                            await unit.complete(true);
+                            res.status(StatusCodes.OK).send(`company with id ${company_id} was deleted`);
+                        } else {
+                            await unit.complete(false);
+                            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                        }
+                    }
+                    } else {
+                        res.sendStatus(StatusCodes.UNAUTHORIZED);
+                    }
+
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
+                return;
+            }
+
+        } catch (e) {
+            console.log(e);
+            return res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});
