@@ -19,6 +19,7 @@ import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
 import {Pool} from "pg";
+
 dotenv.config();
 
 const pool = new Pool({
@@ -94,7 +95,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
             const isMatch: boolean = await argon2.verify(company.password, password);
             if (isMatch) {
                 const emailVerified = Boolean(company.email_verified)
-                if(!emailVerified) {
+                if (!emailVerified) {
                     res.status(StatusCodes.FORBIDDEN).json("Email not verified");
                     return;
                 }
@@ -175,18 +176,19 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         });
 
         const timestampInSeconds = Date.now() / 1000;
-        const insertResult  = await  pool.query(`
-            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
-            RETURNING company_id, admin_verified, email_verified`,
+        const insertResult = await pool.query(`
+                    INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified,
+                                        admin_verified, company_registration_timestamp)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9))
+                    RETURNING company_id, admin_verified, email_verified`,
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
-        const company : ICompanyPayload = insertResult.rows[0];
+        const company: ICompanyPayload = insertResult.rows[0];
         const payload = {
-                company_id: company.company_id,
-                admin_verified: false,
-                email_verified: false
-            }
+            company_id: company.company_id,
+            admin_verified: false,
+            email_verified: false
+        }
         const token = generateEmailToken(payload);
 
         await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
@@ -576,8 +578,8 @@ companyRouter.get("/verify_email/:token", async (req: Request, res: Response) =>
     });
 });
 
-companyRouter.get("/reset-password", async (req: Request, res: Response) => {
-    const { oldpassword, newpassword } = req.params;
+companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
+    const {oldpassword, newpassword} = req.body;
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -593,6 +595,7 @@ companyRouter.get("/reset-password", async (req: Request, res: Response) => {
         }
 
         const company_id = parseInt(decoded.company_id);
+        console.log(company_id)
         if (!isValidId(company_id)) {
             return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
         }
@@ -601,25 +604,30 @@ companyRouter.get("/reset-password", async (req: Request, res: Response) => {
 
         try {
             const service = new CompanyService(unit);
+            const company: ICompany | null = await service.getById(company_id);
 
-            if (await service.companyExists(company_id)) {
-                const company: ICompany | null = await service.getById(company_id);
-                if (company) {
-                    const isMatch: boolean = await argon2.verify(company.password, oldpassword);
-                    if (isMatch) {
-                        const success = await service.resetPassword(company, newpassword);
-                        if (success) {
-                            await unit.complete(true);
-                            res.status(StatusCodes.OK).send(`company with id ${company_id} was deleted`);
-                        } else {
-                            await unit.complete(false);
-                            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
-                        }
-                    }
+            if (company) {
+                const isMatch: boolean = await argon2.verify(company.password, oldpassword);
+                if (isMatch) {
+                    const hashedPassword = await argon2.hash(newpassword, {
+                        algorithm: argon2.Algorithm.Argon2id,
+                        memoryCost: 2 ** 16,
+                        timeCost: 3,
+                        parallelism: 2,
+                    });
+
+                    const success = await service.resetPassword(company, hashedPassword);
+                    if (success) {
+                        await unit.complete(true);
+                        res.status(StatusCodes.OK).send(`Password successfully resetted`);
                     } else {
-                        res.sendStatus(StatusCodes.UNAUTHORIZED);
+                        await unit.complete(false);
+                        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
                     }
-
+                } else {
+                    res.status(StatusCodes.UNAUTHORIZED).send("Falsches Passwort.");
+                    return;
+                }
             } else {
                 res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
                 return;
