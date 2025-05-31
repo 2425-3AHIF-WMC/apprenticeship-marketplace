@@ -7,6 +7,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import {favouriteRouter} from "./router/favourite-router.js";
+import { mediaRouter } from "./router/media-router.js";
 
 const app = express();
 
@@ -24,6 +25,8 @@ app.use("/api/student", studentRouter);
 app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/favourite", favouriteRouter);
+app.use("/api/media", mediaRouter);
+
 
 app.listen(5000, async () => {
     const unit: Unit = await Unit.create(false);
