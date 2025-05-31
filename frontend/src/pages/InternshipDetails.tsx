@@ -113,7 +113,7 @@ const InternshipDescription = () => {
                     {internship.company_logo ? (
                       <div className="h-16 w-16 mr-4 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
                         <img
-                          src={internship.company_logo}
+                          src={`http://localhost:5000/api/media/${internship.company_logo}`}
                           alt={`${internship.company_name} Logo`}
                           className="h-full w-full object-contain"
                         />
@@ -159,7 +159,7 @@ const InternshipDescription = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               <div className="lg:col-span-2 overflow-x-auto ">
-                <Document file={internship.pdf}>
+                <Document file={`http://localhost:5000/api/media/${internship.pdf}`}>
                   <Page pageNumber={1} className="w-full h-auto" scale={1.2} />
                 </Document>
               </div>
@@ -234,7 +234,7 @@ const InternshipDescription = () => {
                         {internship.company_logo ? (
                           <div className="h-12 w-12 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
                             <img
-                              src={internship.company_logo}
+                              src={`http://localhost:5000/api/media/${internship.company_logo}`}
                               alt={`${internship.company_name} Logo`}
                               className="h-full w-full object-contain"
                             />
@@ -244,14 +244,14 @@ const InternshipDescription = () => {
                             <Building className="h-6 w-6" />
                           </div>
                         )}
-                        <div>
+                        <div className="text-left">
                           <h3 className="font-semibold">{internship.company_name}</h3>
                           <p className="text-sm text-muted-foreground">{internship.location}</p>
                         </div>
                       </div>
 
                       <p className="text-sm text-muted-foreground">
-                        {internship.company_name} Unternehmen in Leonding, Linz mit dem Fokus auf IT-Produkte.
+                        {internship.company_info}
                       </p>
 
                       <Button variant="outline" className="w-full">

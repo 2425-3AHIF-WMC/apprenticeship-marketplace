@@ -32,7 +32,7 @@ const InternshipCard = ({ internship, className }: InternshipCardProps) => {
             {internship.company_logo ? <div
                 className="h-16 min-w-24 max-w-24 mr-3 rounded-md overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center dark:bg-gray-200 dark:border-gray-50 ">
                 <img
-                    src={internship.company_logo}
+                    src={`http://localhost:5000/api/media/${internship.company_logo}`}
                     alt={`${internship.company_name} Logo`}
                     className="h-full w-full object-contain"
                 />

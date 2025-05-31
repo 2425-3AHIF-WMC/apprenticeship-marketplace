@@ -75,7 +75,7 @@ const CompanyDetails = () => {
                 {company.company_logo ? (
                   <div className="h-20 w-20 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
                     <img
-                      src={company.company_logo}
+                      src={`http://localhost:5000/api/media/${company.company_logo}`}
                       alt={`${company.name} Logo`}
                       className="h-full w-full object-contain"
                     />
