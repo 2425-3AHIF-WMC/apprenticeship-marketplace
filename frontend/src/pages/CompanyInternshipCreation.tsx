@@ -167,7 +167,36 @@ const CompanyInternshipCreation = () => {
     if(loading) {
         return null;
     }
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            const resp = await fetch('http://localhost:5000/api/internship/change', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    clicks: 20,
+                    title: values.title,
+                    description: values.internshipDescription,
+                    min_year: values.minYear,
+                    internship_creation_timestamp: new Date().toISOString(),
+                    salary: values.salary || 0,
+                    application_end: values.deadline,
+                    location_id: values.site,
+                    worktype_id: values.workType,
+                    internship_duration_id: values.duration,
+                    internship_application_link: "sample"
+                })
+            });
+            if (!resp.ok) {
+                console.log('Fehler beim Speichern');
+            } else {
+                console.log('Erfolgreich gespeichert');
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
         console.log(values);
     }
 
