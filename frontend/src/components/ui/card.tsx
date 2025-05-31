@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import {cn} from "@/lib/utils"
+import {cn} from "@/utils/utils"
 
 const Card = React.forwardRef<
     HTMLDivElement,
@@ -48,8 +48,8 @@ const CardDescription = React.forwardRef<
     HTMLParagraphElement,
     React.HTMLAttributes<HTMLParagraphElement>
 >(({className, ...props}, ref) => (
-    <p
-        ref={ref}
+    <div
+            ref={ref}
         className={cn("text-sm text-muted-foreground", className)}
         {...props}
     />

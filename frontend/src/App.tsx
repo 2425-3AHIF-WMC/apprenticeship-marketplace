@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound"
 import Internships from "@/pages/Internships";
+import InternshipDescription from "./pages/InternshipDetails";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StudentDashboard from "@/pages/StudentDashboard";
@@ -16,6 +17,9 @@ import AdminCompanies from "@/pages/AdminCompanies";
 import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
 import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 import AdminToVerify from "@/pages/AdminToVerify";
+import CompanyInternshipCreation from "@/pages/CompanyInternshipCreation.tsx";
+import CompanyDetails from "@/pages/CompanyDetails";
+import VerifyEmail from "@/pages/VerifyEmail.tsx";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -45,6 +49,11 @@ function App() {
             <Route path="/internships" element={
                 <ProtectedRoute>
                     <Internships />
+                </ProtectedRoute>
+            } />
+            <Route path="/internships/:id" element={
+                <ProtectedRoute>
+                    <InternshipDescription />
                 </ProtectedRoute>
             } />
             <Route path="/login" element={<Login />} />
@@ -96,6 +105,14 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+            <Route
+                path="/companies/:id"
+                element={
+                    <ProtectedRoute>
+                        <CompanyDetails />
+                    </ProtectedRoute>
+                }
+            />
 
             <Route
                 path="/company/dashboard"
@@ -105,8 +122,18 @@ function App() {
                     </ProtectedCompanyRoute>
                 }
             />
+            <Route
+                path="/company/internship/create"
+                element={
+                <ProtectedCompanyRoute>
+                    <CompanyInternshipCreation/>
+                </ProtectedCompanyRoute>
+                }
+            />
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/verify_email/:token" element={<VerifyEmail/>} />
+
         </Routes>
     )
 }

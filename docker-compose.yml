@@ -1,7 +1,13 @@
 services:
+
   postgres:
     image: postgres:17
-    environment:
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    environment: 
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: cruddb
@@ -24,9 +30,13 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - postgres
+        postgres:
+          condition: service_healthy
+          restart: true
     networks:
       - florasCoolesNetzwerk
+    volumes:
+      - ./media:/app/media
 
   frontend:
     build:
@@ -40,6 +50,7 @@ services:
 
 volumes:
   pgdata:
+  media:
 
 networks:
   florasCoolesNetzwerk:

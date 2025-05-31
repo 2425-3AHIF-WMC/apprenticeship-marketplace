@@ -1,149 +1,17 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useLocation} from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import InternshipCard, {InternshipProps} from '@/components/InternshipCard';
+import InternshipCard from '@/components/InternshipCard';
 import InternshipFilter from '@/components/InternshipFilter';
 import {Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
-
-const ALL_INTERNSHIPS: InternshipProps[] = [
-    {
-        id: '1',
-        title: 'Software-Entwicklungs Praktikum',
-        company: 'CarlaCo Enterprises',
-        location: 'Wien',
-        duration: 'variabel',
-        deadline: '2025-05-15',
-        added: '2025-04-02',
-        clicks: 132,
-        workMode: 'On-site',
-        logo: '/assets/company-logos/CarlaCoEnterprises_Logo.png',
-        category: ['Informatik'],
-        schoolYear: '3. Schulstufe',
-        companyLink: 'https://random-company.com/carlaco'
-    },
-    {
-        id: '2',
-        title: 'Marketing Assistent',
-        company: 'LT-Studios',
-        location: 'Graz',
-        duration: '6 Wochen',
-        deadline: '2025-07-30',
-        added: '2025-03-29',
-        clicks: 89,
-        workMode: 'Hybrid',
-        logo: '/assets/company-logos/LT-Studios_Logo.png',
-        category: ['Medientechnik'],
-        schoolYear: '4. Schulstufe',
-        companyLink: 'https://random-company.com/ltstudios'
-    },
-    {
-        id: '3',
-        title: 'UX/UI Design Praktikum',
-        company: 'ITMedia Solutions',
-        duration: '4 Wochen',
-        deadline: '2025-05-05',
-        added: '2025-04-01',
-        clicks: 205,
-        location: "Linz",
-        workMode: 'Remote',
-        logo: '/assets/company-logos/ITMediaSolutions_Logo.png',
-        category: ['Medientechnik', 'Informatik', 'Medizintechnik', 'Elektronik'],
-        schoolYear: '2. Schulstufe',
-        companyLink: 'https://random-company.com/itmediasolutions'
-    },
-    {
-        id: '4',
-        title: 'Elektronik-Entwickler Praktikum',
-        company: 'Elektronic Design',
-        location: 'Linz',
-        duration: '8 Wochen',
-        deadline: '2025-05-20',
-        added: '2025-03-27',
-        clicks: 97,
-        workMode: 'On-site',
-        logo: '/assets/company-logos/ElektronicDesign_Logo.png',
-        category: ['Elektronik'],
-        schoolYear: '3. Schulstufe',
-        companyLink: 'https://random-company.com/elektronicdesign'
-    },
-    {
-        id: '5',
-        title: 'Datenwissenschafts Praktikum',
-        company: 'MeliCorp',
-        location: 'Salzburg',
-        duration: '6 Wochen',
-        deadline: '2025-04-25',
-        added: '2025-04-03',
-        clicks: 178,
-        workMode: 'Hybrid',
-        logo: '/assets/company-logos/MeliCorp_Logo.png',
-        category: ['Informatik'],
-        schoolYear: '4. Schulstufe',
-        companyLink: 'https://random-company.com/melicorp'
-    },
-    {
-        id: '6',
-        title: 'Medizintechnik Praktikum',
-        company: 'TechMed Innovations',
-        location: 'Innsbruck',
-        duration: 'variabel',
-        deadline: '2025-05-10',
-        added: '2025-04-01',
-        clicks: 122,
-        workMode: 'On-site',
-        logo: '/assets/company-logos/TechMed_Innovations_Logo.png',
-        category: ['Medientechnik', 'Informatik', 'Medizintechnik', 'Elektronik'],
-        schoolYear: '4. Schulstufe',
-        companyLink: 'https://random-company.com/techmed'
-    },
-    {
-        id: '7',
-        title: 'Projekt Management Praktikum',
-        company: 'Nexus Solutions',
-        location: 'Wien',
-        duration: '4 Wochen',
-        deadline: '2025-05-22',
-        added: '2025-04-06',
-        clicks: 145,
-        workMode: 'Hybrid',
-        logo: '/assets/company-logos/NexusSolutions_Logo.png',
-        category: ['Informatik'],
-        schoolYear: '3. Schulstufe',
-        companyLink: 'https://random-company.com/nexus'
-    },
-    {
-        id: '8',
-        title: 'Frontend-Entwicklung Praktikum',
-        company: 'Elysee Industries',
-        duration: '4 Wochen',
-        deadline: '2025-05-12',
-        added: '2025-04-04',
-        location: "Linz",
-        clicks: 230,
-        workMode: 'Remote',
-        logo: '/assets/company-logos/ElyseeIndustries_Logo.png',
-        category: ['Informatik'],
-        schoolYear: '2. Schulstufe',
-        companyLink: 'https://random-company.com/elysee'
-    },
-    {
-        id: '9',
-        title: 'Grafikdesign Praktikum',
-        company: 'LuminaTech',
-        location: 'Graz',
-        duration: '6 Wochen',
-        deadline: '2025-04-28',
-        added: '2025-03-30',
-        clicks: 101,
-        workMode: 'On-site',
-        logo: '/assets/company-logos/LuminaTech_Logo.png',
-        category: ['Medientechnik'],
-        schoolYear: '3. Schulstufe',
-        companyLink: 'https://random-company.com/lumina'
-    }
-];
+import { InternshipUIProps } from "@/utils/interfaces";
+import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import { getYearNumber } from '@/utils/filterUtils';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorIndicator from '@/components/ErrorIndicator';
+import { useAuth } from '@/context/AuthContext';
 
 const Internships = () => {
     const location = useLocation();
@@ -157,6 +25,63 @@ const Internships = () => {
     const [selectedSchoolYear, setSelectedSchoolYear] = useState('Alle Schulstufen');
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [sortBy, setSortBy] = useState('Nichts');
+    const [internships, setInternships] = useState<InternshipUIProps[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { studentId } = useAuth();
+    const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
+
+    useEffect(() => {
+        const fetchInternships = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const res = await fetch('http://localhost:5000/api/internship/current');
+                if (!res.ok) throw new Error('Fehler beim Laden der Praktika');
+                const data = await res.json();
+                setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
+            } catch (err: any) {
+                setError(err.message || 'Unbekannter Fehler');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchInternships();
+    }, []);
+
+    useEffect(() => {
+        const fetchFavourites = async () => {
+            if (!studentId) return;
+            const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+            if (!res.ok) return;
+            const favIds = await res.json();
+            console.log(favIds);
+            setFavouriteIds(favIds);
+        };
+        fetchFavourites();
+    }, [studentId]);
+
+    const handleToggleFavourite = async (internshipId: number) => {
+        if (!studentId) return;
+        const isFav = favouriteIds.includes(internshipId);
+        if (isFav) {
+            // Remove favourite
+            await fetch('http://localhost:5000/api/favourite/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+            });
+            setFavouriteIds((prev) => prev.filter((id) => id !== internshipId));
+        } else {
+            // Add favourite
+            await fetch('http://localhost:5000/api/favourite/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+            });
+            setFavouriteIds((prev) => [...prev, internshipId]);
+        }
+    };
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -173,49 +98,53 @@ const Internships = () => {
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
 
-    const filteredInternships = ALL_INTERNSHIPS.filter((internship) => {
-        const deadlineDate = new Date(internship.deadline);
+    // Pre-filter out expired internships
+    const validInternships = internships.filter((internship) => {
+        const deadlineDate = new Date(internship.application_end);
         const today = new Date();
-
-        if (isNaN(deadlineDate.getTime()) || deadlineDate < today) return false;
-
-        const matchesSearch = searchTerm === '' ||
-            internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            internship.company.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesCategory =
-            selectedCategory === 'Alle' ||
-            (Array.isArray(internship.category) && internship.category.includes(selectedCategory));
-
-        const matchesWorkMode =
-            selectedWorkMode === 'Alle' || internship.workMode === selectedWorkMode;
-
-        const matchesDuration =
-            selectedDuration === 'Alle' || internship.duration === selectedDuration;
-
-        const matchesSchoolYear =
-            selectedSchoolYear === 'Alle Schulstufen' || internship.schoolYear === selectedSchoolYear;
-
-        return (
-            matchesSearch &&
-            matchesCategory &&
-            matchesWorkMode &&
-            matchesDuration &&
-            matchesSchoolYear
-        );
-    }).sort((a, b) => {
-        if (sortBy === 'Bewerbungsfrist') {
-            return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-        }
-        if (sortBy === 'Neueste') {
-            return new Date(b.added).getTime() - new Date(a.added).getTime();
-        }
-        if (sortBy === 'Beliebteste') {
-            return b.clicks - a.clicks;
-        }
-        return 0;
+        return !isNaN(deadlineDate.getTime()) && deadlineDate >= today;
     });
 
+    // Use shared filter utility
+    const filterOptions: InternshipFilterOptions = {
+        searchTerm,
+        selectedCategory,
+        selectedWorkMode,
+        selectedDuration,
+        selectedSchoolYear,
+    };
+    let filteredInternships = filterInternships(validInternships, filterOptions);
+
+    // Default: sort by school year if no other sort is selected
+    if (sortBy === 'Nichts' && selectedSchoolYear !== 'Alle Schulstufen') {
+        const selectedYear = getYearNumber(selectedSchoolYear);
+        if (selectedYear !== null) {
+            filteredInternships = filteredInternships.sort((a, b) => {
+                const yearA = getYearNumber(a.min_year) ?? 0;
+                const yearB = getYearNumber(b.min_year) ?? 0;
+                // First, internships for the selected year, then lower years
+                if (yearA === selectedYear && yearB !== selectedYear) return -1;
+                if (yearB === selectedYear && yearA !== selectedYear) return 1;
+                // Then by year descending (3, 2, 1)
+                return yearB - yearA;
+            });
+        }
+    } else {
+        // Sortierfunktion für das gewählte Kriterium
+        const sortFn = (a: InternshipUIProps, b: InternshipUIProps) => {
+            if (sortBy === 'Bewerbungsfrist') {
+                return new Date(a.application_end).getTime() - new Date(b.application_end).getTime();
+            }
+            if (sortBy === 'Neueste') {
+                return new Date(b.added).getTime() - new Date(a.added).getTime();
+            }
+            if (sortBy === 'Beliebteste') {
+                return b.views - a.views;
+            }
+            return 0;
+        };
+        filteredInternships = filteredInternships.sort(sortFn);
+    }
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -276,12 +205,19 @@ const Internships = () => {
 
                             </div>
                         </div>
-
-                        {filteredInternships.length > 0 ? (
+                        {isLoading ? (
+                            <LoadingIndicator message="Lade Praktika..." />
+                        ) : error ? (
+                            <ErrorIndicator message="Fehler beim Laden der Praktika" error={error} />
+                        ) : filteredInternships.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {filteredInternships.map((internship, index) => (
                                     <FadeIn key={internship.id} delay={index * 50}>
-                                        <InternshipCard internship={internship}/>
+                                        <InternshipCard 
+                                            internship={internship}
+                                            isFavourite={favouriteIds.includes(Number(internship.id))}
+                                            onToggleFavourite={handleToggleFavourite}
+                                        />
                                     </FadeIn>
                                 ))}
                             </div>

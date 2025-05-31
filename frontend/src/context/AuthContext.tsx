@@ -6,6 +6,7 @@ interface AuthContextType {
     studentToken: string | null;
     studentUsername: string | null;
     studentName: string | null;
+    studentId: number | null;
     login: () => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -18,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [studentUsername, setStudentUsername] = useState<string | null>(null);
     const [studentName, setStudentName] = useState<string | null>(null);
     const [studentInitialized, setStudentInitialized] = useState(false);
+    const [studentId, setStudentId] = useState<number | null>(null);
 
     useEffect(() => {
         const initKeycloak = async () => {
@@ -44,7 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     console.log('Student name from token:', name);
                     console.log(keycloak.tokenParsed);
                     setStudentName(name);
-                    
+                    setStudentId(2);
+
                     // Set up token refresh
                     keycloak.onTokenExpired = () => {
                         console.log('Token expired, attempting refresh...');
@@ -60,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                     setStudentToken(null);
                                     setStudentUsername(null);
                                     setStudentName(null);
+                                    setStudentId(null);
                                 }
                             })
                             .catch((error) => {
@@ -68,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 setStudentToken(null);
                                 setStudentUsername(null);
                                 setStudentName(null);
+                                setStudentId(null);
                             });
                     };
                 } else {
@@ -76,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentId(null);
                 }
 
                 setStudentInitialized(true);
@@ -87,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(keycloak.token || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
+                    setStudentId(2);
                 };
 
                 // Set up auth error callback
@@ -96,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentId(null);
                 };
 
                 // Set up auth refresh success callback
@@ -105,6 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(keycloak.token || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
+                    setStudentId(2);
                 };
 
                 // Set up auth refresh error callback
@@ -114,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentId(null);
                 };
 
             } catch (error) {
@@ -142,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setStudentToken(null);
             setStudentUsername(null);
             setStudentName(null);
+            setStudentId(null);
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -158,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             studentToken, 
             studentUsername,
             studentName,
+            studentId,
             login, 
             logout 
         }}>
