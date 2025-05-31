@@ -16,7 +16,7 @@ import {useAuth} from '@/context/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import {Input} from "@/components/ui/input.tsx";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
-import {ShieldAlert} from "lucide-react";
+import {Mail, MailWarning, ShieldAlert} from "lucide-react";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +26,9 @@ const Login = () => {
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEmailExistsDialogOpen, setEmailExistsDialogOpen] = useState(false);
+    const [isVerificationEmailSentDialogOpen, setVerificationEmailSentDialogOpen] = useState(false);
+    const [isVerificationNeededDialogOpen, setVerificationNeededDialogOpen] = useState(false);
     const [nameRegistration, setNameRegistration] = useState('');
     const [companyNumberRegistration, setCompanyNumberRegistration] = useState('');
     const [emailRegistration, setEmailRegistration] = useState('');
@@ -75,6 +78,11 @@ const Login = () => {
                     password: passwordLogin
                 }),
             });
+            console.log(res.status)
+            if(res.status === 403) {
+                setVerificationNeededDialogOpen(true)
+                return;
+            }
             if (!res.ok) {
                 setIsDialogOpen(true);
                 return;
@@ -111,17 +119,18 @@ const Login = () => {
                     password: passwordRegistration
                 })
             });
-            if (!res.ok) {
-                return;
+            if (res.status === 201) {
+                setVerificationEmailSentDialogOpen(true);
+            } else if (!res.ok) {
+                setEmailExistsDialogOpen(true);
             }
-            const data = await res.json();
-
-            localStorage.setItem("companyAccessToken", data.accessToken);
-            navigate('/company/dashboard');
         } catch (err) {
             console.log(err);
+        } finally {
+            setIsLoading(false);
         }
     }
+
 
     const validateCompanyRegistrationFields = () => {
         const newErrors: typeof errors = {};
@@ -327,6 +336,54 @@ const Login = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <Button onClick={() => setIsDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isEmailExistsDialogOpen} onOpenChange={open => setEmailExistsDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <MailWarning className="text-yellow-300 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Registrierung fehlgeschlagen</DialogTitle>
+                            <DialogDescription>
+                                E-Mail ist bereits in Verwendung.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setEmailExistsDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isVerificationEmailSentDialogOpen} onOpenChange={open => setVerificationEmailSentDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <Mail className="text-yellow-300 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Bestätigungsmail</DialogTitle>
+                            <DialogDescription>
+                                Eine Bestätigungsmail wurde an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihre E-Mail-Adresse und klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setVerificationEmailSentDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isVerificationNeededDialogOpen} onOpenChange={open => setVerificationNeededDialogOpen(open)}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <MailWarning className="text-yellow-300 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Bestätigungsmail</DialogTitle>
+                            <DialogDescription>
+                                Eine E-Mail wurde bereits an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihre E-Mail-Adresse und klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setVerificationNeededDialogOpen(false)} className="mt-4 w-full max-w-xs">
                             Verstanden
                         </Button>
                     </div>

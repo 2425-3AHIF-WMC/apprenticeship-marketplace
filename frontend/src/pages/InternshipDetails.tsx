@@ -146,7 +146,7 @@ const InternshipDescription = () => {
                       {copied ? 'Link kopiert!' : 'Teilen'}
                     </Button>
                     <Button asChild>
-                      <Link to={internship.company_link} className="flex items-center gap-2">
+                      <Link to={internship.internship_link} className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
                         Jetzt bewerben
                       </Link>
@@ -253,7 +253,6 @@ const InternshipDescription = () => {
                       <p className="text-sm text-muted-foreground">
                         {internship.company_info}
                       </p>
-
                       <Button variant="outline" className="w-full">
                         <Link to={internship.company_link}>
                           Unternehmenswebsite besuchen

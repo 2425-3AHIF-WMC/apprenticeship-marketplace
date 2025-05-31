@@ -8,8 +8,10 @@ import {Search} from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { InternshipUIProps } from "@/utils/interfaces";
 import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions } from '@/utils/utils';
+import { getYearNumber } from '@/utils/filterUtils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
+import { useAuth } from '@/context/AuthContext';
 
 const Internships = () => {
     const location = useLocation();
@@ -26,6 +28,8 @@ const Internships = () => {
     const [internships, setInternships] = useState<InternshipUIProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { studentId } = useAuth();
+    const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
 
     useEffect(() => {
         const fetchInternships = async () => {
@@ -45,6 +49,40 @@ const Internships = () => {
         fetchInternships();
     }, []);
 
+    useEffect(() => {
+        const fetchFavourites = async () => {
+            if (!studentId) return;
+            const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+            if (!res.ok) return;
+            const favIds = await res.json();
+            console.log(favIds);
+            setFavouriteIds(favIds);
+        };
+        fetchFavourites();
+    }, [studentId]);
+
+    const handleToggleFavourite = async (internshipId: number) => {
+        if (!studentId) return;
+        const isFav = favouriteIds.includes(internshipId);
+        if (isFav) {
+            // Remove favourite
+            await fetch('http://localhost:5000/api/favourite/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+            });
+            setFavouriteIds((prev) => prev.filter((id) => id !== internshipId));
+        } else {
+            // Add favourite
+            await fetch('http://localhost:5000/api/favourite/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+            });
+            setFavouriteIds((prev) => [...prev, internshipId]);
+        }
+    };
+
     const clearFilters = () => {
         setSearchTerm('');
         setSelectedCategory('Alle');
@@ -59,12 +97,6 @@ const Internships = () => {
         selectedWorkMode !== 'Alle' ||
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
-
-    // Helper to extract the year as a number from min_year string
-    const getYearNumber = (minYear: string) => {
-        const match = minYear.match(/(\d)\. Schulstufe/);
-        return match ? parseInt(match[1], 10) : null;
-    };
 
     // Pre-filter out expired internships
     const validInternships = internships.filter((internship) => {
@@ -181,7 +213,11 @@ const Internships = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {filteredInternships.map((internship, index) => (
                                     <FadeIn key={internship.id} delay={index * 50}>
-                                        <InternshipCard internship={internship}/>
+                                        <InternshipCard 
+                                            internship={internship}
+                                            isFavourite={favouriteIds.includes(Number(internship.id))}
+                                            onToggleFavourite={handleToggleFavourite}
+                                        />
                                     </FadeIn>
                                 ))}
                             </div>

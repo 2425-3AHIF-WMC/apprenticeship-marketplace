@@ -1,7 +1,8 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from "../unit.js";
 import {ICompany, ICompanySmall} from "../model.js";
-
+import * as nodemailer from "nodemailer"
+import jwt from "jsonwebtoken";
 export class CompanyService extends ServiceBase {
     constructor(unit: Unit) {
         super(unit);
@@ -189,5 +190,39 @@ export class CompanyService extends ServiceBase {
         const count: number = parseInt(stmt.rows[0].count, 10);
 
         return count === 1;
+    }
+
+    public async sendVerificationMail(email: string, company_id : number): Promise<void> {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.samplehost',
+            port: 587,
+            auth: {
+                user: 'sample@mail.mail',
+                pass: 'sample'
+            }
+        });
+        const token = jwt.sign({
+                company_id: company_id,
+                admin_verified: false,
+                email_verified: false
+            }, process.env.JWT_EMAIL_SECRET!, { expiresIn: '7d' }
+        );
+
+        const mailConfigurations = {
+            from: '"Apprenticeship Marketplace" <sample@mail.mail>',
+            to: email,
+            subject: 'Email Bestätigung',
+
+
+            html: `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify_email/${token}">hier</a> klicken.</p>`
+        };
+
+        transporter.sendMail(mailConfigurations, function(error, info){
+            if (error) {
+                console.log(error);
+            }
+            console.log('Email Sent Successfully');
+            console.log(info);
+        });
     }
 }

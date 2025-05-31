@@ -13,7 +13,7 @@ import {
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "@/ThemeProvider";
 import { useAuth } from '@/context/AuthContext';
-import {checkCompanyAuth} from "@/lib/authUtils.ts";
+import {checkCompanyAuth, logoutCompany} from "@/lib/authUtils.ts";
 
 
 const Navbar = () => {
@@ -71,20 +71,9 @@ const Navbar = () => {
         if (studentIsAuthenticated) {
             await logout();
         } else if (companyIsAuthenticated) {
-            try {
-                const response = await fetch("http://localhost:5000/api/company/logout", {
-                    method: "POST",
-                    credentials: 'include',
-                });
-
-                if (response.ok) {
-                    setCompanyIsAuthenticated(false);
-                    setCompanyName(null);
-                    localStorage.removeItem('companyAccessToken');
-                }
-            } catch (err) {
-                console.error(err);
-            }
+            await logoutCompany();
+            setCompanyIsAuthenticated(false);
+            setCompanyName(null);
         }
     };
 

@@ -1,5 +1,14 @@
 import express, {Request, Response} from "express";
-import {ICompany, ICompanySmall, IInternship, IInternshipId, IInternshipUIProps, isValidId, isValidDate} from "../model.js";
+import {
+    ICompany,
+    ICompanySmall,
+    IInternship,
+    IInternshipId,
+    IInternshipUIProps,
+    isValidId,
+    isValidDate,
+    ISite, ICompanyPayload
+} from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
@@ -8,8 +17,18 @@ import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
-
+import {SiteService} from "../services/site-service.js";
+import {Pool} from "pg";
 dotenv.config();
+
+const pool = new Pool({
+    user: "postgres",
+    host: "postgres",
+    database: "cruddb",
+    password: "postgres",
+    port: 5432,
+});
+
 
 export const companyRouter = express.Router();
 const allowedBooleanStrings: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
@@ -71,10 +90,14 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
         const company: ICompany | null = await service.getByEmail(email);
 
         if (company) {
-            res.status(StatusCodes.OK).json(company);
 
             const isMatch: boolean = await argon2.verify(company.password, password);
             if (isMatch) {
+                const emailVerified = Boolean(company.email_verified)
+                if(!emailVerified) {
+                    res.status(StatusCodes.FORBIDDEN).json("Email not verified");
+                    return;
+                }
                 // Acesstoken & Refreshtoken erstellen
                 const payload = {
                     company_id: company.company_id,
@@ -131,6 +154,40 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
             .json({accessToken: newAccessToken})
     } catch (err) {
         res.status(500).json({error: "Internal server error"});
+    }
+});
+
+companyRouter.post("/register", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const {name, companyNumber, email, phoneNumber, website, password} = req.body;
+    try {
+        const service = new CompanyService(unit);
+        const emailExists: ICompany | null = await service.getByEmail(email);
+        if (emailExists) {
+            res.status(409).json({error: "E-Mail is already in Use"});
+            return;
+        }
+        const hashedPassword = await argon2.hash(password, {
+            algorithm: argon2.Algorithm.Argon2id,
+            memoryCost: 2 ** 16,
+            timeCost: 3,
+            parallelism: 2,
+        });
+
+        const timestampInSeconds = Date.now() / 1000;
+        const insertResult  = await  pool.query(`
+            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
+            RETURNING company_id, admin_verified, email_verified`,
+            [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
+
+        const company : ICompanyPayload = insertResult.rows[0];
+        await service.sendVerificationMail(email, company.company_id);
+        res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
+    } catch (err) {
+        console.log(err);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({Error: err})
+
     }
 });
 
@@ -302,7 +359,7 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
         if (isValidId(company_id) && await companyService.companyExists(company_id)) {
             const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
-            if(internships.length > 0) {
+            if (internships.length > 0) {
                 res.status(StatusCodes.OK).json(internships);
             } else {
                 res.status(StatusCodes.NOT_FOUND).json([]);
@@ -319,6 +376,34 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
         await unit.complete();
     }
 
+});
+
+companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const sites: ISite[] = await siteService.getAllByCompanyId(company_id);
+
+            if (sites.length > 0) {
+                res.status(StatusCodes.OK).json(sites);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json([]);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 // to insert and update a new company
@@ -420,3 +505,65 @@ function isValidCompanyNumber(number: string): boolean {
 
     return !isNaN(nums) && isNaN(letter);
 }
+
+companyRouter.get("/verify_email/:token", async (req: Request, res: Response) => {
+    const token = req.params.token;
+
+
+    jwt.verify(token, process.env.JWT_EMAIL_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            console.log(err);
+            return res.status(StatusCodes.UNAUTHORIZED).send("Email verification failed.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+
+            if (await service.companyExists(company_id)) {
+                const success = await service.verifyEmail(company_id);
+
+                if (success) {
+                    await unit.complete(true);
+                    const payload = {
+                        company_id: decoded.company_id,
+                        admin_verified: decoded.admin_verified,
+                        email_verified: true,
+                    };
+
+                    const newAccessToken = generateAccessToken(payload);
+                    const newRefreshToken = generateRefreshToken(payload);
+
+                    res.cookie('refreshToken', newRefreshToken, {
+                        httpOnly: true,
+                        sameSite: 'strict',
+                        secure: false, // TODO: change at production to true
+                        maxAge: 7 * 24 * 60 * 60 * 1000
+                    })
+                        .header('Authorization', `Bearer ${newAccessToken}`)
+                        .status(StatusCodes.OK)
+                        .json({accessToken: newAccessToken});
+                } else {
+                    await unit.complete(false);
+                    res.status(StatusCodes.CONFLICT).send("E-Mail Konnte nicht geupadetet werden");
+                    return;
+                }
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
+                return;
+            }
+
+        } catch (e) {
+            console.log(e);
+            return res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});

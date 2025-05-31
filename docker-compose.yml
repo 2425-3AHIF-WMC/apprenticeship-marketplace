@@ -30,7 +30,9 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - postgres
+        postgres:
+          condition: service_healthy
+          restart: true
     networks:
       - florasCoolesNetzwerk
     volumes:
