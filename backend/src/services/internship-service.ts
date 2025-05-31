@@ -1,5 +1,6 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
+
 import {ICompany, IInternship, IInternshipId, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
@@ -167,5 +168,6 @@ export class InternshipService extends ServiceBase{
                                                                     FROM internship
                                                                     WHERE internship_creation_timestamp >= NOW() - INTERVAL '30 days';`);
         return parseInt(stmt.rows[0].count ?? 0, 10);
+
     }
 }
