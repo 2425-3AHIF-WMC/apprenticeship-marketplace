@@ -11,7 +11,7 @@ import {
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
+import {generateAccessToken, generateEmailToken, generateRefreshToken,} from "../services/token-service.js";
 import dotenv from "dotenv";
 import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
@@ -182,7 +182,15 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
         const company : ICompanyPayload = insertResult.rows[0];
-        await service.sendVerificationMail(email, company.company_id);
+        const payload = {
+                company_id: company.company_id,
+                admin_verified: false,
+                email_verified: false
+            }
+        const token = generateEmailToken(payload);
+
+        await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
+            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify_email/${token}">hier</a> klicken.</p>`);
         res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
     } catch (err) {
         console.log(err);
