@@ -34,6 +34,33 @@ studentRouter.get("/favourites/:id", async (req: Request, res: Response) => {
     }
 });
 
+studentRouter.get("/favourites_detailed/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const id: number = parseInt(req.params.id);
+
+    if (!Number.isInteger(id) || id < 0 || id === null) {
+        res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
+        return;
+    }
+
+    try {
+        const service = new StudentService(unit);
+        if (await service.studentExists(id)) {
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+            return;
+        }
+        const internshipIds = await service.getAllDetailedFavourites(id);
+
+        res.status(StatusCodes.OK).json(internshipIds);
+
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        return;
+    } finally {
+        await unit.complete();
+    }
+})
+
 studentRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
