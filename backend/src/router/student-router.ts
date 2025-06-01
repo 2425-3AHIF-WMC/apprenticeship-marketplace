@@ -49,7 +49,7 @@ studentRouter.get("/favourites_detailed/:id", async (req: Request, res: Response
             res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
             return;
         }
-        const internshipIds = await service.getAllFavourites(id);
+        const internshipIds = await service.getAllDetailedFavourites(id);
 
         res.status(StatusCodes.OK).json(internshipIds);
 
