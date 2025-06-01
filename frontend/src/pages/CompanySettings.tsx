@@ -16,6 +16,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Button} from "@/components/ui/button.tsx";
 import {checkCompanyAuth} from "@/lib/authUtils.ts";
 import {useNavigate} from "react-router-dom";
+import {toast, Toaster} from "sonner";
 
 const formSchema = z.object({
     oldPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
@@ -66,11 +67,14 @@ const CompanySettings = () => {
                 })
             });
 
-            if (!response.ok) {
-                console.log("Password reset failed")
+            if (response.ok) {
+                toast.success("Passwort wurde erfolgreich geändert.");
+                form.reset();
+            } else if (response.status === 401) {
+                toast.error("Aktuelles Passwort ist falsch.");
+            } else {
+                toast.error("Fehler beim Ändern des Passworts.");
             }
-
-            form.reset();
 
         } catch (err) {
             console.log(err)
@@ -81,6 +85,7 @@ const CompanySettings = () => {
 
     return (
         <div className="flex min-h-screen">
+            <Toaster richColors position="top-center" closeButton/>
             <CompanyDashboardSidebar/>
             <div className="flex-1 flex justify-center">
                 <main className="w-full p-8 space-y-6">
