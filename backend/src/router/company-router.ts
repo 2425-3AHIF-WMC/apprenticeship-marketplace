@@ -195,9 +195,10 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             email_verified: false
         }
         const token = generateEmailToken(payload);
+        const verificationLink = `http://localhost:8081/verify-email/${token}`;
 
         await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
-            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify-email/${token}">hier</a> klicken.</p>`);
+            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
         res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
     } catch (err) {
         console.log(err);
@@ -673,7 +674,7 @@ companyRouter.post("/send-password-reset-mail", async (req: Request, res: Respon
             email_verified: company.email_verified,
         };
         const token = generatePasswordResetToken(payload);
-        const resetLink = `http://localhost:8081/reset-password?token=${token}`;
+        const resetLink = `http://localhost:8081/reset-password/${token}`;
 
         await service.sendMail(
             company.email,
