@@ -11,7 +11,12 @@ import {
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {generateAccessToken, generateRefreshToken,} from "../services/token-service.js";
+import {
+    generateAccessToken,
+    generateEmailToken,
+    generatePasswordResetToken,
+    generateRefreshToken,
+} from "../services/token-service.js";
 import dotenv from "dotenv";
 import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
@@ -19,6 +24,7 @@ import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
 import {Pool} from "pg";
+
 dotenv.config();
 
 const pool = new Pool({
@@ -94,7 +100,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
             const isMatch: boolean = await argon2.verify(company.password, password);
             if (isMatch) {
                 const emailVerified = Boolean(company.email_verified)
-                if(!emailVerified) {
+                if (!emailVerified) {
                     res.status(StatusCodes.FORBIDDEN).json("Email not verified");
                     return;
                 }
@@ -175,14 +181,24 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         });
 
         const timestampInSeconds = Date.now() / 1000;
-        const insertResult  = await  pool.query(`
-            INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9)) 
-            RETURNING company_id, admin_verified, email_verified`,
+        const insertResult = await pool.query(`
+                    INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified,
+                                        admin_verified, company_registration_timestamp)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9))
+                    RETURNING company_id, admin_verified, email_verified`,
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
-        const company : ICompanyPayload = insertResult.rows[0];
-        await service.sendVerificationMail(email, company.company_id);
+        const company: ICompanyPayload = insertResult.rows[0];
+        const payload = {
+            company_id: company.company_id,
+            admin_verified: false,
+            email_verified: false
+        }
+        const token = generateEmailToken(payload);
+        const verificationLink = `http://localhost:8081/verify-email/${token}`;
+
+        await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
+            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
         res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
     } catch (err) {
         console.log(err);
@@ -506,7 +522,7 @@ function isValidCompanyNumber(number: string): boolean {
     return !isNaN(nums) && isNaN(letter);
 }
 
-companyRouter.get("/verify_email/:token", async (req: Request, res: Response) => {
+companyRouter.get("/verify-email/:token", async (req: Request, res: Response) => {
     const token = req.params.token;
 
 
@@ -567,3 +583,166 @@ companyRouter.get("/verify_email/:token", async (req: Request, res: Response) =>
         }
     });
 });
+
+// for password reset via dashboard
+companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
+    const {oldpassword, newpassword} = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({error: "No token"});
+        return;
+    }
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, process.env.JWT_ACCESS_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            console.log(err);
+            return res.status(StatusCodes.UNAUTHORIZED).send("Password Reset failed.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        console.log(company_id)
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+            const company: ICompany | null = await service.getById(company_id);
+
+            if (company) {
+                const isMatch: boolean = await argon2.verify(company.password, oldpassword);
+                if (isMatch) {
+                    const hashedPassword = await argon2.hash(newpassword, {
+                        algorithm: argon2.Algorithm.Argon2id,
+                        memoryCost: 2 ** 16,
+                        timeCost: 3,
+                        parallelism: 2,
+                    });
+
+                    const success = await service.resetPassword(company, hashedPassword);
+                    if (success) {
+                        await unit.complete(true);
+                        res.status(StatusCodes.OK).send(`Password successfully resetted`);
+                    } else {
+                        await unit.complete(false);
+                        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+                    }
+                } else {
+                    res.status(StatusCodes.UNAUTHORIZED).send("Wrong Password.");
+                    return;
+                }
+            } else {
+                res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
+                return;
+            }
+
+        } catch (e) {
+            console.log(e);
+            return res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});
+
+companyRouter.post("/send-password-reset-mail", async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).send("E-Mail ist erforderlich.");
+        return;
+    }
+
+    const unit: Unit = await Unit.create(false);
+    const service = new CompanyService(unit);
+
+    try {
+        const company = await service.getByEmail(email);
+
+        if (!company) {
+            res.status(StatusCodes.NOT_FOUND).send(`Company with email ${email} does not exist.`);
+            return;
+        }
+
+        const payload = {
+            company_id: company.company_id,
+            admin_verified: company.admin_verified,
+            email_verified: company.email_verified,
+        };
+        const token = generatePasswordResetToken(payload);
+        const resetLink = `http://localhost:8081/reset-password/${token}`;
+
+        await service.sendMail(
+            company.email,
+            "Passwort zurücksetzen",
+            `
+                <p>Hallo ${company.name},</p>
+                <p>Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den folgenden Link:</p>
+                <a href="${resetLink}">Passwort zurücksetzen</a>
+                <p>Dieser Link ist für 30 Minuten gültig.</p>
+                <p>Wenn Sie das nicht waren, ignorieren Sie diese Nachricht einfach.</p>
+            `,
+        );
+
+        await unit.complete(true);
+        res.status(StatusCodes.OK).send("Reset-E-Mail sent.");
+    } catch (error) {
+        console.error("Error sending password reset mail:", error);
+        await unit.complete(false);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+    }
+});
+
+// for password reset via email link
+companyRouter.patch("/reset-password/:token", async (req: Request, res: Response) => {
+    const { newpassword } = req.body;
+    const { token } = req.params;
+
+    jwt.verify(token, process.env.JWT_PASSWORD_RESET_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            return res.status(StatusCodes.UNAUTHORIZED).send("Invalid or expired token.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+            const company = await service.getById(company_id);
+
+            if (!company) {
+                return res.status(StatusCodes.NOT_FOUND).send("Company not found.");
+            }
+
+            const hashedPassword = await argon2.hash(newpassword, {
+                algorithm: argon2.Algorithm.Argon2id,
+                memoryCost: 2 ** 16,
+                timeCost: 3,
+                parallelism: 2,
+            });
+
+            const success = await service.resetPassword(company, hashedPassword);
+            await unit.complete(success);
+
+            if (success) {
+                res.status(StatusCodes.OK).send("Passwort erfolgreich zurückgesetzt.");
+            } else {
+                res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+        } catch (err) {
+            console.error(err);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});
+

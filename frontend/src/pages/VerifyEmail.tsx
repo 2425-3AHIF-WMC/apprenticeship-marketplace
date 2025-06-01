@@ -8,7 +8,7 @@ const VerifyEmail = () => {
     useEffect(() => {
         const verify = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/company/verify_email/${token}`, {
+                const response = await fetch(`http://localhost:5000/api/company/verify-email/${token}`, {
                     credentials: "include"
                 });
                 if(response.ok) {
