@@ -11,7 +11,12 @@ import {
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {generateAccessToken, generateEmailToken, generateRefreshToken,} from "../services/token-service.js";
+import {
+    generateAccessToken,
+    generateEmailToken,
+    generatePasswordResetToken,
+    generateRefreshToken,
+} from "../services/token-service.js";
 import dotenv from "dotenv";
 import argon2 from '@node-rs/argon2';
 import {Unit} from "../unit.js";
@@ -625,7 +630,7 @@ companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
                         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
                     }
                 } else {
-                    res.status(StatusCodes.UNAUTHORIZED).send("Falsches Passwort.");
+                    res.status(StatusCodes.UNAUTHORIZED).send("Wrong Password.");
                     return;
                 }
             } else {
@@ -640,4 +645,52 @@ companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
             await unit.complete(false);
         }
     });
+});
+
+companyRouter.post("/send-password-reset-mail", async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).send("E-Mail ist erforderlich.");
+        return;
+    }
+
+    const unit: Unit = await Unit.create(false);
+    const service = new CompanyService(unit);
+
+    try {
+        const company = await service.getByEmail(email);
+
+        if (!company) {
+            res.status(StatusCodes.NOT_FOUND).send(`Company with email ${email} does not exist.`);
+            return;
+        }
+
+        const payload = {
+            company_id: company.company_id,
+            admin_verified: company.admin_verified,
+            email_verified: company.email_verified,
+        };
+        const token = generatePasswordResetToken(payload);
+        const resetLink = `http://localhost:8081/reset-password?token=${token}`;
+
+        await service.sendMail(
+            company.email,
+            "Passwort zurücksetzen",
+            `
+                <p>Hallo ${company.name},</p>
+                <p>Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den folgenden Link:</p>
+                <a href="${resetLink}">Passwort zurücksetzen</a>
+                <p>Dieser Link ist für 30 Minuten gültig.</p>
+                <p>Wenn Sie das nicht waren, ignorieren Sie diese Nachricht einfach.</p>
+            `,
+        );
+
+        await unit.complete(true);
+        res.status(StatusCodes.OK).send("Reset-E-Mail sent.");
+    } catch (error) {
+        console.error("Error sending password reset mail:", error);
+        await unit.complete(false);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+    }
 });

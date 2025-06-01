@@ -11,5 +11,10 @@ export function generateRefreshToken(payload: object): string {
 }
 
 export function generateEmailToken(payload: object): string {
-    return jwt.sign(payload, process.env.JWT_EMAIL_SECRET!, { expiresIn: "1h" });
+    return jwt.sign(payload, process.env.JWT_EMAIL_SECRET!, { expiresIn: "7d" });
 }
+
+export function generatePasswordResetToken(payload: object): string {
+    return jwt.sign(payload, process.env.JWT_PASSWORD_RESET_SECRET!, { expiresIn: "30m" });
+}
+
