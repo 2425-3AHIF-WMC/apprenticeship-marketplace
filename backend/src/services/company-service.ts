@@ -3,6 +3,7 @@ import {Unit} from "../unit.js";
 import {ICompany, ICompanySmall} from "../model.js";
 import * as nodemailer from "nodemailer"
 import jwt from "jsonwebtoken";
+
 export class CompanyService extends ServiceBase {
     constructor(unit: Unit) {
         super(unit);
@@ -90,6 +91,11 @@ export class CompanyService extends ServiceBase {
         return stmt.rows as ICompany[];
     }
 
+    public async getVerifiedEmailUnverifiedAdminCount(): Promise<number> {
+        const stmt = await this.unit.prepare(`select count(company_id) from company where email_verified='true' and admin_verified='false'`);
+        return parseInt(stmt.rows[0].count);
+    }
+
     public async update(company: ICompany): Promise<boolean> {
         const stmt = await this.unit.prepare(`update company
                                               set name=$1,
@@ -124,7 +130,10 @@ export class CompanyService extends ServiceBase {
     }
 
     public async verifyAdmin(company_id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`update company set admin_verified='true', admin_verification_timestamp=NOW() where company_id=$1`, [
+        const stmt = await this.unit.prepare(`update company
+                                              set admin_verified='true',
+                                                  admin_verification_timestamp=NOW()
+                                              where company_id = $1`, [
             company_id
         ]);
 
@@ -132,7 +141,10 @@ export class CompanyService extends ServiceBase {
     }
 
     public async unverifyAdmin(company_id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`update company set admin_verified='false', admin_verification_timestamp=null where company_id=$1`, [
+        const stmt = await this.unit.prepare(`update company
+                                              set admin_verified='false',
+                                                  admin_verification_timestamp=null
+                                              where company_id = $1`, [
             company_id
         ]);
 
@@ -140,7 +152,10 @@ export class CompanyService extends ServiceBase {
     }
 
     public async verifyEmail(company_id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`update company set email_verified='true', email_verification_timestamp=NOW() where company_id=$1`, [
+        const stmt = await this.unit.prepare(`update company
+                                              set email_verified='true',
+                                                  email_verification_timestamp=NOW()
+                                              where company_id = $1`, [
             company_id
         ]);
 
@@ -148,7 +163,10 @@ export class CompanyService extends ServiceBase {
     }
 
     public async unverifyEmail(company_id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`update company set email_verified='false', email_verification_timestamp=null where company_id=$1`, [
+        const stmt = await this.unit.prepare(`update company
+                                              set email_verified='false',
+                                                  email_verification_timestamp=null
+                                              where company_id = $1`, [
             company_id
         ]);
 
@@ -180,19 +198,23 @@ export class CompanyService extends ServiceBase {
     }
 
     public async delete(id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`DELETE FROM company WHERE company_id = $1`, [id]);
+        const stmt = await this.unit.prepare(`DELETE
+                                              FROM company
+                                              WHERE company_id = $1`, [id]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
     public async companyExists(id: number): Promise<boolean> {
-        const stmt = await this.unit.prepare(`select count(company_id) from company where company_id=$1`, [id])
+        const stmt = await this.unit.prepare(`select count(company_id)
+                                              from company
+                                              where company_id = $1`, [id])
         const count: number = parseInt(stmt.rows[0].count, 10);
 
         return count === 1;
     }
 
-    public async sendMail(email: string, subject : string, body : string): Promise<void> {
+    public async sendMail(email: string, subject: string, body: string): Promise<void> {
         const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST!,
             port: 587,
@@ -212,7 +234,7 @@ export class CompanyService extends ServiceBase {
             html: `${body}`
         };
 
-        transporter.sendMail(mailConfigurations, function(error, info){
+        transporter.sendMail(mailConfigurations, function (error, info) {
             if (error) {
                 console.log(error);
             }
@@ -221,7 +243,7 @@ export class CompanyService extends ServiceBase {
         });
     }
 
-    public async resetPassword(company : ICompany, new_password: string): Promise<boolean> {
+    public async resetPassword(company: ICompany, new_password: string): Promise<boolean> {
         const stmt = await this.unit.prepare(`update company
                                               set password=$1
                                               where company_id = $2`, [new_password, company.company_id]);

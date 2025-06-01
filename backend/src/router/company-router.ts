@@ -184,8 +184,8 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         const insertResult = await pool.query(`
                     INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified,
                                         admin_verified, company_registration_timestamp)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9))
-                    RETURNING company_id, admin_verified, email_verified`,
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
+                            to_timestamp($9)) RETURNING company_id, admin_verified, email_verified`,
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
         const company: ICompanyPayload = insertResult.rows[0];
@@ -257,6 +257,29 @@ companyRouter.get("/unverified_admin", async (_, res: Response) => {
         await unit.complete();
     }
 });
+
+// get the count of all companies whose email are verified but admins are not
+companyRouter.get("/open_admin_verifications/count", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+
+    try {
+        const service = new CompanyService(unit);
+        const openAdminVerificationCount: number = await service.getVerifiedEmailUnverifiedAdminCount();
+        console.log(openAdminVerificationCount);
+
+        if (!isNaN(openAdminVerificationCount) && openAdminVerificationCount >= 0) {
+            res.status(StatusCodes.OK).json(openAdminVerificationCount);
+        } else {
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("invalid count returned");
+        }
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
 
 companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => {
     const adminVerified: string = req.body.admin_verified;
@@ -650,7 +673,7 @@ companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
 });
 
 companyRouter.post("/send-password-reset-mail", async (req: Request, res: Response) => {
-    const { email } = req.body;
+    const {email} = req.body;
 
     if (!email) {
         res.status(400).send("E-Mail ist erforderlich.");
@@ -699,8 +722,8 @@ companyRouter.post("/send-password-reset-mail", async (req: Request, res: Respon
 
 // for password reset via email link
 companyRouter.patch("/reset-password/:token", async (req: Request, res: Response) => {
-    const { newpassword } = req.body;
-    const { token } = req.params;
+    const {newpassword} = req.body;
+    const {token} = req.params;
 
     jwt.verify(token, process.env.JWT_PASSWORD_RESET_SECRET!, async (err, decoded: any) => {
         if (err || !decoded?.company_id) {
