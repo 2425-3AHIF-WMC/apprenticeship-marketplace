@@ -173,6 +173,12 @@ export class CompanyService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
+    public async isEmailVerified(company_id: number) : Promise<boolean> {
+        const stmt = await this.unit.prepare(`select email_verified from company where company_id=$1`, [company_id]);
+
+        return stmt.rows[0].email_verified === true;
+    }
+
     public async insert(company: ICompany): Promise<boolean> {
         const stmt = await this.unit.prepare(`INSERT INTO Company (name, company_number, company_info, website, email,
                                                                    phone_number, password, email_verified,

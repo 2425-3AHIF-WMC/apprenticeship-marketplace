@@ -289,6 +289,12 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
         const unit: Unit = await Unit.create(false);
         try {
             const service = new CompanyService(unit);
+
+            if(!(await service.isEmailVerified(company_id))) {
+                res.status(StatusCodes.BAD_REQUEST).send("cannot verify admin, email is not yet verified.");
+                return;
+            }
+
             if (await service.companyExists(company_id)) {
                 let success: boolean;
 
