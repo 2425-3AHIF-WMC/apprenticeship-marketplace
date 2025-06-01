@@ -2,11 +2,21 @@ import AdminDashboardSidebar from '@/components/AdminDashboardSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FadeIn from '@/components/FadeIn';
 import { Building,   BriefcaseBusiness} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
   // Placeholder values for now
   const outstandingVerifications = 5;
-  const newInternships = 12;
+  const [newInternships, setNewInternships] = useState(0);
+
+  useEffect(() => {
+    const fetchInternships = async () => {
+      const res = await fetch('http://localhost:5000/api/internship/created/last30days');
+      const data = await res.json();
+      setNewInternships(data.count);
+    };
+    fetchInternships();
+  }, []);
 
   return (
     <div className="flex min-h-screen">
