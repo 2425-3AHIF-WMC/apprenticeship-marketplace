@@ -197,7 +197,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         const token = generateEmailToken(payload);
 
         await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
-            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify_email/${token}">hier</a> klicken.</p>`);
+            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="http://localhost:8081/verify-email/${token}">hier</a> klicken.</p>`);
         res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
     } catch (err) {
         console.log(err);
@@ -521,7 +521,7 @@ function isValidCompanyNumber(number: string): boolean {
     return !isNaN(nums) && isNaN(letter);
 }
 
-companyRouter.get("/verify_email/:token", async (req: Request, res: Response) => {
+companyRouter.get("/verify-email/:token", async (req: Request, res: Response) => {
     const token = req.params.token;
 
 
@@ -583,6 +583,7 @@ companyRouter.get("/verify_email/:token", async (req: Request, res: Response) =>
     });
 });
 
+// for password reset via dashboard
 companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
     const {oldpassword, newpassword} = req.body;
     const authHeader = req.headers.authorization;
@@ -694,3 +695,53 @@ companyRouter.post("/send-password-reset-mail", async (req: Request, res: Respon
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 });
+
+// for password reset via email link
+companyRouter.patch("/reset-password/:token", async (req: Request, res: Response) => {
+    const { newpassword } = req.body;
+    const { token } = req.params;
+
+    jwt.verify(token, process.env.JWT_PASSWORD_RESET_SECRET!, async (err, decoded: any) => {
+        if (err || !decoded?.company_id) {
+            return res.status(StatusCodes.UNAUTHORIZED).send("Invalid or expired token.");
+        }
+
+        const company_id = parseInt(decoded.company_id);
+        if (!isValidId(company_id)) {
+            return res.status(StatusCodes.BAD_REQUEST).send("Invalid company ID.");
+        }
+
+        const unit: Unit = await Unit.create(false);
+
+        try {
+            const service = new CompanyService(unit);
+            const company = await service.getById(company_id);
+
+            if (!company) {
+                return res.status(StatusCodes.NOT_FOUND).send("Company not found.");
+            }
+
+            const hashedPassword = await argon2.hash(newpassword, {
+                algorithm: argon2.Algorithm.Argon2id,
+                memoryCost: 2 ** 16,
+                timeCost: 3,
+                parallelism: 2,
+            });
+
+            const success = await service.resetPassword(company, hashedPassword);
+            await unit.complete(success);
+
+            if (success) {
+                res.status(StatusCodes.OK).send("Passwort erfolgreich zurückgesetzt.");
+            } else {
+                res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+        } catch (err) {
+            console.error(err);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        } finally {
+            await unit.complete(false);
+        }
+    });
+});
+
