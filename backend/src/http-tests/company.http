@@ -1,6 +1,6 @@
 @BaseUrl = http://localhost:5000/api/company/
 
-### create Company
+### udpate an existing Company
 PUT {{BaseUrl}} HTTP/1.1
 Content-Type:application/json
 
@@ -34,7 +34,8 @@ Content-Type:application/json
   "admin_verified": "N",
   "company_registration_timestamp": "2025-05-23 09:45:12.001",
   "email_verification_timestamp": null,
-  "admin_verification_timestamp": null
+  "admin_verification_timestamp": null,
+  "company_logo_path": "company-logos/greenWave.jpeg"
 }
 
 ### post a company login

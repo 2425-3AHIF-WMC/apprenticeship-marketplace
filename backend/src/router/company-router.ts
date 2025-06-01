@@ -472,7 +472,8 @@ companyRouter.put("", async (req: Request, res: Response) => {
             : null,
         admin_verification_timestamp: req.body.admin_verification_timestamp
             ? new Date(req.body.admin_verification_timestamp)
-            : null
+            : null,
+        company_logo_path: req.body.company_logo_path
     };
     const unit: Unit = await Unit.create(false);
 

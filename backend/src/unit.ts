@@ -98,7 +98,7 @@ export async function ensureTablesCreated(): Promise<void> {
             company_registration_timestamp TIMESTAMP NOT NULL,
             email_verification_timestamp TIMESTAMP,
             admin_verification_timestamp TIMESTAMP,
-            company_logo TEXT,
+            company_logo_path TEXT,
             CONSTRAINT pk_company PRIMARY KEY (company_id)
             );
 

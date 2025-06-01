@@ -22,7 +22,8 @@ export class CompanyService extends ServiceBase {
                                                      admin_verified,
                                                      company_registration_timestamp,
                                                      email_verification_timestamp,
-                                                     admin_verification_timestamp
+                                                     admin_verification_timestamp,
+                                                     company_logo_path
                                               from company`);
         return stmt.rows as ICompany[];
     }
@@ -40,7 +41,8 @@ export class CompanyService extends ServiceBase {
                                                      admin_verified,
                                                      company_registration_timestamp,
                                                      email_verification_timestamp,
-                                                     admin_verification_timestamp
+                                                     admin_verification_timestamp,
+                                                     company_logo_path
                                               from company
                                               where company_id = $1`, [id]);
         return ServiceBase.nullIfUndefined(stmt.rows[0] as ICompany);
@@ -66,7 +68,8 @@ export class CompanyService extends ServiceBase {
                                                      admin_verified,
                                                      company_registration_timestamp,
                                                      email_verification_timestamp,
-                                                     admin_verification_timestamp
+                                                     admin_verification_timestamp,
+                                                     company_logo_path
                                               from company
                                               where email = $1`, [email]);
         return ServiceBase.nullIfUndefined(stmt.rows[0] as ICompany);
@@ -85,7 +88,8 @@ export class CompanyService extends ServiceBase {
                                                      admin_verified,
                                                      company_registration_timestamp,
                                                      email_verification_timestamp,
-                                                     admin_verification_timestamp
+                                                     admin_verification_timestamp,
+                                                     company_logo_path
                                               from company
                                               where admin_verified = 'no'`);
         return stmt.rows as ICompany[];
@@ -109,8 +113,9 @@ export class CompanyService extends ServiceBase {
                                                   admin_verified=$9,
                                                   company_registration_timestamp=$10,
                                                   email_verification_timestamp=$11,
-                                                  admin_verification_timestamp=$12
-                                              where company_id = $13`, [
+                                                  admin_verification_timestamp=$12,
+                                                  company_logo_path=$13
+                                              where company_id = $14`, [
             company.name,
             company.company_number,
             company.company_info,
@@ -123,6 +128,7 @@ export class CompanyService extends ServiceBase {
             company.company_registration_timestamp.toISOString(),
             company.email_verification_timestamp?.toISOString() ?? null,
             company.admin_verification_timestamp?.toISOString() ?? null,
+            company.company_logo_path ?? null,
             company.company_id
         ]);
 
@@ -184,8 +190,8 @@ export class CompanyService extends ServiceBase {
                                                                    phone_number, password, email_verified,
                                                                    admin_verified, company_registration_timestamp,
                                                                    email_verification_timestamp,
-                                                                   admin_verification_timestamp)
-                                              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, [
+                                                                   admin_verification_timestamp, company_logo_path)
+                                              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, [
             company.name,
             company.company_number,
             company.company_info,
@@ -197,7 +203,8 @@ export class CompanyService extends ServiceBase {
             company.admin_verified,
             company.company_registration_timestamp,
             company.email_verification_timestamp?.toISOString() ?? null,
-            company.admin_verification_timestamp?.toISOString() ?? null
+            company.admin_verification_timestamp?.toISOString() ?? null,
+            company.company_logo_path ?? null
         ]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;

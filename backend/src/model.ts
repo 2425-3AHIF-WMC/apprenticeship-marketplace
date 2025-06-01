@@ -112,7 +112,8 @@ export interface ICompany {
     admin_verified: string,
     company_registration_timestamp: Date,
     email_verification_timestamp: Date | null,
-    admin_verification_timestamp: Date | null
+    admin_verification_timestamp: Date | null,
+    company_logo_path: string | null
 }
 
 export interface ICompanySmall {
