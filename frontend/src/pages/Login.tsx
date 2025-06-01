@@ -17,12 +17,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import {Input} from "@/components/ui/input.tsx";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Mail, MailWarning, ShieldAlert} from "lucide-react";
+import { isAdmin } from '@/lib/authUtils';
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isRegistration, setIsRegistration] = useState(false);
     const navigate = useNavigate();
-    const { login, studentIsAuthenticated, studentUsername } = useAuth();
+    const { login, studentIsAuthenticated, studentId } = useAuth();
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,14 +46,16 @@ const Login = () => {
     }>({});
 
     useEffect(() => {
-        if (studentIsAuthenticated) {
-            if (studentUsername === 'if220183') {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/student/dashboard');
-            }
+        if (studentIsAuthenticated && studentId) {
+            isAdmin(studentId).then((admin) => {
+                if (admin) {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/student/dashboard');
+                }
+            });
         }
-    }, [studentIsAuthenticated, studentUsername, navigate]);
+    }, [studentIsAuthenticated, studentId, navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
