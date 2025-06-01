@@ -131,3 +131,22 @@ studentRouter.delete("/:id", async (req: Request, res: Response) => {
         await unit.complete(false);
     }
 });
+
+studentRouter.get("/by-username/:username", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const username = req.params.username;
+    try {
+        const service = new StudentService(unit);
+        const students: IStudent[] = await service.getAllPersons();
+        const student = students.find(s => s.username === username);
+        if (student) {
+            res.status(StatusCodes.OK).json(student);
+        } else {
+            res.status(StatusCodes.NOT_FOUND).send("Student not found");
+        }
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+    } finally {
+        await unit.complete();
+    }
+});

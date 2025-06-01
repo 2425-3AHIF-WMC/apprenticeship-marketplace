@@ -12,6 +12,11 @@ export class StudentService extends ServiceBase{
         return stmt.rows as IStudent[];
     }
 
+    public async getAllPersons(): Promise<IStudent[]> {
+        const stmt = await this.unit.prepare(`select person_id, username, person_creation_timestamp, persontype from person`);
+        return stmt.rows as IStudent[];
+    }
+
     public async getById(id: number): Promise<IStudent>{
         const stmt = await this.unit.prepare("select person_id, username, person_creation_timestamp, persontype from person where person_id=$1 and persontype = 'Student'", [id]);
         return stmt.rows[0] as IStudent;
@@ -56,7 +61,7 @@ export class StudentService extends ServiceBase{
     }
 
     public async studentExistsByUser(username: string): Promise<boolean> {
-        const stmt = await this.unit.prepare(`select count(person_id) from person where username=$1 and persontype=$2`, [username, PersonType.Student]);
+        const stmt = await this.unit.prepare(`select count(person_id) from person where username=$1`, [username]);
         const count: number = parseInt(stmt.rows[0].count, 10);
 
         return count === 1;
