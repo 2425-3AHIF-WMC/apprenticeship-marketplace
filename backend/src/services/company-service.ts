@@ -1,6 +1,6 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from "../unit.js";
-import {ICompany, ICompanySmall} from "../model.js";
+import {ICompany, ICompanyPayload, ICompanySmall} from "../model.js";
 import * as nodemailer from "nodemailer"
 import jwt from "jsonwebtoken";
 
@@ -96,7 +96,10 @@ export class CompanyService extends ServiceBase {
     }
 
     public async getVerifiedEmailUnverifiedAdminCount(): Promise<number> {
-        const stmt = await this.unit.prepare(`select count(company_id) from company where email_verified='true' and admin_verified='false'`);
+        const stmt = await this.unit.prepare(`select count(company_id)
+                                              from company
+                                              where email_verified = 'true'
+                                                and admin_verified = 'false'`);
         return parseInt(stmt.rows[0].count);
     }
 
@@ -179,8 +182,10 @@ export class CompanyService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async isEmailVerified(company_id: number) : Promise<boolean> {
-        const stmt = await this.unit.prepare(`select email_verified from company where company_id=$1`, [company_id]);
+    public async isEmailVerified(company_id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`select email_verified
+                                              from company
+                                              where company_id = $1`, [company_id]);
 
         return stmt.rows[0].email_verified === true;
     }
@@ -208,6 +213,34 @@ export class CompanyService extends ServiceBase {
         ]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async insertAndReturn(company: ICompany): Promise<ICompanyPayload> {
+        const stmt = await this.unit.prepare(`INSERT INTO COMPANY(name, company_number, company_info, website, email,
+                                                                  phone_number,
+                                                                  password, email_verified,
+                                                                  admin_verified, company_registration_timestamp,
+                                                                  email_verification_timestamp,
+                                                                  admin_verification_timestamp, company_logo_path)
+                                              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $11, $12,
+                                                      $13,) RETURNING company_id, admin_verified, email_verified`, [
+            company.name,
+            company.company_number,
+            company.company_info ?? null,
+            company.website,
+            company.email,
+            company.phone_number,
+            company.password,
+            company.email_verified,
+            company.admin_verified,
+            company.company_registration_timestamp,
+            company.email_verification_timestamp?.toISOString() ?? null,
+            company.admin_verification_timestamp?.toISOString() ?? null,
+            company.company_logo_path ?? null
+        ]);
+
+        return stmt.rows[0] as ICompanyPayload;
+
     }
 
     public async delete(id: number): Promise<boolean> {
