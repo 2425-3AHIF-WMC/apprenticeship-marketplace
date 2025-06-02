@@ -2,8 +2,6 @@ import express, {Request, Response} from "express";
 import {
     ICompany,
     ICompanySmall,
-    IInternship,
-    IInternshipId,
     IInternshipUIProps,
     isValidId,
     isValidDate,
@@ -23,7 +21,6 @@ import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
-import {Pool} from "pg";
 
 dotenv.config();
 
@@ -156,7 +153,6 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
 
 companyRouter.post("/register", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(false);
-    //const {name, companyNumber, email, phoneNumber, website, password} = req.body;
 
     const hashedPassword = await argon2.hash(req.body.password, {
         algorithm: argon2.Algorithm.Argon2id,
@@ -190,21 +186,9 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             return;
         }
 
-        /*
-        const timestampInSeconds = Date.now() / 1000;
-        const insertResult = await pool.query(`
-                    INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified,
-                                        admin_verified, company_registration_timestamp)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
-                            to_timestamp($9)) RETURNING company_id, admin_verified, email_verified`,
-            [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
-
-         */
-
-        const validWebsite: boolean = company.website.substring(0, 8) === "https://";
+        const validWebsite: boolean = !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim())
         const validEmail: boolean = company.email.includes('@');
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
-
 
         if (validWebsite && validEmail && validVerifications && isValidCompanyNumber(company.company_number)) {
             const companyPayload: ICompanyPayload = await service.insertAndReturn(company);
