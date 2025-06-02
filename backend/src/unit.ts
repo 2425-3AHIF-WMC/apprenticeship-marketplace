@@ -53,144 +53,168 @@ export class Unit {
 export async function ensureTablesCreated(): Promise<void> {
     await pool.query(`
         
-        BEGIN TRANSACTION; 
-        
-        CREATE TABLE IF NOT EXISTS person (
-                                              person_id SERIAL NOT NULL,
-                                              username TEXT NOT NULL,
-                                              person_creation_timestamp TIMESTAMP NOT NULL,
-                                              persontype TEXT NOT NULL,
-                                              CONSTRAINT pk_person PRIMARY KEY (person_id),
+        BEGIN TRANSACTION;
+
+        CREATE TABLE IF NOT EXISTS person
+        (
+            person_id                 SERIAL    NOT NULL,
+            username                  TEXT      NOT NULL,
+            person_creation_timestamp TIMESTAMP NOT NULL,
+            persontype                TEXT      NOT NULL,
+            CONSTRAINT pk_person PRIMARY KEY (person_id),
             CONSTRAINT chk_persontype CHECK (persontype IN ('Admin', 'Person', 'Student'))
-            );
-
-        CREATE TABLE IF NOT EXISTS student (
-                                               student_id INTEGER NOT NULL,
-                                               CONSTRAINT pk_student PRIMARY KEY (student_id),
+        );
+        
+        CREATE TABLE IF NOT EXISTS student
+        (
+            student_id INTEGER NOT NULL,
+            CONSTRAINT pk_student PRIMARY KEY (student_id),
             CONSTRAINT fk_student_person FOREIGN KEY (student_id)
-            REFERENCES person(person_id)
-            ON DELETE CASCADE
-            );
-
-        CREATE TABLE IF NOT EXISTS admin (
-                                             admin_id INTEGER NOT NULL,
-                                             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
+                REFERENCES person (person_id)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS admin
+        (
+            admin_id INTEGER NOT NULL,
+            CONSTRAINT pk_admin PRIMARY KEY (admin_id),
             CONSTRAINT fk_admin_person FOREIGN KEY (admin_id)
-            REFERENCES person(person_id)
-            ON DELETE CASCADE
-            );
-
-        CREATE TABLE IF NOT EXISTS city (
-                                            plz INTEGER,
-                                            name TEXT NOT NULL,
-                                            CONSTRAINT pk_city PRIMARY KEY (plz),
+                REFERENCES person (person_id)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS city
+        (
+            plz  INTEGER,
+            name TEXT NOT NULL,
+            CONSTRAINT pk_city PRIMARY KEY (plz),
             CONSTRAINT chk_plz CHECK (plz >= 1000 AND plz <= 9999)
-            );
-
-        CREATE TABLE IF NOT EXISTS company (
-                                               company_id SERIAL NOT NULL,
-                                               name TEXT NOT NULL,
-                                               company_number TEXT NOT NULL,
-                                               company_info TEXT,
-                                               website TEXT NOT NULL,
-                                               email TEXT NOT NULL,
-                                               phone_number TEXT NOT NULL,
-                                               password TEXT NOT NULL,
-                                               email_verified BOOLEAN NOT NULL,
-                                               admin_verified BOOLEAN NOT NULL,
-                                               company_registration_timestamp TIMESTAMP NOT NULL,
-                                               email_verification_timestamp TIMESTAMP,
-                                               admin_verification_timestamp TIMESTAMP,
-                                               company_logo_path TEXT,
-                                               CONSTRAINT pk_company PRIMARY KEY (company_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS department (
-                                                  department_id SMALLINT NOT NULL,
-                                                  name TEXT,
-                                                  CONSTRAINT pk_department PRIMARY KEY (department_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS site (
-                                            location_id SMALLINT NOT NULL,
-                                            address TEXT NOT NULL,
-                                            name TEXT,
-                                            company_id INTEGER,
-                                            plz INTEGER,
-                                            CONSTRAINT pk_site PRIMARY KEY (location_id),
+        );
+        
+        CREATE TABLE IF NOT EXISTS company
+        (
+            company_id                     SERIAL    NOT NULL,
+            name                           TEXT      NOT NULL,
+            company_number                 TEXT      NOT NULL,
+            company_info                   TEXT,
+            website                        TEXT      NOT NULL,
+            email                          TEXT      NOT NULL,
+            phone_number                   TEXT      NOT NULL,
+            password                       TEXT      NOT NULL,
+            email_verified                 BOOLEAN   NOT NULL,
+            admin_verified                 BOOLEAN   NOT NULL,
+            company_registration_timestamp TIMESTAMP NOT NULL,
+            email_verification_timestamp   TIMESTAMP,
+            admin_verification_timestamp   TIMESTAMP,
+            company_logo_path              TEXT,
+            CONSTRAINT pk_company PRIMARY KEY (company_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS department
+        (
+            department_id SMALLINT NOT NULL,
+            name          TEXT,
+            CONSTRAINT pk_department PRIMARY KEY (department_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS site
+        (
+            location_id SMALLINT NOT NULL,
+            address     TEXT     NOT NULL,
+            name        TEXT,
+            company_id  INTEGER  NOT NULL,
+            plz         INTEGER  NOT NULL,
+            CONSTRAINT pk_site PRIMARY KEY (location_id),
             CONSTRAINT fk_site_company FOREIGN KEY (company_id)
-            REFERENCES company(company_id),
+                REFERENCES company (company_id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_site_city FOREIGN KEY (plz)
-            REFERENCES city(plz)
-            );
-
-        CREATE TABLE IF NOT EXISTS worktype (
-                                                worktype_id INTEGER NOT NULL,
-                                                name TEXT NOT NULL,
-                                                description TEXT,
-                                                CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS internship_duration (
-                                                           internship_duration_id INTEGER NOT NULL,
-                                                           description TEXT NOT NULL,
-                                                           CONSTRAINT pk_internship_duration PRIMARY KEY (internship_duration_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS internship (
-                                                  internship_id SERIAL NOT NULL,
-                                                  title TEXT NOT NULL,
-                                                  pdf_path TEXT NOT NULL,
-                                                  min_year SMALLINT,
-                                                  internship_creation_timestamp TIMESTAMP NOT NULL,
-                                                  salary NUMERIC(6,2) NOT NULL,
-            application_end DATE NOT NULL,
-            location_id SMALLINT,
-            clicks INTEGER NOT NULL,
-            worktype_id INTEGER,
-            internship_duration_id INTEGER,
-            internship_application_link TEXT NOT NULL,
+                REFERENCES city (plz)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS worktype
+        (
+            worktype_id INTEGER NOT NULL,
+            name        TEXT    NOT NULL,
+            description TEXT,
+            CONSTRAINT pk_worktype PRIMARY KEY (worktype_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS internship_duration
+        (
+            internship_duration_id INTEGER NOT NULL,
+            description            TEXT    NOT NULL,
+            CONSTRAINT pk_internship_duration PRIMARY KEY (internship_duration_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS internship
+        (
+            internship_id                 SERIAL        NOT NULL,
+            title                         TEXT          NOT NULL,
+            pdf_path                      TEXT          NOT NULL,
+            min_year                      SMALLINT,
+            internship_creation_timestamp TIMESTAMP     NOT NULL,
+            salary                        NUMERIC(6, 2) NOT NULL,
+            application_end               DATE          NOT NULL,
+            location_id                   SMALLINT      NOT NULL,
+            clicks                        INTEGER       NOT NULL,
+            worktype_id                   INTEGER,
+            internship_duration_id        INTEGER,
+            internship_application_link   TEXT          NOT NULL,
             CONSTRAINT pk_internship PRIMARY KEY (internship_id),
             CONSTRAINT fk_internship_site FOREIGN KEY (location_id)
-            REFERENCES site(location_id),
+                REFERENCES site (location_id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_internship_worktype FOREIGN KEY (worktype_id)
-            REFERENCES worktype(worktype_id),
+                REFERENCES worktype (worktype_id)
+                ON DELETE SET NULL,
             CONSTRAINT fk_internship_duration FOREIGN KEY (internship_duration_id)
-            REFERENCES internship_duration(internship_duration_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS favourite (
-                                                 student_id INTEGER NOT NULL,
-                                                 internship_id SMALLINT NOT NULL,
-                                                 favourite_creation_timestamp TIMESTAMP,
-                                                 CONSTRAINT pk_favourite PRIMARY KEY (student_id, internship_id),
+                REFERENCES internship_duration (internship_duration_id)
+                ON DELETE SET NULL
+        );
+        
+        CREATE TABLE IF NOT EXISTS favourite
+        (
+            student_id                   INTEGER  NOT NULL,
+            internship_id                SMALLINT NOT NULL,
+            favourite_creation_timestamp TIMESTAMP,
+            CONSTRAINT pk_favourite PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_fav_student FOREIGN KEY (student_id)
-            REFERENCES student(student_id),
+                REFERENCES student (student_id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_fav_internship FOREIGN KEY (internship_id)
-            REFERENCES internship(internship_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS internship_department_map (
-                                                                 internship_id SMALLINT NOT NULL,
-                                                                 department_id SMALLINT NOT NULL,
-                                                                 CONSTRAINT pk_internship_dept_map PRIMARY KEY (internship_id, department_id),
+                REFERENCES internship (internship_id)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS internship_department_map
+        (
+            internship_id SMALLINT NOT NULL,
+            department_id SMALLINT NOT NULL,
+            CONSTRAINT pk_internship_dept_map PRIMARY KEY (internship_id, department_id),
             CONSTRAINT fk_map_internship FOREIGN KEY (internship_id)
-            REFERENCES internship(internship_id),
+                REFERENCES internship (internship_id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_map_department FOREIGN KEY (department_id)
-            REFERENCES department(department_id)
-            );
-
-        CREATE TABLE IF NOT EXISTS viewed_internships (
-                                                          student_id INTEGER NOT NULL,
-                                                          internship_id SMALLINT NOT NULL,
-                                                          viewed_timestamp TIMESTAMP NOT NULL,
-                                                          CONSTRAINT pk_viewed_internships PRIMARY KEY (student_id, internship_id),
+                REFERENCES department (department_id)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS viewed_internships
+        (
+            student_id       INTEGER   NOT NULL,
+            internship_id    SMALLINT  NOT NULL,
+            viewed_timestamp TIMESTAMP NOT NULL,
+            CONSTRAINT pk_viewed_internships PRIMARY KEY (student_id, internship_id),
             CONSTRAINT fk_view_student FOREIGN KEY (student_id)
-            REFERENCES student(student_id),
+                REFERENCES student (student_id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
-            REFERENCES internship(internship_id)
-            );
-            
+                REFERENCES internship (internship_id)
+                ON DELETE CASCADE
+        );
+        
         COMMIT;
     `);
 }
