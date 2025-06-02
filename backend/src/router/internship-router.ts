@@ -29,13 +29,13 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
     const clicks = req.body.clicks ?? 0;
 
     const {
-        title, description, min_year,
+        title, pdf_path, min_year,
         internship_creation_timestamp, salary, application_end,
         location_id, worktype_id, internship_duration_id,
         internship_application_link
     } = req.body;
 
-    if (!title || !description || !min_year
+    if (!title || !pdf_path || !min_year
         || !internship_creation_timestamp || !salary || !application_end
         || !location_id || !clicks || !worktype_id || !internship_duration_id
         || !internship_application_link) {
@@ -63,7 +63,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
 
         if (id === -1) {
             let internship: IInternship = {
-                title, description, min_year,
+                title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
                 location_id, clicks, worktype_id, internship_duration_id,
                 internship_application_link
@@ -90,7 +90,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             }
 
             let internship: IInternship = {
-                title, description, min_year,
+                title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
                 location_id, clicks, worktype_id, internship_duration_id,
                 internship_application_link
@@ -156,6 +156,22 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
         await unit.complete();
     }
 });
+
+internshipRouter.get("/admin_verified", async (req, res)=>{
+    const unit: Unit = await Unit.create(true);
+    try {
+        const service = new InternshipService(unit);
+        const internship = await service.getAllAdminVerified();
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+
+    } finally {
+        await unit.complete();
+    }
+})
 
 internshipRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);

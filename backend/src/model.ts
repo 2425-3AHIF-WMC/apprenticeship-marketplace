@@ -27,13 +27,14 @@ export interface IInternshipUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo: string;
+    company_logo_path: string;
     duration: string;
     added: string;
     views: number;
     category: string[];
     company_link: string;
     internship_link: string;
+    admin_verified: boolean;
 }
 
 export interface IInternshipDetailsUIProps {
@@ -44,7 +45,7 @@ export interface IInternshipDetailsUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo: string;
+    company_logo_path: string;
     duration: string;
     added: string;
     views: number;
@@ -54,12 +55,12 @@ export interface IInternshipDetailsUIProps {
     internship_link: string;
     company_id: string;
     company_info: string;
-    pdf: string;
+    pdf_path: string;
 }
 
 export interface IInternship{
     title: string,
-    description: string,
+    pdf_path: string,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -74,7 +75,7 @@ export interface IInternship{
 export interface IInternshipId {
     internship_id: string,
     title: string,
-    description: string,
+    pdf_path: string,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -112,7 +113,8 @@ export interface ICompany {
     admin_verified: string,
     company_registration_timestamp: Date,
     email_verification_timestamp: Date | null,
-    admin_verification_timestamp: Date | null
+    admin_verification_timestamp: Date | null,
+    company_logo_path: string | null
 }
 
 export interface ICompanySmall {

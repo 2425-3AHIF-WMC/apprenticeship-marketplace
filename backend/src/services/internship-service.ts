@@ -1,7 +1,7 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
 
-import {ICompany, IInternship, IInternshipId, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
+import {IInternship, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
@@ -10,11 +10,11 @@ export class InternshipService extends ServiceBase{
 
     public async getAll(): Promise<IInternshipUIProps[]> {
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address as location,
-                                                                         w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added",
+                                                                         w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added",
                                                                          (select count(*)
                                                                           from viewed_internships vi
                                                                           where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
-                                                                         c.website as "company_link", i.internship_application_link as "internship_link"
+                                                                         c.website as "company_link", i.internship_application_link as "internship_link", c.admin_verified
                                                                   from internship i
                                                                            join site s on (i.location_id = s.location_id)
                                                                            join city ci on (s.plz = ci.plz)
@@ -23,17 +23,17 @@ export class InternshipService extends ServiceBase{
                                                                            join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
                                                                            left join internship_department_map idm on (i.internship_id = idm.internship_id)
                                                                            left join department d ON d.department_id = idm.department_id
-                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;`);
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info,c.admin_verified;`);
         return await stmt.rows as IInternshipUIProps[];
     }
 
     public async getAllCurrent(): Promise<IInternshipUIProps[]>{
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address as location,
-                                                                         w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added",
+                                                                         w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added",
                                                                          (select count(*)
                                                                           from viewed_internships vi
                                                                           where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
-                                                                         c.website as "company_link", i.internship_application_link as "internship_link"
+                                                                         c.website as "company_link", i.internship_application_link as "internship_link", c.admin_verified
                                                                   from internship i
                                                                            join site s on (i.location_id = s.location_id)
                                                                            join city ci on (s.plz = ci.plz)
@@ -43,16 +43,37 @@ export class InternshipService extends ServiceBase{
                                                                            left join internship_department_map idm on (i.internship_id = idm.internship_id)
                                                                            left join department d ON d.department_id = idm.department_id
                                                                   WHERE i.application_end >= CURRENT_DATE
-                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, c.admin_verified;
         `);
 
 
         return await stmt.rows as IInternshipUIProps[];
     }
 
+    public async getAllAdminVerified(): Promise<IInternshipUIProps[]>{
+        const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address as location,
+                                                       w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added",
+                                                       (select count(*)
+                                                        from viewed_internships vi
+                                                        where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
+                                                       c.website as "company_link", i.internship_application_link as "internship_link", true as admin_verified
+                                                from internship i
+                                                         join site s on (i.location_id = s.location_id)
+                                                         join city ci on (s.plz = ci.plz)
+                                                         join company c on (s.company_id = c.company_id)
+                                                         join worktype w on (i.worktype_id = w.worktype_id)
+                                                         join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
+                                                         left join internship_department_map idm on (i.internship_id = idm.internship_id)
+                                                         left join department d ON d.department_id = idm.department_id
+                                                WHERE c.admin_verified is true
+                                                group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info,c.admin_verified;
+                                                `);
+        return stmt.rows as IInternshipUIProps[];
+    }
+
     public async getById(id: number): Promise<IInternshipDetailsUIProps>{
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address  as location,
-                                                                         w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added", i.description as "pdf",
+                                                                         w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added", i.pdf_path as "pdf",
                                                                          (select count(*)
                                                                           from viewed_internships vi
                                                                           where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
@@ -66,7 +87,7 @@ export class InternshipService extends ServiceBase{
                                                                            left join internship_department_map idm on (i.internship_id = idm.internship_id)
                                                                            left join department d ON d.department_id = idm.department_id
                                                                   where i.internship_id = $1
-                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
                         `, [id]);
         return stmt.rows[0] as IInternshipDetailsUIProps;
     }
@@ -79,7 +100,7 @@ export class InternshipService extends ServiceBase{
                                                      i.min_year,
                                                      ci.name || ', ' || s.address                   as location,
                                                      w.name                                         as "work_type",
-                                                     c.company_logo,
+                                                     c.company_logo_path,
                                                      id.description                                 as "duration",
                                                      i.internship_creation_timestamp                as "added",
                                                      (select count(*)
@@ -87,7 +108,8 @@ export class InternshipService extends ServiceBase{
                                                       where vi.internship_id = i.internship_id)     as "views",
                                                      ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
                                                      c.website                                      as "company_link",
-                                                     i.internship_application_link                  as "internship_link"
+                                                     i.internship_application_link                  as "internship_link",
+                                                    c.admin_verified
                                               from internship i
                                                        join site s on (i.location_id = s.location_id)
                                                        join city ci on (s.plz = ci.plz)
@@ -99,9 +121,9 @@ export class InternshipService extends ServiceBase{
                                                        left join department d ON d.department_id = idm.department_id
                                               where c.company_id=$1
                                               group by i.internship_id, i.title, c.name, i.application_end, i.min_year,
-                                                       location, w.name, c.company_logo, id.description,
+                                                       location, w.name, c.company_logo_path, id.description,
                                                        i.internship_creation_timestamp, c.website, i.salary,
-                                                       i.internship_application_link, c.company_id, c.company_info;`, [company_id]);
+                                                       i.internship_application_link, c.company_id, c.company_info, c.admin_verified;`, [company_id]);
 
         return stmt.rows as IInternshipUIProps[];
     }
@@ -119,10 +141,10 @@ export class InternshipService extends ServiceBase{
     }
 
     public async newInternship(i: IInternship): Promise<number>{
-        const stmt = await this.unit.prepare(`INSERT INTO internship (title, description, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
+        const stmt = await this.unit.prepare(`INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) 
                                                                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
                                                                    RETURNING internship_id;`
-                                                            , [ i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+                                                            , [ i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
 
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
@@ -132,7 +154,7 @@ export class InternshipService extends ServiceBase{
         const stmt = await this.unit.prepare(`UPDATE internship 
                                                                     set 
                                                                         title = $1,
-                                                                        description = $2,
+                                                                        pdf_path = $2,
                                                                         min_year = $3,
                                                                         internship_creation_timestamp = $4,
                                                                         salary = $5,
@@ -142,7 +164,7 @@ export class InternshipService extends ServiceBase{
                                                                         worktype_id = $9,
                                                                         internship_duration_id = $10,
                                                                         internship_application_link = $11`
-                                                            , [i.title, i.description, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+                                                            , [i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.clicks, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }

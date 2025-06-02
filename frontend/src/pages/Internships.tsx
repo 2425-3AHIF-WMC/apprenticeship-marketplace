@@ -12,6 +12,7 @@ import { getYearNumber } from '@/utils/filterUtils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
 import { useAuth } from '@/context/AuthContext';
+import { isAdmin } from '@/lib/authUtils';
 
 const Internships = () => {
     const location = useLocation();
@@ -30,6 +31,34 @@ const Internships = () => {
     const [error, setError] = useState<string | null>(null);
     const { studentId } = useAuth();
     const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
+    const [isAdminUser, setIsAdminUser] = useState<boolean | null>(null);
+
+    const fetchFavourites = async () => {
+        if (!studentId) return;
+        const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+        if (!res.ok) return;
+        const favIds = await res.json();
+        setFavouriteIds(favIds);
+    };
+
+    useEffect(() => {
+        let mounted = true;
+        if (studentId) {
+            isAdmin(studentId).then((result) => {
+                if (mounted) setIsAdminUser(result);
+            });
+        } else {
+            setIsAdminUser(false);
+        }
+        return () => { mounted = false; };
+    }, [studentId]);
+
+    useEffect(() => {
+        if (isAdminUser === null) return; // Wait until admin check is done
+        if (!isAdminUser) {
+            fetchFavourites();
+        }
+    }, [isAdminUser]);
 
     useEffect(() => {
         const fetchInternships = async () => {
@@ -48,18 +77,6 @@ const Internships = () => {
         };
         fetchInternships();
     }, []);
-
-    useEffect(() => {
-        const fetchFavourites = async () => {
-            if (!studentId) return;
-            const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
-            if (!res.ok) return;
-            const favIds = await res.json();
-            console.log(favIds);
-            setFavouriteIds(favIds);
-        };
-        fetchFavourites();
-    }, [studentId]);
 
     const handleToggleFavourite = async (internshipId: number) => {
         if (!studentId) return;

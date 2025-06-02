@@ -98,3 +98,10 @@ export async function fetchCompanyProfile(): Promise<{
         return null;
     }
 }
+
+export async function isAdmin(studentId: number): Promise<boolean> {
+    const res = await fetch(`http://localhost:5000/api/person/${studentId}/isAdmin`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.isAdmin === true;
+}

@@ -108,7 +108,7 @@ const StudentDashboard = () => {
                         <CardDescription>Praktika, die du gespeichert hast</CardDescription>
                       </div>
                       <Button asChild>
-                        <Link to="/schueler/favoriten">
+                        <Link to="/student/favourites">
                           <BookmarkIcon className="h-4 w-4 md:mr-2" />
                           {!isMobile && "Alle anzeigen"}
                         </Link>

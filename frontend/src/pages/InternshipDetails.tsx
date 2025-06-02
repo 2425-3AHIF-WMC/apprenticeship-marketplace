@@ -21,6 +21,7 @@ import {
   FileText,
   Mail,
   Euro,
+  BookmarkCheck,
 } from 'lucide-react';
 import FadeIn from '@/components/FadeIn';
 import { Document, Page } from 'react-pdf';
@@ -28,11 +29,12 @@ import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { InternshipDetailsUIProps } from '@/utils/interfaces';
-import { mapBackendToInternshipDetailsProps } from '@/utils/utils';
+import { cn, mapBackendToInternshipDetailsProps } from '@/utils/utils';
 import { useEffect, useState } from 'react';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
-
+import { useAuth } from '@/context/AuthContext';
+import { isAdmin } from '@/lib/authUtils';
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 
@@ -53,6 +55,22 @@ const InternshipDescription = () => {
   const [internship, setInternship] = useState<InternshipDetailsUIProps | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFavourite, setIsFavourite] = useState(false);
+  const { studentId } = useAuth();
+  const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    if (studentId) {
+        isAdmin(studentId).then((result) => {
+            if (mounted) setIsAdminUser(result);
+        });
+    } else {
+        setIsAdminUser(false);
+    }
+    return () => { mounted = false; };
+}, [studentId]);
 
   const handleShare = async () => {
     try {
@@ -82,6 +100,42 @@ const InternshipDescription = () => {
     };
     fetchInternship();
   }, [id]);
+
+  useEffect(() => {
+    const fetchFavourites = async () => {
+      if (!studentId) return;
+      const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
+      if (!res.ok) return;
+      const favIds = await res.json();
+      setFavouriteIds(favIds);
+      setIsFavourite(favIds.includes(Number(id)));
+    };
+    fetchFavourites();
+  }, [studentId]);
+
+  const handleToggleFavourite = async (internshipId: number) => {
+    if (!studentId) return;
+    const isFav = favouriteIds.includes(internshipId);
+    if (isFav) {
+      // Remove favourite
+      await fetch('http://localhost:5000/api/favourite/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+      });
+      setFavouriteIds((prev) => prev.filter((id) => id !== internshipId));
+      setIsFavourite(false);
+    } else {
+      // Add favourite
+      await fetch('http://localhost:5000/api/favourite/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, internship_id: internshipId })
+      });
+      setFavouriteIds((prev) => [...prev, internshipId]);
+      setIsFavourite(true);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -137,10 +191,15 @@ const InternshipDescription = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <BookmarkPlus className="h-4 w-4" />
-                      Speichern
+                  { studentId && !isAdminUser && <Button variant="outline" className={cn("flex items-center gap-2", isFavourite ? "bg-primary/10 text-primary hover:bg-primary/20 dark:hover:bg-primary/20 dark:hover:text-primary" : "")} 
+                    onClick={() => handleToggleFavourite(Number(internship.id))}>
+                      {isFavourite ? (
+                        <BookmarkCheck className="h-5 w-5" />
+                      ) : (
+                        <BookmarkPlus className="h-5 w-5" /> 
+                      )} {isFavourite ? 'Gespeichert' : 'Speichern'}
                     </Button>
+}
                     <Button variant="outline" className="flex items-center gap-2" onClick={handleShare}>
                       <Share className="h-4 w-4" />
                       {copied ? 'Link kopiert!' : 'Teilen'}

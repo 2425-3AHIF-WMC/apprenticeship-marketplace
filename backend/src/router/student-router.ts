@@ -34,6 +34,33 @@ studentRouter.get("/favourites/:id", async (req: Request, res: Response) => {
     }
 });
 
+studentRouter.get("/favourites_detailed/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const id: number = parseInt(req.params.id);
+
+    if (!Number.isInteger(id) || id < 0 || id === null) {
+        res.status(StatusCodes.BAD_REQUEST).send("Id was not valid");
+        return;
+    }
+
+    try {
+        const service = new StudentService(unit);
+        if (await service.studentExists(id)) {
+            res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
+            return;
+        }
+        const internshipIds = await service.getAllDetailedFavourites(id);
+
+        res.status(StatusCodes.OK).json(internshipIds);
+
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        return;
+    } finally {
+        await unit.complete();
+    }
+})
+
 studentRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
@@ -129,5 +156,24 @@ studentRouter.delete("/:id", async (req: Request, res: Response) => {
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
     } finally {
         await unit.complete(false);
+    }
+});
+
+studentRouter.get("/by-username/:username", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const username = req.params.username;
+    try {
+        const service = new StudentService(unit);
+        const students: IStudent[] = await service.getAllPersons();
+        const student = students.find(s => s.username === username);
+        if (student) {
+            res.status(StatusCodes.OK).json(student);
+        } else {
+            res.status(StatusCodes.NOT_FOUND).send("Student not found");
+        }
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+    } finally {
+        await unit.complete();
     }
 });

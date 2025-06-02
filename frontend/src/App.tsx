@@ -20,6 +20,8 @@ import AdminToVerify from "@/pages/AdminToVerify";
 import CompanyInternshipCreation from "@/pages/CompanyInternshipCreation.tsx";
 import CompanyDetails from "@/pages/CompanyDetails";
 import VerifyEmail from "@/pages/VerifyEmail.tsx";
+import CompanySettings from "@/pages/CompanySettings.tsx";
+import ResetPassword from "@/pages/ResetPassword.tsx";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -130,9 +132,18 @@ function App() {
                 </ProtectedCompanyRoute>
                 }
             />
+            <Route
+                path="/company/settings"
+                element={
+                    <ProtectedCompanyRoute>
+                        <CompanySettings/>
+                    </ProtectedCompanyRoute>
+                }
+            />
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />
-            <Route path="/verify_email/:token" element={<VerifyEmail/>} />
+            <Route path="/verify-email/:token" element={<VerifyEmail/>} />
+            <Route path="/reset-password/:token" element={<ResetPassword/>} />
 
         </Routes>
     )

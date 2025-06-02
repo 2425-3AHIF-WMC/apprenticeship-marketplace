@@ -18,7 +18,8 @@ app.use(cors({
     exposedHeaders: ['Authorization']
 }));
 
-app.use(bodyParser.json());
+app.use("/api/media", mediaRouter);
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -27,7 +28,6 @@ app.use("/api/student", studentRouter);
 app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/favourite", favouriteRouter);
-app.use("/api/media", mediaRouter);
 
 
 app.listen(5000, async () => {

@@ -2,8 +2,10 @@ import { Clock, Building, CalendarDays, ArrowUpRight, ExternalLink, BookmarkChec
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InternshipUIProps } from '@/utils/interfaces';
+import { isAdmin } from '@/lib/authUtils';
+import { useAuth } from '@/context/AuthContext';
 
 
 interface InternshipCardProps {
@@ -15,6 +17,20 @@ interface InternshipCardProps {
 
 const InternshipCard = ({ internship, className, isFavourite = false, onToggleFavourite }: InternshipCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
+    const { studentId } = useAuth();
+    const [isAdminUser, setIsAdminUser] = useState(false);
+
+    useEffect(() => {
+        let mounted = true;
+        if (studentId) {
+            isAdmin(studentId).then((result) => {
+                if (mounted) setIsAdminUser(result);
+            });
+        } else {
+            setIsAdminUser(false);
+        }
+        return () => { mounted = false; };
+    }, [studentId]);
 
     const getCategoryClasses = (category: string) => {
         return `tag-${category}`;
@@ -52,7 +68,7 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
                 </div>
             </div>
             </div>
-            <Button 
+            { studentId && !isAdminUser && <Button 
                 variant="ghost" 
                 size="icon" 
                 className={cn(
@@ -70,6 +86,7 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
                     {isFavourite ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
                 </span>
             </Button>
+}
         </div>
 
         <div className="space-y-3 mb-5 flex-1">

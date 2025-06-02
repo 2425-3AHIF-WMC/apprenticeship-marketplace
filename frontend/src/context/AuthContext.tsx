@@ -24,7 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const initKeycloak = async () => {
             try {
-                console.log('Initializing Keycloak...');
                 const authenticated = await keycloak.init({
                     onLoad: 'check-sso',
                     silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
@@ -34,19 +33,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     flow: 'standard'
                 });
 
-                console.log('Keycloak initialized, authenticated:', authenticated);
 
                 if (authenticated) {
-                    console.log('User is authenticated');
                     setStudentIsAuthenticated(true);
                     setStudentToken(keycloak.token || null);
-                    setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
+                    const username = keycloak.tokenParsed?.preferred_username || null;
+                    setStudentUsername(username);
                     // Get the student's name from the token
                     const name = keycloak.tokenParsed?.name || null;
-                    console.log('Student name from token:', name);
-                    console.log(keycloak.tokenParsed);
                     setStudentName(name);
-                    setStudentId(2);
+
+                    if (username) {
+                        await ensureStudentAndFetchId(username);
+                    } else {
+                        setStudentId(null);
+                    }
 
                     // Set up token refresh
                     keycloak.onTokenExpired = () => {
@@ -87,13 +88,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setStudentInitialized(true);
 
                 // Set up auth success callback
-                keycloak.onAuthSuccess = () => {
+                keycloak.onAuthSuccess = async () => {
                     console.log('Auth success');
                     setStudentIsAuthenticated(true);
                     setStudentToken(keycloak.token || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
-                    setStudentId(2);
+                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null);
                 };
 
                 // Set up auth error callback
@@ -107,13 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 };
 
                 // Set up auth refresh success callback
-                keycloak.onAuthRefreshSuccess = () => {
+                keycloak.onAuthRefreshSuccess = async () => {
                     console.log('Auth refresh success');
                     setStudentIsAuthenticated(true);
                     setStudentToken(keycloak.token || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
-                    setStudentId(2);
+                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null);
                 };
 
                 // Set up auth refresh error callback
@@ -155,6 +156,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setStudentId(null);
         } catch (error) {
             console.error('Logout failed:', error);
+        }
+    };
+
+    const ensureStudentAndFetchId = async (username: string) => {
+        if (!username) {
+            setStudentId(null);
+            return;
+        }
+        try {
+            // Try to create the user
+            const createRes = await fetch('http://localhost:5000/api/student/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username }),
+            });
+            if (createRes.status !== 201 && createRes.status !== 409) {
+                alert('User creation unsuccessful!');
+                setStudentId(null);
+            } else {
+                // Fetch the studentId
+                const idRes = await fetch(`http://localhost:5000/api/student/by-username/${username}`);
+                if (idRes.ok) {
+                    const student = await idRes.json();
+                    setStudentId(student.person_id || student.studentId || null);
+                } else {
+                    alert('Could not fetch student ID!');
+                    setStudentId(null);
+                }
+            }
+        } catch (err) {
+            alert('User creation or ID fetch failed!');
+            setStudentId(null);
         }
     };
 

@@ -193,12 +193,12 @@ const AdminInternships = () => {
                                                 <FadeIn key={internship.id} delay={index * 50}>
                                                     <div
                                                         className={
-                                                            `relative ${isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200' : ''}`
+                                                            `relative ${isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200 dark:bg-black/60 dark:hover:bg-black/40' : ''}`
                                                         }
                                                     >
                                                         <button
                                                             onClick={() => handleDelete(internship.id)}
-                                                            className="absolute top-3 right-3 z-10 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow-md"
+                                                            className="absolute top-3 right-3 z-10 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow-md dark:bg-black dark:hover:bg-black/40"
                                                             title="Praktikum löschen"
                                                         >
                                                             <X className="w-5 h-5" />

@@ -17,12 +17,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import {Input} from "@/components/ui/input.tsx";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Mail, MailWarning, ShieldAlert} from "lucide-react";
+import { isAdmin } from '@/lib/authUtils';
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isRegistration, setIsRegistration] = useState(false);
     const navigate = useNavigate();
-    const { login, studentIsAuthenticated, studentUsername } = useAuth();
+    const { login, studentIsAuthenticated, studentId } = useAuth();
     const [emailLogin, setEmailLogin] = useState('');
     const [passwordLogin, setPasswordLogin] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,16 +44,48 @@ const Login = () => {
         website?: string;
         password?: string;
     }>({});
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+    const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] = useState(false);
+    const [isForgotPasswordSuccessDialogOpen, setIsForgotPasswordSuccessDialogOpen] = useState(false);
+
+    const handleForgotPassword = async () => {
+        if (!forgotPasswordEmail || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+            alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:5000/api/company/send-password-reset-mail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: forgotPasswordEmail })
+            });
+
+            if (res.ok) {
+                setIsForgotPasswordDialogOpen(false);
+                setIsForgotPasswordSuccessDialogOpen(true);
+            } else {
+                alert("Fehler beim Senden der Zurücksetzungs-E-Mail.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Serverfehler beim Zurücksetzen des Passworts.");
+        }
+    };
 
     useEffect(() => {
-        if (studentIsAuthenticated) {
-            if (studentUsername === 'if220183') {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/student/dashboard');
-            }
+        if (studentIsAuthenticated && studentId) {
+            isAdmin(studentId).then((admin) => {
+                if (admin) {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/student/dashboard');
+                }
+            });
         }
-    }, [studentIsAuthenticated, studentUsername, navigate]);
+    }, [studentIsAuthenticated, studentId, navigate]);
 
     const handleLogin = async () => {
         setIsLoading(true);
@@ -248,11 +281,15 @@ const Login = () => {
                                         </Button>
 
                                     </CardContent>
-                                    <CardFooter className="flex justify-center border-t pt-6">
+                                    <CardFooter className="flex justify-center border-t pt-6 flex-col items-center gap-0.5">
                                         <p className="text-sm text-muted-foreground">
                                             Sie haben noch kein Konto? Registrieren Sie sich <span
                                             onClick={toggleCompanyRegisterForm} className="text-primary cursor-pointer hover:underline">hier</span>
                                         </p>
+                                        <button className="text-sm text-primary hover:underline"
+                                            onClick={() => setIsForgotPasswordDialogOpen(true)}>
+                                            Passwort vergessen?
+                                        </button>
                                     </CardFooter>
 
                                 </Card>
@@ -310,12 +347,16 @@ const Login = () => {
                                                 </Button>
 
                                             </CardContent>
-                                        <CardFooter className="flex justify-center border-t pt-6">
+                                        <CardFooter className="flex justify-center border-t pt-6 flex-col items-center gap-0.5">
                                             <p className="text-sm text-muted-foreground">
                                                 Sie haben bereits ein Konto? Melden Sie sich <span
                                                 onClick={toggleCompanyRegisterForm} className="text-primary cursor-pointer hover:underline">hier</span>
                                                 <span> an</span>
                                             </p>
+                                            <button className="text-sm text-primary hover:underline"
+                                                    onClick={() => setIsForgotPasswordDialogOpen(true)}>
+                                                Passwort vergessen?
+                                            </button>
                                         </CardFooter>
                                     </Card>
                                 }
@@ -384,6 +425,43 @@ const Login = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <Button onClick={() => setVerificationNeededDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Verstanden
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isForgotPasswordDialogOpen} onOpenChange={setIsForgotPasswordDialogOpen}>
+                <DialogContent className="text-center">
+                    <DialogHeader>
+                        <DialogTitle>Passwort zurücksetzen</DialogTitle>
+                        <DialogDescription>
+                            Geben Sie Ihre E-Mail-Adresse ein, um den Link zum Zurücksetzen des Passworts zu erhalten.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Input
+                        type="email"
+                        placeholder="E-Mail-Adresse eingeben"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    />
+                    <Button onClick={handleForgotPassword} className="mt-4 w-full">
+                        Zurücksetzungslink senden
+                    </Button>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isForgotPasswordSuccessDialogOpen} onOpenChange={setIsForgotPasswordSuccessDialogOpen}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <Mail className="text-green-600 h-10 w-10" />
+                        <DialogHeader>
+                            <DialogTitle>Zurücksetzungslink gesendet</DialogTitle>
+                            <DialogDescription>
+                                Bitte überprüfen Sie Ihre E-Mails, um das Passwort zurückzusetzen.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setIsForgotPasswordSuccessDialogOpen(false)} className="mt-4 w-full max-w-xs">
                             Verstanden
                         </Button>
                     </div>
