@@ -59,7 +59,7 @@ export interface IInternshipDetailsUIProps {
 
 export interface IInternship{
     title: string,
-    description: string,
+    pdf_path: string,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -74,7 +74,7 @@ export interface IInternship{
 export interface IInternshipId {
     internship_id: string,
     title: string,
-    description: string,
+    pdf_path: string,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
