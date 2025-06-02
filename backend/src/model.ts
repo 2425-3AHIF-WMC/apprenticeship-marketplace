@@ -27,7 +27,7 @@ export interface IInternshipUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo: string;
+    company_logo_path: string;
     duration: string;
     added: string;
     views: number;
@@ -44,7 +44,7 @@ export interface IInternshipDetailsUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo: string;
+    company_logo_path: string;
     duration: string;
     added: string;
     views: number;
@@ -54,7 +54,7 @@ export interface IInternshipDetailsUIProps {
     internship_link: string;
     company_id: string;
     company_info: string;
-    pdf: string;
+    pdf_path: string;
 }
 
 export interface IInternship{
