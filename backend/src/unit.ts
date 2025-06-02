@@ -137,7 +137,7 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS internship (
             internship_id SERIAL NOT NULL,
             title TEXT NOT NULL,
-            description TEXT NOT NULL,
+            pdf_path TEXT NOT NULL,
             min_year SMALLINT,
             internship_creation_timestamp TIMESTAMP NOT NULL,
             salary NUMERIC(6,2) NOT NULL,
