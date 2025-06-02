@@ -27,15 +27,6 @@ import {Pool} from "pg";
 
 dotenv.config();
 
-const pool = new Pool({
-    user: "postgres",
-    host: "postgres",
-    database: "cruddb",
-    password: "postgres",
-    port: 5432,
-});
-
-
 export const companyRouter = express.Router();
 const allowedBooleanStrings: string[] = ['true', 't', 'y', 'yes', '1', 'false', 'f', 'n', 'no', '0'];
 const allowedBooleanTrueStrings: string[] = ['true', 't', 'y', 'yes', '1'];
@@ -164,22 +155,42 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
 });
 
 companyRouter.post("/register", async (req: Request, res: Response) => {
-    const unit: Unit = await Unit.create(true);
-    const {name, companyNumber, email, phoneNumber, website, password} = req.body;
+    const unit: Unit = await Unit.create(false);
+    //const {name, companyNumber, email, phoneNumber, website, password} = req.body;
+
+    const hashedPassword = await argon2.hash(req.body.password, {
+        algorithm: argon2.Algorithm.Argon2id,
+        memoryCost: 2 ** 16,
+        timeCost: 3,
+        parallelism: 2,
+    });
+
+    const company: ICompany = {
+        company_id: -1,
+        name: req.body.name,
+        company_number: req.body.companyNumber,
+        company_info: req.body.company_info ?? null,
+        website: req.body.website,
+        email: req.body.email,
+        phone_number: req.body.phoneNumber,
+        password: hashedPassword,
+        email_verified: "false",
+        admin_verified: "false",
+        company_registration_timestamp: new Date(),
+        email_verification_timestamp: null,
+        admin_verification_timestamp: null,
+        company_logo_path: req.body.company_logo_path ?? null,
+    };
+
     try {
         const service = new CompanyService(unit);
-        const emailExists: ICompany | null = await service.getByEmail(email);
+        const emailExists: ICompany | null = await service.getByEmail(company.email);
         if (emailExists) {
             res.status(409).json({error: "E-Mail is already in Use"});
             return;
         }
-        const hashedPassword = await argon2.hash(password, {
-            algorithm: argon2.Algorithm.Argon2id,
-            memoryCost: 2 ** 16,
-            timeCost: 3,
-            parallelism: 2,
-        });
 
+        /*
         const timestampInSeconds = Date.now() / 1000;
         const insertResult = await pool.query(`
                     INSERT INTO COMPANY(name, company_number, website, email, phone_number, password, email_verified,
@@ -188,22 +199,38 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
                             to_timestamp($9)) RETURNING company_id, admin_verified, email_verified`,
             [name, companyNumber, website, email, phoneNumber, hashedPassword, false, false, timestampInSeconds]);
 
-        const company: ICompanyPayload = insertResult.rows[0];
-        const payload = {
-            company_id: company.company_id,
-            admin_verified: false,
-            email_verified: false
-        }
-        const token = generateEmailToken(payload);
-        const verificationLink = `http://localhost:8081/verify-email/${token}`;
+         */
 
-        await service.sendMail(email, 'E-Mail Bestätigung | Apprenticeship marketplace',
-            `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
-        res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
+        const validWebsite: boolean = company.website.substring(0, 8) === "https://";
+        const validEmail: boolean = company.email.includes('@');
+        const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
+
+
+        if (validWebsite && validEmail && validVerifications && isValidCompanyNumber(company.company_number)) {
+            const companyPayload: ICompanyPayload = await service.insertAndReturn(company);
+            await unit.complete(true);
+
+            const payload = {
+                company_id: companyPayload.company_id,
+                admin_verified: false,
+                email_verified: false
+            }
+            const token = generateEmailToken(payload);
+            const verificationLink = `http://localhost:8081/verify-email/${token}`;
+
+            await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship marketplace',
+                `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
+            res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("validation was not successful");
+            await unit.complete(false);
+        }
+
     } catch (err) {
         console.log(err);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({Error: err})
-
+    } finally {
+        await unit.complete(false);
     }
 });
 
@@ -280,7 +307,6 @@ companyRouter.get("/open_admin_verifications/count", async (req: Request, res: R
     }
 });
 
-
 companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => {
     const adminVerified: string = req.body.admin_verified;
     const company_id: number = parseInt(req.params.id);
@@ -290,7 +316,7 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
         try {
             const service = new CompanyService(unit);
 
-            if(!(await service.isEmailVerified(company_id))) {
+            if (!(await service.isEmailVerified(company_id))) {
                 res.status(StatusCodes.BAD_REQUEST).send("cannot verify admin, email is not yet verified.");
                 return;
             }
@@ -324,46 +350,6 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
     } else {
         res.status(StatusCodes.BAD_REQUEST).send("req body or param id was not valid");
     }
-});
-
-companyRouter.patch("/:id/verify_email", async (req: Request, res: Response) => {
-    const emailVerified: string = req.body.email_verified;
-    const company_id: number = parseInt(req.params.id);
-
-    if (allowedBooleanStrings.includes(emailVerified) && isValidId(company_id)) {
-        const unit: Unit = await Unit.create(false);
-        try {
-            const service = new CompanyService(unit);
-            if (await service.companyExists(company_id)) {
-                let success: boolean;
-
-                if (allowedBooleanTrueStrings.includes(emailVerified)) {
-                    success = await service.verifyEmail(company_id);
-                } else {
-                    success = await service.unverifyEmail(company_id);
-                }
-
-                if (success) {
-                    await unit.complete(true);
-                    res.status(StatusCodes.NO_CONTENT).send(`email_verified was set to ${emailVerified}`);
-                } else {
-                    await unit.complete(false);
-                    res.status(StatusCodes.CONFLICT).send("could not update email_verified")
-                }
-            } else {
-                res.status(StatusCodes.NOT_FOUND).send(`company with id ${company_id} does not exist`);
-            }
-
-        } catch (e) {
-            console.log(e);
-            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
-        } finally {
-            await unit.complete(false);
-        }
-    } else {
-        res.status(StatusCodes.BAD_REQUEST).send("req body or param id was not valid");
-    }
-
 });
 
 companyRouter.get("/:param_id", async (req: Request, res: Response) => {
@@ -544,13 +530,6 @@ companyRouter.delete("/:id", async (req: Request, res: Response) => {
     }
 
 });
-
-function isValidCompanyNumber(number: string): boolean {
-    const nums: number = parseInt(number.substring(0, 6));
-    const letter: number = parseInt(number.substring(6));
-
-    return !isNaN(nums) && isNaN(letter);
-}
 
 companyRouter.get("/verify-email/:token", async (req: Request, res: Response) => {
     const token = req.params.token;
@@ -775,4 +754,13 @@ companyRouter.patch("/reset-password/:token", async (req: Request, res: Response
         }
     });
 });
+
+// helper functions
+
+function isValidCompanyNumber(number: string): boolean {
+    const nums: number = parseInt(number.substring(0, 6));
+    const letter: number = parseInt(number.substring(6));
+
+    return !isNaN(nums) && isNaN(letter);
+}
 
