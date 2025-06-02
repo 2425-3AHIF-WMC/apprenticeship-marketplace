@@ -157,6 +157,22 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
     }
 });
 
+internshipRouter.get("/admin_verified", async (req, res)=>{
+    const unit: Unit = await Unit.create(true);
+    try {
+        const service = new InternshipService(unit);
+        const internship = await service.getAllAdminVerified();
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+
+    } finally {
+        await unit.complete();
+    }
+})
+
 internshipRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
