@@ -52,6 +52,9 @@ export class Unit {
 
 export async function ensureTablesCreated(): Promise<void> {
     await pool.query(`
+        
+        BEGIN TRANSACTION; 
+        
         CREATE TABLE IF NOT EXISTS person (
                                               person_id SERIAL NOT NULL,
                                               username TEXT NOT NULL,
@@ -187,12 +190,14 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
             REFERENCES internship(internship_id)
             );
+            
+        COMMIT;
     `);
 }
 
 export async function insertSampleData(unit: Unit): Promise<void> {
 
-    const tables: string[] = ["worktype", "internship_duration", "city", "company", "site", "internship"];
+    const tables: string[] = ["worktype", "internship_duration", "city", "department", "company", "site", "internship", "internship_department_map"];
 
     async function dataPresent(table: string): Promise<boolean> {
         const chkStmt = await unit.prepare('select count(*) as "count" from internship');
@@ -203,108 +208,111 @@ export async function insertSampleData(unit: Unit): Promise<void> {
     async function insert(): Promise<void> {
         await pool.query(`
 
-            INSERT INTO WorkType (worktype_id, name, description) VALUES
-                                                                      (1, 'Hybrid', 'keine Arbeit aus dem Homeoffice möglich'),
-                                                                      (2, 'On-Site', 'teilweise Arbeit aus dem Homeoffice möglich'),
-                                                                      (3, 'Remote', 'Arbeit aus dem Homeoffice möglich');
+            BEGIN TRANSACTION; 
+            
+            INSERT INTO WorkType (worktype_id, name, description)
+            VALUES (1, 'Hybrid', 'keine Arbeit aus dem Homeoffice möglich'),
+                   (2, 'On-Site', 'teilweise Arbeit aus dem Homeoffice möglich'),
+                   (3, 'Remote', 'Arbeit aus dem Homeoffice möglich');
 
             -- Praktikadauern
-            INSERT INTO internship_duration (internship_duration_id, description) VALUES
-                                                                                      (1, '4 Wochen'),
-                                                                                      (2, '8 Wochen'),
-                                                                                      (3, 'variabel');
+            INSERT INTO internship_duration (internship_duration_id, description)
+            VALUES (1, '4 Wochen'),
+                   (2, '8 Wochen'),
+                   (3, 'variabel');
 
             -- Städte
-            INSERT INTO city (plz, name) VALUES
-                                             (1010, 'Wien'),
-                                             (4020, 'Linz'),
-                                             (5020, 'Salzburg'),
-                                             (8010, 'Graz'),
-                                             (6020, 'Innsbruck'),
-                                             (3100, 'St. Pölten'),
-                                             (9020, 'Klagenfurt'),
-                                             (4463, 'Großraming');
+            INSERT INTO city (plz, name)
+            VALUES (1010, 'Wien'),
+                   (4020, 'Linz'),
+                   (5020, 'Salzburg'),
+                   (8010, 'Graz'),
+                   (6020, 'Innsbruck'),
+                   (3100, 'St. Pölten'),
+                   (9020, 'Klagenfurt'),
+                   (4463, 'Großraming');
 
             -- Abteilungen
-            INSERT INTO department (department_id, name) VALUES
-                                                             (1, 'Informatik'),
-                                                             (2, 'Medientechnik'),
-                                                             (3, 'Elektronik'),
-                                                             (4, 'Medizintechnik');
+            INSERT INTO department (department_id, name)
+            VALUES (1, 'Informatik'),
+                   (2, 'Medientechnik'),
+                   (3, 'Elektronik'),
+                   (4, 'Medizintechnik');
 
             -- Firmen
-            INSERT INTO company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp) VALUES
-                                                                                                                                                                                 ('TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
-                                                                                                                                                                                 ('DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
+            INSERT INTO company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
+            VALUES ('TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
+                   ('DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
 
             -- Standorte
-            INSERT INTO site (location_id, address, name, company_id, plz) VALUES
-                                                                               (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010),
-                                                                               (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020),
-                                                                               (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020),
-                                                                               (4, 'Herrengasse 5', 'EduLearn Graz', 4, 8010),
-                                                                               (5, 'Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020),
-                                                                               (6, 'Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100),
-                                                                               (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
+            INSERT INTO site (location_id, address, name, company_id, plz)
+            VALUES (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010),
+                   (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020),
+                   (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020),
+                   (4, 'Herrengasse 5', 'EduLearn Graz', 4, 8010),
+                   (5, 'Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020),
+                   (6, 'Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100),
+                   (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
 
             -- Praktika
-            INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link) VALUES
-                                                                                                                                                                                                                     ('Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
-                                                                                                                                                                                                                     ('Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
-                                                                                                                                                                                                                     ('Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
-                                                                                                                                                                                                                     ('Marketing Assistant', 'Unterstützung bei Online-Kampagnen', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
-                                                                                                                                                                                                                     ('Health App Tester', 'Usability-Tests von mobilen Anwendungen', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
-                                                                                                                                                                                                                     ('E-Learning Content Creator', 'Multimedia-Inhalte entwickeln', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
-                                                                                                                                                                                                                     ('Fahrzeugsimulation Praktikum', 'Simulation autonomer Fahrzeuge', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
-                                                                                                                                                                                                                     ('Smart Building Testing', 'IoT-Sensorik evaluieren', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
-                                                                                                                                                                                                                     ('Machine Learning Assistant', 'Modelle für Vorhersagen trainieren', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
-                                                                                                                                                                                                                     ('Webdesign Praktikum', 'Mitarbeit an responsiven Layouts', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
-                                                                                                                                                                                                                     ('Backoffice Assistant', 'Dokumentenmanagement und Kommunikation', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
-                                                                                                                                                                                                                     ('UX Research Praktikum', 'Interviews und Nutzeranalysen', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
-                                                                                                                                                                                                                     ('Energieoptimierung Praktikum', 'Auswertung von Verbrauchsdaten', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
-                                                                                                                                                                                                                     ('Cloud Infrastruktur Praktikum', 'Arbeiten mit AWS und Docker', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
-                                                                                                                                                                                                                     ('Technischer Redakteur', 'Erstellen technischer Dokumentationen', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
-                                                                                                                                                                                                                     ('App-Entwicklung iOS', 'Swift und Xcode kennenlernen', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
-                                                                                                                                                                                                                     ('DevOps Intern', 'CI/CD Pipelines automatisieren', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
-                                                                                                                                                                                                                     ('CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
-                                                                                                                                                                                                                     ('Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
-                                                                                                                                                                                                                     ('SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
+            INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link)
+            VALUES ('Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
+                   ('Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
+                   ('Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
+                   ('Marketing Assistant', 'Unterstützung bei Online-Kampagnen', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
+                   ('Health App Tester', 'Usability-Tests von mobilen Anwendungen', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
+                   ('E-Learning Content Creator', 'Multimedia-Inhalte entwickeln', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
+                   ('Fahrzeugsimulation Praktikum', 'Simulation autonomer Fahrzeuge', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
+                   ('Smart Building Testing', 'IoT-Sensorik evaluieren', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
+                   ('Machine Learning Assistant', 'Modelle für Vorhersagen trainieren', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
+                   ('Webdesign Praktikum', 'Mitarbeit an responsiven Layouts', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
+                   ('Backoffice Assistant', 'Dokumentenmanagement und Kommunikation', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
+                   ('UX Research Praktikum', 'Interviews und Nutzeranalysen', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
+                   ('Energieoptimierung Praktikum', 'Auswertung von Verbrauchsdaten', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
+                   ('Cloud Infrastruktur Praktikum', 'Arbeiten mit AWS und Docker', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
+                   ('Technischer Redakteur', 'Erstellen technischer Dokumentationen', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
+                   ('App-Entwicklung iOS', 'Swift und Xcode kennenlernen', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
+                   ('DevOps Intern', 'CI/CD Pipelines automatisieren', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
+                   ('CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
+                   ('Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
+                   ('SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
 
             -- Abteilungen zu Praktika
-            INSERT INTO internship_department_map (internship_id, department_id) VALUES
-                                                                                     (1, 1),
-                                                                                     (1, 2),
-                                                                                     (2, 1),
-                                                                                     (2, 2),
-                                                                                     (3, 1),
-                                                                                     (4, 1),
-                                                                                     (4, 2),
-                                                                                     (5, 4),
-                                                                                     (6, 2),
-                                                                                     (7, 1),
-                                                                                     (8, 3),
-                                                                                     (9, 3),
-                                                                                     (10, 2),
-                                                                                     (11, 1),
-                                                                                     (11, 2),
-                                                                                     (11, 3),
-                                                                                     (11, 4),
-                                                                                     (12, 2),
-                                                                                     (13, 1),
-                                                                                     (14, 1),
-                                                                                     (15, 1),
-                                                                                     (15, 2),
-                                                                                     (16, 2),
-                                                                                     (17, 1),
-                                                                                     (18, 1),
-                                                                                     (19, 1),
-                                                                                     (20, 2);
+            INSERT INTO internship_department_map (internship_id, department_id)
+            VALUES (1, 1),
+                   (1, 2),
+                   (2, 1),
+                   (2, 2),
+                   (3, 1),
+                   (4, 1),
+                   (4, 2),
+                   (5, 4),
+                   (6, 2),
+                   (7, 1),
+                   (8, 3),
+                   (9, 3),
+                   (10, 2),
+                   (11, 1),
+                   (11, 2),
+                   (11, 3),
+                   (11, 4),
+                   (12, 2),
+                   (13, 1),
+                   (14, 1),
+                   (15, 1),
+                   (15, 2),
+                   (16, 2),
+                   (17, 1),
+                   (18, 1),
+                   (19, 1),
+                   (20, 2);
 
+            COMMIT;
         `);
     }
 
