@@ -1,7 +1,7 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
 
-import {ICompany, IInternship, IInternshipId, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
+import {IInternship, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
