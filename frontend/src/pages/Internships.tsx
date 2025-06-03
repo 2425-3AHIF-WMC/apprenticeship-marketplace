@@ -65,10 +65,11 @@ const Internships = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await fetch('http://localhost:5000/api/internship/current');
+                const res = await fetch('http://localhost:5000/api/internship/admin_verified');
                 if (!res.ok) throw new Error('Fehler beim Laden der Praktika');
                 const data = await res.json();
                 setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
+
             } catch (err: any) {
                 setError(err.message || 'Unbekannter Fehler');
             } finally {
