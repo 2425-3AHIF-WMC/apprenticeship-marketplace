@@ -122,7 +122,7 @@ export async function ensureTablesCreated(): Promise<void> {
             CONSTRAINT pk_site PRIMARY KEY (location_id),
             CONSTRAINT fk_site_company FOREIGN KEY (company_id)
                 REFERENCES company (company_id)
-                ON DELETE CASCADE,
+                ON DELETE CASCADE
         );
         
         CREATE TABLE IF NOT EXISTS worktype
