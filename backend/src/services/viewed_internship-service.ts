@@ -24,7 +24,7 @@ export class ViewedInternshipService extends ServiceBase {
         const stmt = await this.unit.prepare(`SELECT COUNT(*)
                                                   FROM viewed_internships
                                                   WHERE student_id = $1
-                                                    AND viewed_timestamp >= NOW() - INTERVAL '30 days'`, [studentId]);
+                                                    AND viewed_timestamp >= NOW() - INTERVAL '31 days'`, [studentId]);
         return stmt.rows[0].count || 0;
     }
 }
