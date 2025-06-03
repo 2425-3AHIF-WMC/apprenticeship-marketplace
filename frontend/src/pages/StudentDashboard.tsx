@@ -18,6 +18,7 @@ const StudentDashboard = () => {
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewedCount, setViewedCount] = useState(0);
 
   useEffect(() => {
     const fetchFavourites = async () => {
@@ -38,9 +39,17 @@ const StudentDashboard = () => {
     fetchFavourites();
   }, [studentId]);
 
-  // Beispielstatistiken
-  const viewedCount = Math.floor(Math.random() * 20) + 5;
-  
+  useEffect(() => {
+    const fetchViewed = async () => {
+      if (!studentId) return;
+      const res = await fetch(`http://localhost:5000/api/viewed_internship/${studentId}/countLast30Days`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setViewedCount(data);
+    };
+    fetchViewed();
+  }, [studentId]);
+
   return (
     <div className="flex min-h-screen">
       <StudentDashboardSidebar />
@@ -50,7 +59,7 @@ const StudentDashboard = () => {
             <div className="flex flex-col gap-2">
               <h1 className="heading-md">Willkommen, {studentName}!</h1>
               <p className="text-muted-foreground">
-                Hier findest du eine Übersicht über deine favorisierten Praktika und Bewerbungen.
+                Hier findest du eine Übersicht über deine favorisierten Praktika.
               </p>
             </div>
           </FadeIn>
