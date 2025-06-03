@@ -17,19 +17,15 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import {ISite} from "@/utils/interfaces.ts";
 
-interface ISite {
-    location_id?: number;
-    name: string;
-    address: string;
-    plz: string;
-    company_id: number;
-}
 
 const siteSchema = z.object({
     name: z.string().min(1, "Name ist erforderlich"),
     address: z.string().min(3, "Adresse ist erforderlich"),
-    plz: z.string().min(4, "PLZ ist erforderlich"),
+    city: z.string().min(2, "Ort ist erforderlich"),
+    plz: z.coerce.number().min(1000, "PLZ ist erforderlich"), // coerce to number
 });
 
 type SiteForm = z.infer<typeof siteSchema>;
@@ -46,36 +42,45 @@ function CompanySites({ companyId }: Props) {
 
     const form = useForm<SiteForm>({
         resolver: zodResolver(siteSchema),
-        defaultValues: { name: "", address: "", plz: "" },
+        defaultValues: { name: "", address: "", city: "", plz: 0 },
     });
 
-    // Sites laden
     async function fetchSites() {
         setLoading(true);
         try {
             const res = await fetch(`http://localhost:5000/api/company/${companyId}/sites`);
-            if (!res.ok) throw new Error("Fehler beim Laden der Standorte");
+            if (!res.ok) {
+                throw new Error("Fehler beim Laden der Standorte");
+            }
             const data = await res.json();
-            setSites(data);
+            const normalized = data.map((site: any) => ({
+                ...site,
+                plz: Number(site.plz),
+            }));
+            setSites(normalized);
         } catch (err) {
-            alert((err as Error).message);
+            toast.error((err as Error).message);
         } finally {
             setLoading(false);
         }
     }
 
     useEffect(() => {
-        if (companyId) fetchSites();
+        if (companyId) {
+            fetchSites();
+        }
     }, [companyId]);
 
-    // Öffnet Dialog (Neu oder Bearbeiten)
     function openDialog(site?: ISite) {
         if (site) {
             setEditSite(site);
-            form.reset(site);
+            form.reset({
+                ...site,
+                plz: Number(site.plz),
+            });
         } else {
             setEditSite(null);
-            form.reset({ name: "", address: "", plz: "" });
+            form.reset({ name: "", address: "", city: "", plz: 0 });
         }
         setDialogOpen(true);
     }
@@ -90,28 +95,41 @@ function CompanySites({ companyId }: Props) {
         try {
             const res = await fetch("http://localhost:5000/api/company/site", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(payload),
             });
 
-            if (!res.ok) throw new Error("Fehler beim Speichern");
+            if (!res.ok) {
+                toast.error(`Fehler beim Speichern`);
+                return;
+            }
 
             await fetchSites();
+            toast.success(editSite ? "Standort aktualisiert" : "Standort hinzugefügt");
             setDialogOpen(false);
         } catch (err) {
-            alert((err as Error).message);
+            toast.error((err as Error).message);
         }
     }
 
     async function deleteSite(id: number) {
-        if (!confirm("Standort wirklich löschen?")) return;
+        if (!confirm("Standort wirklich löschen?")) {
+            return;
+        }
 
         try {
-            const res = await fetch(`http://localhost:5000/api/company/site/${id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Fehler beim Löschen");
+            const res = await fetch(`http://localhost:5000/api/company/site/${id}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) {
+                throw new Error("Fehler beim Löschen");
+            }
             await fetchSites();
+            toast.success("Standort gelöscht");
         } catch (err) {
-            alert((err as Error).message);
+            toast.error((err as Error).message);
         }
     }
 
@@ -136,9 +154,7 @@ function CompanySites({ companyId }: Props) {
                         >
                             <div>
                                 <p className="font-semibold">{site.name}</p>
-                                <p>
-                                    {site.address}, {site.plz}
-                                </p>
+                                <p>{site.address}, {site.plz} {site.city}</p>
                             </div>
                             <div className="space-x-2">
                                 <Button
@@ -202,7 +218,27 @@ function CompanySites({ companyId }: Props) {
                                     <FormItem>
                                         <FormLabel>PLZ</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="PLZ eingeben" {...field} />
+                                            <Input
+                                                type="number"
+                                                placeholder="PLZ eingeben"
+                                                {...field}
+                                                onChange={(e) =>
+                                                    field.onChange(Number(e.target.value))
+                                                }
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="city"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Ort</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ort eingeben" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -217,7 +253,9 @@ function CompanySites({ companyId }: Props) {
                                 >
                                     Abbrechen
                                 </Button>
-                                <Button type="submit">{editSite ? "Speichern" : "Hinzufügen"}</Button>
+                                <Button type="submit">
+                                    {editSite ? "Speichern" : "Hinzufügen"}
+                                </Button>
                             </div>
                         </form>
                     </Form>
