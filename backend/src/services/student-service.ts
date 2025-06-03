@@ -33,7 +33,7 @@ export class StudentService extends ServiceBase{
 
     public async getAllDetailedFavourites(id: number): Promise<IInternshipUIProps>{
         const stmt = await this.unit.prepare(`
-            select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address as location,
+            select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, s.city || ', ' || s.address as location,
                    w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added",
                    (select count(*)
                     from viewed_internships vi
@@ -41,7 +41,6 @@ export class StudentService extends ServiceBase{
                    c.website as "company_link", i.internship_application_link as "internship_link"
             from internship i
                      join site s on (i.location_id = s.location_id)
-                     join city ci on (s.plz = ci.plz)
                      join company c on (s.company_id = c.company_id)
                      join worktype w on (i.worktype_id = w.worktype_id)
                      join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
