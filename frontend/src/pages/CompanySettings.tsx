@@ -17,6 +17,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {checkCompanyAuth} from "@/lib/authUtils.ts";
 import {useNavigate} from "react-router-dom";
 import {toast, Toaster} from "sonner";
+import CompanySites from "@/pages/CompanySites.tsx";
 
 const formSchema = z.object({
     oldPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
@@ -31,9 +32,21 @@ const formSchema = z.object({
     path: ["confirmPassword"]
 });
 
+function getCompanyIdFromToken(): number | null {
+    try {
+        const token = localStorage.getItem("companyAccessToken");
+        if (!token) return null;
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.company_id || null;
+    } catch {
+        return null;
+    }
+}
+
 const CompanySettings = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const companyId = getCompanyIdFromToken();
 
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -166,6 +179,11 @@ const CompanySettings = () => {
                                 </Form>
                             </div>
                         </div>
+                        {companyId ? (
+                            <CompanySites companyId={companyId} />
+                        ) : (
+                            <p>Firma nicht erkannt. Bitte neu einloggen.</p>
+                        )}
                     </FadeIn>
                 </main>
             </div>

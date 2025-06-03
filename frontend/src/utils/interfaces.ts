@@ -84,3 +84,12 @@ export interface ICompanyPayload {
     email_verified: boolean,
     admin_verified: boolean
 }
+
+// Site Interface
+export interface ISite {
+    location_id: number,
+    address: string,
+    name: string,
+    company_id: number,
+    plz: number
+}

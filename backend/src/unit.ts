@@ -119,7 +119,7 @@ export async function ensureTablesCreated(): Promise<void> {
         
         CREATE TABLE IF NOT EXISTS site
         (
-            location_id SMALLINT NOT NULL,
+            location_id SERIAL NOT NULL,
             address     TEXT     NOT NULL,
             name        TEXT,
             company_id  INTEGER  NOT NULL,
