@@ -15,4 +15,45 @@ export class SiteService extends ServiceBase {
         return stmt.rows as ISite[];
     }
 
+    public async insert(site: ISite): Promise<boolean> {
+        const stmt = await this.unit.prepare(`INSERT INTO site (address, name, company_id, plz)
+                                              VALUES ($1, $2, $3, $4)`, [
+            site.address,
+            site.name,
+            site.company_id,
+            site.plz
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async update(site: ISite): Promise<boolean> {
+        const stmt = await this.unit.prepare(`UPDATE site
+                                              SET address = $1,
+                                                  name = $2,
+                                                  company_id = $3,
+                                                  plz = $4
+                                              WHERE location_id = $5`, [
+            site.address,
+            site.name,
+            site.company_id,
+            site.plz,
+            site.location_id
+        ]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async delete(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`DELETE FROM site WHERE location_id = $1`, [id]);
+
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async exists(id: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`SELECT COUNT(*) FROM site WHERE location_id = $1`, [id]);
+        const count = parseInt(stmt.rows[0].count, 10);
+        return count > 0;
+    }
+
 }
