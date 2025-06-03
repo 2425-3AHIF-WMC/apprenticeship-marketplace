@@ -264,14 +264,23 @@ export async function insertSampleData(unit: Unit): Promise<void> {
                    (4, 'Medizintechnik');
 
             -- Firmen
-            INSERT INTO company (name, company_number, company_info, website, email, phone_number, password, email_verified, admin_verified, company_registration_timestamp)
-            VALUES ('TechNova GmbH', '123456a', 'Innovative IT Lösungen', 'https://technova.at', 'info@technova.at', '015123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('GreenFuture AG', '245789b', 'Nachhaltige Energiekonzepte', 'https://greenfuture.at', 'kontakt@greenfuture.at', '0732123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('MediCare Solutions', '367890d', 'Digitale Gesundheitstechnologien', 'https://medicare.at', 'service@medicare.at', '0664123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('EduLearn GmbH', '489321f', 'E-Learning Plattformen', 'https://edulearn.at', 'support@edulearn.at', '0316123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('AutoDrive AG', '590234g', 'Autonomes Fahren', 'https://autodrive.at', 'team@autodrive.at', '0512123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('BuildTech', '612345h', 'Smart Building Lösungen', 'https://buildtech.at', 'contact@buildtech.at', '0276123456', 'pass123', 'Y', 'Y', NOW()),
-                   ('DataOcean GmbH', '734256k', 'Big Data Analyse', 'https://dataocean.at', 'hello@dataocean.at', '0463123456', 'pass123', 'Y', 'Y', NOW());
+            INSERT INTO company (
+                name, company_number, company_info, website, email, phone_number, password,
+                email_verified, admin_verified, company_registration_timestamp,
+                email_verification_timestamp, admin_verification_timestamp, company_logo_path
+            )
+            VALUES 
+            ('CarlaCo Enterprises', '890123a', 'Business-Lösungen für moderne Unternehmen', 'https://carlaco.com', 'info@carlaco.com', '06641234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'CarlaCoEnterprises_Logo.png'),
+            ('Elektronic Design', '901234b', 'Elektronikentwicklung und PCB Design', 'https://elektronicdesign.com', 'contact@elektronicdesign.com', '06761234567', 'pass123', 'N', 'N', NOW(), null, null, 'ElektronicDesign_Logo.png'),
+            ('Elysee Industries', '912345c', 'Industrielösungen und Automation', 'https://elyseeindustries.com', 'service@elyseeindustries.com', '0316123456', 'pass123', 'Y', 'N', NOW(), null, null, 'ElyseeIndustries_Logo.png'),
+            ('IT Media Solutions', '923456d', 'Digitale Medien- und IT-Dienstleistungen', 'https://itmediasolutions.com', 'hello@itmediasolutions.com', '06991234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'ITMediaSolutions_Logo.png'),
+            ('LT Studios', '934567e', 'Kreative Studio- und Designlösungen', 'https://lt-studios.com', 'studio@lt-studios.com', '0720123456', 'pass123', 'N', 'N', NOW(), null, null, 'LT-Studios_Logo.png'),
+            ('LuminaTech', '945678f', 'Beleuchtungstechnologien der Zukunft', 'https://luminatech.com', 'kontakt@luminatech.com', '06601234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'LuminaTech_Logo.png'),
+            ('MeliCorp', '956789g', 'Globale Logistik- und Handelslösungen', 'https://melicorp.com', 'info@melicorp.com', '01 23456789', 'pass123', 'Y', 'Y', NOW(), null, null, 'MeliCorp_Logo.png'),
+            ('Nebula Dynamics', '967890h', 'Cloud Computing & Datenanalyse', 'https://nebuladynamics.com', 'team@nebuladynamics.com', '0732123456', 'pass123', 'Y', 'N', NOW(), null, null, 'NebulaDynamics_Logo.png'),
+            ('Nexus Solutions', '978901i', 'Innovative Unternehmenssoftware', 'https://nexussolutions.com', 'support@nexussolutions.com', '0551223456', 'pass123', 'Y', 'Y', NOW(), null, null, 'NexusSolutions_Logo.png'),
+            ('TechMed Innovations', '989012j', 'Medizintechnologie & Forschung', 'https://techmedinnovations.com', 'contact@techmedinnovations.com', '06641230000', 'pass123', 'N', 'N', NOW(), null, null, 'TechMed_Innovations_Logo.png'),
+            ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'ZenithTech_Logo.png');
 
             -- Standorte
             INSERT INTO site (location_id, address, name, company_id, plz)
