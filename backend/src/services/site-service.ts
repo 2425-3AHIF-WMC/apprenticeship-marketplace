@@ -8,7 +8,7 @@ export class SiteService extends ServiceBase {
     }
 
     public async getAllByCompanyId(id: number):Promise<ISite[]> {
-        const stmt = await this.unit.prepare(`select location_id, address, name, company_id, plz
+        const stmt = await this.unit.prepare(`select location_id, address, name, company_id, plz, city
                                               from site
                                               where company_id = $1`, [id]);
 
@@ -21,7 +21,8 @@ export class SiteService extends ServiceBase {
             site.address,
             site.name,
             site.company_id,
-            site.plz
+            site.plz,
+            site.city
         ]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;

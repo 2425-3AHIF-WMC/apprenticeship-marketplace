@@ -103,17 +103,22 @@ const CompanySettings = () => {
             <div className="flex-1 flex justify-center">
                 <main className="w-full p-8 space-y-6">
                     <FadeIn>
-                        <div className="flex flex-col gap-4">
+                        {companyId ? (
+                            <CompanySites companyId={companyId}/>
+                        ) : (
+                            <p>Firma nicht erkannt. Bitte neu einloggen.</p>
+                        )}
+
+
+                        <div className="flex flex-col mt-12 gap-1">
                             <div>
-                                <h1 className="heading-md text-left">Konto-Einstellungen</h1>
+                                <h1 className="heading-md text-left">Passwort zurücksetzen</h1>
                                 <p className="text-muted-foreground text-left">
-                                    Verwalten Sie Ihre Kontoeinstellungen und Passwort
+                                    Setzen Sie ihr derzeitiges Passwort zurück
                                 </p>
                             </div>
 
                             <div className="bg-card rounded-lg p-6 shadow-sm">
-                                <h2 className="text-lg font-semibold mb-4">Passwort ändern</h2>
-
                                 <Form {...form}>
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                         <FormField
@@ -179,11 +184,6 @@ const CompanySettings = () => {
                                 </Form>
                             </div>
                         </div>
-                        {companyId ? (
-                            <CompanySites companyId={companyId} />
-                        ) : (
-                            <p>Firma nicht erkannt. Bitte neu einloggen.</p>
-                        )}
                     </FadeIn>
                 </main>
             </div>

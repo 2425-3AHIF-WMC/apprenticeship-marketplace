@@ -135,8 +135,10 @@ function CompanySites({ companyId }: Props) {
 
     return (
         <section>
-            <h2 className="text-2xl font-bold mb-4">Standorte verwalten</h2>
-
+            <h1 className="heading-md text-left">Standorte verwalten</h1>
+            <p className="text-muted-foreground text-left mb-4">
+                Sie können Standorte hinzufügen, bearbeiten und löschen.
+            </p>
             <Button onClick={() => openDialog()} className="mb-4">
                 Neuen Standort hinzufügen
             </Button>

@@ -406,7 +406,7 @@ companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
             if (sites.length > 0) {
                 res.status(StatusCodes.OK).json(sites);
             } else {
-                res.status(StatusCodes.NOT_FOUND).json([]);
+                res.status(StatusCodes.OK).json([]);
             }
 
         } else {

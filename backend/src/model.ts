@@ -131,7 +131,7 @@ export interface ICompanyPayload {
 }
 
 export interface ISite {
-    location_id: number,
+    location_id?: number,
     address: string,
     name: string,
     company_id: number,
