@@ -437,6 +437,68 @@ companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
     }
 });
 
+companyRouter.put("/site", async (req: Request, res: Response) => {
+    const site: ISite = req.body;
+    const unit: Unit = await Unit.create(true);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (!isValidId(site.company_id)) {
+            res.status(StatusCodes.BAD_REQUEST).send("Invalid company id");
+            return;
+        }
+
+        const isUpdate = site.location_id && await siteService.exists(site.location_id);
+
+        const success = isUpdate
+            ? await siteService.update(site)
+            : await siteService.insert(site);
+
+        if (success) {
+            await unit.complete(true);
+            res.status(isUpdate ? StatusCodes.NO_CONTENT : StatusCodes.CREATED).json(site);
+            return;
+        } else {
+            await unit.complete(false);
+            res.status(StatusCodes.BAD_REQUEST).send("Updating or creating was not successful");
+            return;
+        }
+
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.delete("/site/:id", async (req: Request, res: Response) => {
+    const location_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (!isValidId(location_id)) {
+            await unit.complete(false);
+            res.status(StatusCodes.BAD_REQUEST).send("Invalid site id");
+            return;
+        }
+
+        const success = await siteService.delete(location_id);
+
+        await unit.complete(success);
+        res.sendStatus(success ? StatusCodes.NO_CONTENT : StatusCodes.NOT_FOUND);
+        return;
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
 // to insert and update a new company
 companyRouter.put("", async (req: Request, res: Response) => {
     const id: number = req.body.company_id === undefined ? -1 : parseInt(req.body.company_id);
