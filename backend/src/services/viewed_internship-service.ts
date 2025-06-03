@@ -14,6 +14,17 @@ export class ViewedInternshipService extends ServiceBase {
     }
 
     public async getCountOfStudent(studentId: number): Promise<number> {
-        return -1;
+        const stmt = await this.unit.prepare(`select count(*)
+                                              from viewed_internships
+                                              where student_id = $1`, [studentId]);
+        return stmt.rows[0].count || 0;
+    }
+
+    public async getCountOfStudentLast30Days(studentId: number): Promise<number> {
+        const stmt = await this.unit.prepare(`SELECT COUNT(*)
+                                                  FROM viewed_internships
+                                                  WHERE student_id = $1
+                                                    AND viewed_timestamp >= NOW() - INTERVAL '30 days'`, [studentId]);
+        return stmt.rows[0].count || 0;
     }
 }

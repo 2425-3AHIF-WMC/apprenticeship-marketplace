@@ -24,7 +24,7 @@ viewedInternshipRouter.put("/", async (req: Request, res: Response) => {
         const viewedService = new ViewedInternshipService(unit);
         const success: boolean = await viewedService.insert(studentId, internshipId);
 
-        if(success) {
+        if (success) {
             res.status(StatusCodes.CREATED).send("viewed internship was created");
             await unit.complete(true);
         }
@@ -36,4 +36,48 @@ viewedInternshipRouter.put("/", async (req: Request, res: Response) => {
         await unit.complete(false);
     }
 
+});
+
+viewedInternshipRouter.get("/:studentId/count", async (req: Request, res: Response) => {
+    const studentId: number = parseInt(req.params.studentId);
+    const unit: Unit = await Unit.create(true);
+    const studentService = new StudentService(unit);
+
+    if (!isValidId(studentId) || !(await studentService.studentExists(studentId))) {
+        res.status(StatusCodes.BAD_REQUEST).json({"viewedCount": "0"});
+    }
+
+    try {
+        const viewedService =  new ViewedInternshipService(unit);
+        const viewedCount: number = await viewedService.getCountOfStudent(studentId);
+
+        res.status(StatusCodes.OK).json(viewedCount);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+viewedInternshipRouter.get("/:studentId/countLast30Days", async (req: Request, res: Response) => {
+    const studentId: number = parseInt(req.params.studentId);
+    const unit: Unit = await Unit.create(true);
+    const studentService = new StudentService(unit);
+
+    if (!isValidId(studentId) || !(await studentService.studentExists(studentId))) {
+        res.status(StatusCodes.BAD_REQUEST).json({"viewedCount": "0"});
+    }
+
+    try {
+        const viewedService =  new ViewedInternshipService(unit);
+        const viewedCount: number = await viewedService.getCountOfStudentLast30Days(studentId);
+
+        res.status(StatusCodes.OK).json(viewedCount);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
