@@ -88,11 +88,6 @@ const AdminInternships = () => {
         };
         filteredInternships = filteredInternships.sort(sortFn);
     }
-    const isDeadlineExpired = (deadline: string) => {
-        const today = new Date();
-        const deadlineDate = new Date(deadline);
-        return deadlineDate < today;
-    };
 
     const handleDelete = async (id: string) => {
         try {
@@ -193,7 +188,7 @@ const AdminInternships = () => {
                                                 <FadeIn key={internship.id} delay={index * 50}>
                                                     <div
                                                         className={
-                                                            `relative ${isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200 dark:bg-black/60 dark:hover:bg-black/40' : ''}`
+                                                            `relative ${internship.admin_verified ? '' : 'opacity-50'}`
                                                         }
                                                     >
                                                         <button

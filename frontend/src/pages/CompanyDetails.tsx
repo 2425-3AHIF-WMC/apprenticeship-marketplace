@@ -51,7 +51,6 @@ const CompanyDetails = () => {
         return res.json();
       })
       .then(data => {
-        console.log(data);
         setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
       })
       .catch(err => setInternshipsError(err.message || 'Unbekannter Fehler'))
@@ -130,7 +129,7 @@ const CompanyDetails = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {internships.map((internship, index) => (
                       <FadeIn key={internship.id} delay={index * 50}>
-                          <InternshipCard internship={internship}/>
+                          <InternshipCard internship={internship} />
                       </FadeIn>
                   ))}
               </div>

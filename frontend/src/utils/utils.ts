@@ -23,7 +23,7 @@ export function mapBackendToCompanyUIPropsAdmin(item: any): CompanyUIPropsAdmin 
         company_registration_timestamp: item.company_registration_timestamp ? new Date(item.company_registration_timestamp).toISOString() : '',
         email_verification_timestamp: item.email_verification_timestamp ? new Date(item.email_verification_timestamp).toISOString() : '',
         admin_verification_timestamp: item.admin_verification_timestamp ? new Date(item.admin_verification_timestamp).toISOString() : '',
-        company_logo: item.company_logo ?? '',
+        company_logo: item.company_logo_path ?? '',
         company_number: item.company_number ?? '',
         internships: Array.isArray(item.internships) ? item.internships : [],
     };
