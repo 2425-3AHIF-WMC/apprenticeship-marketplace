@@ -25,19 +25,10 @@ const StudentDashboard = () => {
       setError(null);
       try {
         if (!studentId) return;
-        // 1. Get favourite internship IDs
-        const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
-        if (!res.ok) throw new Error('Fehler beim Laden der Favoriten-IDs');
-        const favIds = await res.json();
-        // 2. Fetch each internship by ID
-        const internshipPromises = favIds.map(async (id: number) => {
-          const res = await fetch(`http://localhost:5000/api/internship/${id}`);
-          if (!res.ok) throw new Error('Fehler beim Laden eines Praktikums');
-          const data = await res.json();
-          return mapBackendToInternshipProps(data);
-        });
-        const internships = (await Promise.all(internshipPromises)).filter(Boolean);
-        setFavoriteInternships(internships);
+        const res = await fetch(`http://localhost:5000/api/student/favourites_detailed/${studentId}`);
+        if (!res.ok) throw new Error('Fehler beim Laden der Favoriten');
+        const data = await res.json();
+        setFavoriteInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
       } catch (err: any) {
         setError(err.message || 'Unbekannter Fehler');
       } finally {
