@@ -91,7 +91,7 @@ export class CompanyService extends ServiceBase {
                                                      admin_verification_timestamp,
                                                      company_logo_path
                                               from company
-                                              where admin_verified = 'no'`);
+                                              where admin_verified = 'no' and email_verified = 'yes'`);
         return stmt.rows as ICompany[];
     }
 

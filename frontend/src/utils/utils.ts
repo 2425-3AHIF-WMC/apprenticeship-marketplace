@@ -23,7 +23,7 @@ export function mapBackendToCompanyUIPropsAdmin(item: any): CompanyUIPropsAdmin 
         company_registration_timestamp: item.company_registration_timestamp ? new Date(item.company_registration_timestamp).toISOString() : '',
         email_verification_timestamp: item.email_verification_timestamp ? new Date(item.email_verification_timestamp).toISOString() : '',
         admin_verification_timestamp: item.admin_verification_timestamp ? new Date(item.admin_verification_timestamp).toISOString() : '',
-        company_logo: item.company_logo ?? '',
+        company_logo: item.company_logo_path ?? '',
         company_number: item.company_number ?? '',
         internships: Array.isArray(item.internships) ? item.internships : [],
     };
@@ -40,11 +40,12 @@ export function mapBackendToInternshipProps(item: any): InternshipUIProps {
         added: item.added || '',
         views: item.views || item.clicks || 0,
         work_type: item.work_type,
-        company_logo: item.company_logo,
+        company_logo: item.company_logo_path,
         department: Array.isArray(item.department) ? item.department : Array.isArray(item.category) ? item.category : [item.department || item.category],
         min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
         company_link: item.companyLink || item.company_link || '',
         internship_link: item.internship_link || '',
+        admin_verified: item.admin_verified === true || item.admin_verified === 'true' || item.admin_verified === 1,
     };
 }
 
@@ -60,7 +61,7 @@ export function mapBackendToInternshipDetailsProps(item: any): InternshipDetails
         added: item.added,
         views: item.views,
         work_type: item.work_type,
-        company_logo: item.company_logo,
+        company_logo: item.company_logo_path,
         category: Array.isArray(item.category) ? item.category : [item.category],
         min_year: item.min_year ? `${item.min_year}. Schulstufe` : '',
         company_link: item.company_link,

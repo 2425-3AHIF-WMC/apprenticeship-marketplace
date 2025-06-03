@@ -25,6 +25,8 @@ export interface InternshipUIProps {
     department: string[];
     company_link: string;
     internship_link: string;
+    admin_verified: boolean;
+
 }
 
 export interface InternshipDetailsUIProps {

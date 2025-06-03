@@ -17,7 +17,7 @@ internshipRouter.get("/current", async (req: Request, res: Response) => {
         res.status(StatusCodes.OK).json(internship);
 
     } catch (e) {
-        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
     } finally {
         await unit.complete();
     }
@@ -108,7 +108,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             }
         }
     } catch (e) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
     } finally {
         await unit.complete();
     }
@@ -224,7 +224,7 @@ internshipRouter.delete("/delete/:id", async (req: Request, res: Response) => {
         }
 
     } catch (e) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
         return;
 
     } finally {

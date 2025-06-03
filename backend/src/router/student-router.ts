@@ -45,7 +45,7 @@ studentRouter.get("/favourites_detailed/:id", async (req: Request, res: Response
 
     try {
         const service = new StudentService(unit);
-        if (await service.studentExists(id)) {
+        if (!await service.studentExists(id)) {
             res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
             return;
         }

@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react';
 
 const AdminDashboard = () => {
   // Placeholder values for now
-  const outstandingVerifications = 5;
   const [newInternships, setNewInternships] = useState(0);
+  const [openAdminVerifications, setOpenAdminVerifications] = useState(0);
 
   useEffect(() => {
     const fetchInternships = async () => {
@@ -16,6 +16,15 @@ const AdminDashboard = () => {
       setNewInternships(data.count);
     };
     fetchInternships();
+  }, []);
+
+  useEffect(() => {
+    const fetchOpenAdminVerifications = async () => {
+      const res = await fetch('http://localhost:5000/api/company/open_admin_verifications/count');
+      const data = await res.json();
+      setOpenAdminVerifications(data);
+    };
+    fetchOpenAdminVerifications();
   }, []);
 
   return (
@@ -42,7 +51,7 @@ const AdminDashboard = () => {
                   <CardContent>
                     <div className="flex items-center">
                       <Building className="h-8 w-8 text-primary mr-3" />
-                      <div className="text-3xl font-semibold">{outstandingVerifications}</div>
+                      <div className="text-3xl font-semibold">{openAdminVerifications}</div>
                     </div>
                   </CardContent>
                 </Card>

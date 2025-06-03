@@ -31,29 +31,29 @@ export class StudentService extends ServiceBase{
         return stmt.rows[0].array_agg ?? [];
     }
 
-    public async getAllDetailedFavourites(id: number): Promise<IInternshipUIProps>{
+    public async getAllDetailedFavourites(id: number): Promise<IInternshipUIProps[]>{
         const stmt = await this.unit.prepare(`
-            select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, ci.name || ', ' || s.address as location,
-                   w.name as "work_type", c.company_logo, id.description as "duration", i.internship_creation_timestamp as "added",
-                   (select count(*)
-                    from viewed_internships vi
-                    where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
-                   c.website as "company_link", i.internship_application_link as "internship_link"
-            from internship i
-                     join site s on (i.location_id = s.location_id)
-                     join city ci on (s.plz = ci.plz)
-                     join company c on (s.company_id = c.company_id)
-                     join worktype w on (i.worktype_id = w.worktype_id)
-                     join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
-                     left join internship_department_map idm on (i.internship_id = idm.internship_id)
-                     left join department d ON d.department_id = idm.department_id
+            
+        select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, s.city || ', ' || s.address as location,
+                                                       w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added",
+                                                       (select count(*)
+                                                        from viewed_internships vi
+                                                        where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
+                                                       c.website as "company_link", i.internship_application_link as "internship_link", true as admin_verified
+                                                from internship i
+                                                         join site s on (i.location_id = s.location_id)
+                                                         join company c on (s.company_id = c.company_id)
+                                                         join worktype w on (i.worktype_id = w.worktype_id)
+                                                         join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
+                                                         left join internship_department_map idm on (i.internship_id = idm.internship_id)
+                                                         left join department d ON d.department_id = idm.department_id       
                     join favourite f on (i.internship_id = f.internship_id)
                     join student st on (st.student_id = f.student_id)
-            where st.student_id = 1
-            group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
-        `);
+            where st.student_id = $1
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, c.admin_verified;
+            `, [id]);
 
-        return stmt.rows[0] as IInternshipUIProps;
+        return stmt.rows as IInternshipUIProps[];
     }
 
     public async insert(username: string): Promise<boolean> {
