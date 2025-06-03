@@ -70,10 +70,10 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             }
 
             const service = new InternshipService(unit);
-            const addedSuccessful = await service.newInternship(internship);
+            const addedId: number = await service.newInternship(internship);
 
-            if (addedSuccessful != -1) {
-                res.status(StatusCodes.CREATED).send("Internship added successfully");
+            if (addedId != -1) {
+                res.status(StatusCodes.CREATED).json(addedId);
             } else {
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
                 return;
@@ -130,7 +130,7 @@ internshipRouter.get("/isOfCompany", async (req: Request, res: Response) => {
             const internshipIdsOfCompany: number[] = await internshipService.getIdByCompanyId(company_id);
             const isOfCompany: boolean = internshipIdsOfCompany.includes(internship_id);
 
-            res.status(StatusCodes.OK).json({ isOfCompany });
+            res.status(StatusCodes.OK).json({isOfCompany});
         } else {
             res.status(StatusCodes.BAD_REQUEST).send("ids are not valid or corresponding row does not exist");
         }
@@ -148,8 +148,8 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
 
     try {
         const count: number = await service.getCountCreatedTheLast30Days();
-        res.status(StatusCodes.OK).json({ count });
-    }catch (e) {
+        res.status(StatusCodes.OK).json({count});
+    } catch (e) {
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
         return;
     } finally {
@@ -157,7 +157,7 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
     }
 });
 
-internshipRouter.get("/admin_verified", async (req, res)=>{
+internshipRouter.get("/admin_verified", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     try {
         const service = new InternshipService(unit);

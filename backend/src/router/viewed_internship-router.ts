@@ -22,10 +22,11 @@ viewedInternshipRouter.put("/", async (req: Request, res: Response) => {
 
     try {
         const viewedService = new ViewedInternshipService(unit);
-        const success: boolean = await viewedService.insert(studentId, internshipId);
+        const exists: boolean = await viewedService.viewedInternshipExists(studentId, internshipId);
+        const success: boolean = exists ? await viewedService.update(studentId, internshipId) : await viewedService.insert(studentId, internshipId);
 
         if (success) {
-            res.status(StatusCodes.CREATED).send("viewed internship was created");
+            res.status(exists ? StatusCodes.NO_CONTENT : StatusCodes.CREATED).send("viewed internship was created or updated");
             await unit.complete(true);
         }
 
@@ -48,7 +49,7 @@ viewedInternshipRouter.get("/:studentId/count", async (req: Request, res: Respon
     }
 
     try {
-        const viewedService =  new ViewedInternshipService(unit);
+        const viewedService = new ViewedInternshipService(unit);
         const viewedCount: number = await viewedService.getCountOfStudent(studentId);
 
         res.status(StatusCodes.OK).json(viewedCount);
@@ -70,7 +71,7 @@ viewedInternshipRouter.get("/:studentId/countLast30Days", async (req: Request, r
     }
 
     try {
-        const viewedService =  new ViewedInternshipService(unit);
+        const viewedService = new ViewedInternshipService(unit);
         const viewedCount: number = await viewedService.getCountOfStudentLast30Days(studentId);
 
         res.status(StatusCodes.OK).json(viewedCount);
