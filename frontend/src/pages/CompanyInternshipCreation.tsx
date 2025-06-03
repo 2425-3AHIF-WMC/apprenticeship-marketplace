@@ -77,7 +77,7 @@ const descriptionSchema = z.discriminatedUnion('descriptionType', [
 const formSchema = z
     .object({
         title: z.string().min(1, "Ein Titel muss vorhanden sein"),
-        internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
+        internship_application_link: z.string().min(5, "Ein Bewerbungslink muss vorhanden sein"),
         minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
         workType: z.string({ required_error: "Eine Arbeitsart muss ausgewählt sein" }),
         duration: z.string({ required_error: "Eine Dauer muss ausgewählt sein" }),
@@ -155,7 +155,7 @@ const CompanyInternshipCreation = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: '',
-            internshipDescription: '',
+            internship_application_link: '',
             minYear: '',
             departments: [],
             salaryType: 'salary',
@@ -187,7 +187,7 @@ const CompanyInternshipCreation = () => {
                     location_id: String(values.site),
                     worktype_id: String(values.workType),
                     internship_duration_id: String(values.duration),
-                    internship_application_link: "sample"
+                    internship_application_link: values.internship_application_link
                 })
             });
             if (!resp.ok) {
@@ -211,7 +211,7 @@ const CompanyInternshipCreation = () => {
                 const container = document.getElementById('editor-pdf-content');
                 if (container) {
                     container.innerHTML = `<div class="ql-editor">${values.editorContent}</div>`;
-                    
+
                     const qlDiv = container.querySelector('.ql-editor');
                     if (qlDiv) {
                         const opt = {
@@ -309,12 +309,12 @@ const CompanyInternshipCreation = () => {
 
                                         <FormField
                                             control={form.control}
-                                            name="internshipDescription"
+                                            name="internship_application_link"
                                             render={({field}) => (
                                                 <FormItem>
-                                                    <FormLabel>Kurzbeschreibung</FormLabel>
+                                                    <FormLabel>Bewerbungslink</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="z.B. IT-Entwicklung" {...field} />
+                                                        <Input placeholder="z.B. https://www.example.com/bewerbung" {...field} />
                                                     </FormControl>
                                                     <FormMessage/>
                                                 </FormItem>
