@@ -83,13 +83,7 @@ export async function ensureTablesCreated(): Promise<void> {
                 ON DELETE CASCADE
         );
         
-        CREATE TABLE IF NOT EXISTS city
-        (
-            plz  INTEGER,
-            name TEXT NOT NULL,
-            CONSTRAINT pk_city PRIMARY KEY (plz),
-            CONSTRAINT chk_plz CHECK (plz >= 1000 AND plz <= 9999)
-        );
+        
         
         CREATE TABLE IF NOT EXISTS company
         (
@@ -124,13 +118,11 @@ export async function ensureTablesCreated(): Promise<void> {
             name        TEXT,
             company_id  INTEGER  NOT NULL,
             plz         INTEGER  NOT NULL,
+            city TEXT     NOT NULL,
             CONSTRAINT pk_site PRIMARY KEY (location_id),
             CONSTRAINT fk_site_company FOREIGN KEY (company_id)
                 REFERENCES company (company_id)
                 ON DELETE CASCADE,
-            CONSTRAINT fk_site_city FOREIGN KEY (plz)
-                REFERENCES city (plz)
-                ON DELETE CASCADE
         );
         
         CREATE TABLE IF NOT EXISTS worktype
@@ -221,7 +213,7 @@ export async function ensureTablesCreated(): Promise<void> {
 
 export async function insertSampleData(unit: Unit): Promise<void> {
 
-    const tables: string[] = ["worktype", "internship_duration", "city", "department", "company", "site", "internship", "internship_department_map"];
+    const tables: string[] = ["worktype", "internship_duration", "department", "company", "site", "internship", "internship_department_map"];
 
     async function dataPresent(table: string): Promise<boolean> {
         const chkStmt = await unit.prepare('select count(*) as "count" from internship');
@@ -244,17 +236,6 @@ export async function insertSampleData(unit: Unit): Promise<void> {
             VALUES (1, '4 Wochen'),
                    (2, '8 Wochen'),
                    (3, 'variabel');
-
-            -- Städte
-            INSERT INTO city (plz, name)
-            VALUES (1010, 'Wien'),
-                   (4020, 'Linz'),
-                   (5020, 'Salzburg'),
-                   (8010, 'Graz'),
-                   (6020, 'Innsbruck'),
-                   (3100, 'St. Pölten'),
-                   (9020, 'Klagenfurt'),
-                   (4463, 'Großraming');
 
             -- Abteilungen
             INSERT INTO department (department_id, name)
@@ -283,14 +264,14 @@ export async function insertSampleData(unit: Unit): Promise<void> {
             ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'ZenithTech_Logo.png');
 
             -- Standorte
-            INSERT INTO site (location_id, address, name, company_id, plz)
-            VALUES (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010),
-                   (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020),
-                   (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020),
-                   (4, 'Herrengasse 5', 'EduLearn Graz', 4, 8010),
-                   (5, 'Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020),
-                   (6, 'Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100),
-                   (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020);
+            INSERT INTO site (location_id, address, name, company_id, plz, city)
+            VALUES (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010, 'Wien'),
+                   (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020, 'Linz'),
+                   (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020, 'Salzburg'),
+                   (4, 'Herrengasse 5', 'EduLearn Graz', 4, 8010, 'Graz'),
+                   (5, 'Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020, 'Innsbruck'),
+                   (6, 'Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100, 'St. Pölten'),
+                   (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020, 'Klagenfurt');
 
             -- Praktika
             INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link)
