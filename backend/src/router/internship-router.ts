@@ -61,6 +61,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
 
         }
 
+        console.log(id);
         if (id === -1) {
             let internship: IInternship = {
                 title, pdf_path, min_year,
@@ -73,7 +74,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             const addedId: number = await service.newInternship(internship);
 
             if (addedId != -1) {
-                res.status(StatusCodes.CREATED).json(addedId);
+                res.status(StatusCodes.CREATED).json({ internship_id: addedId });
             } else {
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
                 return;

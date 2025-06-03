@@ -188,4 +188,12 @@ export class InternshipService extends ServiceBase{
         return parseInt(stmt.rows[0].count ?? 0, 10);
 
     }
+
+    public async updatePdfPath(internshipId: number, pdfPath: string): Promise<boolean> {
+        const stmt = await this.unit.prepare(
+            `UPDATE internship SET pdf_path = $1 WHERE internship_id = $2`,
+            [pdfPath, internshipId]
+        );
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
 }

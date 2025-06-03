@@ -169,34 +169,58 @@ const CompanyInternshipCreation = () => {
     }
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            // 1. Internship anlegen (ohne PDF)
             const resp = await fetch('http://localhost:5000/api/internship/change', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    clicks: 20,
+                    clicks: String(1),
                     title: values.title,
-                    description: values.internshipDescription,
-                    min_year: values.minYear,
+                    pdf_path: "pending",
+                    min_year: String(values.minYear),
                     internship_creation_timestamp: new Date().toISOString(),
-                    salary: values.salary || 0,
-                    application_end: values.deadline,
-                    location_id: values.site,
-                    worktype_id: values.workType,
-                    internship_duration_id: values.duration,
+                    salary: String(values.salary || 0),
+                    application_end: values.deadline.toISOString().split('T')[0],
+                    location_id: String(values.site),
+                    worktype_id: String(values.workType),
+                    internship_duration_id: String(values.duration),
                     internship_application_link: "sample"
                 })
             });
             if (!resp.ok) {
                 console.log('Fehler beim Speichern');
-            } else {
-                console.log('Erfolgreich gespeichert');
+                return;
             }
+            // 2. ID aus Response holen
+            const text = await resp.text();
+            let internshipId;
+            try {
+                internshipId = JSON.parse(text).internship_id;
+            } catch {
+                internshipId = Number(text);
+            }
+            // 3. PDF hochladen, falls vorhanden
+            if (values.descriptionType === 'pdf' && values.pdfFile) {
+                const formData = new FormData();
+                formData.append('file', values.pdfFile);
+                formData.append('internshipId', internshipId.toString());
+                const uploadResp = await fetch(`http://localhost:5000/api/media/upload/${internshipId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!uploadResp.ok) {
+                    console.log('Fehler beim PDF-Upload');
+                    return;
+                }
+                const uploadResult = await uploadResp.json();
+                console.log('PDF erfolgreich hochgeladen:', uploadResult.pdfPath);
+            }
+            console.log('Erfolgreich gespeichert');
         } catch (error) {
             console.log(error);
         }
-
         console.log(values);
     }
 
@@ -286,7 +310,6 @@ const CompanyInternshipCreation = () => {
                                                         <SelectItem value="2">2. Jahrgang</SelectItem>
                                                         <SelectItem value="3">3. Jahrgang</SelectItem>
                                                         <SelectItem value="4">4. Jahrgang</SelectItem>
-                                                        <SelectItem value="5">5. Jahrgang</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage/>
