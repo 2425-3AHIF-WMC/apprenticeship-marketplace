@@ -251,17 +251,17 @@ export async function insertSampleData(unit: Unit): Promise<void> {
                 email_verification_timestamp, admin_verification_timestamp, company_logo_path
             )
             VALUES 
-            ('CarlaCo Enterprises', '890123a', 'Business-Lösungen für moderne Unternehmen', 'https://carlaco.com', 'info@carlaco.com', '06641234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'CarlaCoEnterprises_Logo.png'),
-            ('Elektronic Design', '901234b', 'Elektronikentwicklung und PCB Design', 'https://elektronicdesign.com', 'contact@elektronicdesign.com', '06761234567', 'pass123', 'N', 'N', NOW(), null, null, 'ElektronicDesign_Logo.png'),
-            ('Elysee Industries', '912345c', 'Industrielösungen und Automation', 'https://elyseeindustries.com', 'service@elyseeindustries.com', '0316123456', 'pass123', 'Y', 'N', NOW(), null, null, 'ElyseeIndustries_Logo.png'),
-            ('IT Media Solutions', '923456d', 'Digitale Medien- und IT-Dienstleistungen', 'https://itmediasolutions.com', 'hello@itmediasolutions.com', '06991234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'ITMediaSolutions_Logo.png'),
-            ('LT Studios', '934567e', 'Kreative Studio- und Designlösungen', 'https://lt-studios.com', 'studio@lt-studios.com', '0720123456', 'pass123', 'N', 'N', NOW(), null, null, 'LT-Studios_Logo.png'),
-            ('LuminaTech', '945678f', 'Beleuchtungstechnologien der Zukunft', 'https://luminatech.com', 'kontakt@luminatech.com', '06601234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'LuminaTech_Logo.png'),
-            ('MeliCorp', '956789g', 'Globale Logistik- und Handelslösungen', 'https://melicorp.com', 'info@melicorp.com', '01 23456789', 'pass123', 'Y', 'Y', NOW(), null, null, 'MeliCorp_Logo.png'),
-            ('Nebula Dynamics', '967890h', 'Cloud Computing & Datenanalyse', 'https://nebuladynamics.com', 'team@nebuladynamics.com', '0732123456', 'pass123', 'Y', 'N', NOW(), null, null, 'NebulaDynamics_Logo.png'),
-            ('Nexus Solutions', '978901i', 'Innovative Unternehmenssoftware', 'https://nexussolutions.com', 'support@nexussolutions.com', '0551223456', 'pass123', 'Y', 'Y', NOW(), null, null, 'NexusSolutions_Logo.png'),
-            ('TechMed Innovations', '989012j', 'Medizintechnologie & Forschung', 'https://techmedinnovations.com', 'contact@techmedinnovations.com', '06641230000', 'pass123', 'N', 'N', NOW(), null, null, 'TechMed_Innovations_Logo.png'),
-            ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'ZenithTech_Logo.png');
+            ('CarlaCo Enterprises', '890123a', 'Business-Lösungen für moderne Unternehmen', 'https://carlaco.com', 'info@carlaco.com', '06641234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/CarlaCoEnterprises_Logo.png'),
+            ('Elektronic Design', '901234b', 'Elektronikentwicklung und PCB Design', 'https://elektronicdesign.com', 'contact@elektronicdesign.com', '06761234567', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/ElektronicDesign_Logo.png'),
+            ('Elysee Industries', '912345c', 'Industrielösungen und Automation', 'https://elyseeindustries.com', 'service@elyseeindustries.com', '0316123456', 'pass123', 'Y', 'N', NOW(), null, null, 'company-logos/ElyseeIndustries_Logo.png'),
+            ('IT Media Solutions', '923456d', 'Digitale Medien- und IT-Dienstleistungen', 'https://itmediasolutions.com', 'hello@itmediasolutions.com', '06991234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/ITMediaSolutions_Logo.png'),
+            ('LT Studios', '934567e', 'Kreative Studio- und Designlösungen', 'https://lt-studios.com', 'studio@lt-studios.com', '0720123456', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/LT-Studios_Logo.png'),
+            ('LuminaTech', '945678f', 'Beleuchtungstechnologien der Zukunft', 'https://luminatech.com', 'kontakt@luminatech.com', '06601234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/LuminaTech_Logo.png'),
+            ('MeliCorp', '956789g', 'Globale Logistik- und Handelslösungen', 'https://melicorp.com', 'info@melicorp.com', '01 23456789', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/MeliCorp_Logo.png'),
+            ('Nebula Dynamics', '967890h', 'Cloud Computing & Datenanalyse', 'https://nebuladynamics.com', 'team@nebuladynamics.com', '0732123456', 'pass123', 'Y', 'N', NOW(), null, null, 'company-logos/NebulaDynamics_Logo.png'),
+            ('Nexus Solutions', '978901i', 'Innovative Unternehmenssoftware', 'https://nexussolutions.com', 'support@nexussolutions.com', '0551223456', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/NexusSolutions_Logo.png'),
+            ('TechMed Innovations', '989012j', 'Medizintechnologie & Forschung', 'https://techmedinnovations.com', 'contact@techmedinnovations.com', '06641230000', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/TechMed_Innovations_Logo.png'),
+            ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/ZenithTech_Logo.png');
 
             -- Standorte
             INSERT INTO site (location_id, address, name, company_id, plz, city)
@@ -275,26 +275,26 @@ export async function insertSampleData(unit: Unit): Promise<void> {
 
             -- Praktika
             INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link)
-            VALUES ('Softwareentwickler Praktikum', 'C#/.NET Entwicklung', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
-                   ('Frontend Entwickler', 'React.js Projektarbeit', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
-                   ('Data Analyst Praktikum', 'Analyse großer Datensätze mit Python', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
-                   ('Marketing Assistant', 'Unterstützung bei Online-Kampagnen', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
-                   ('Health App Tester', 'Usability-Tests von mobilen Anwendungen', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
-                   ('E-Learning Content Creator', 'Multimedia-Inhalte entwickeln', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
-                   ('Fahrzeugsimulation Praktikum', 'Simulation autonomer Fahrzeuge', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
-                   ('Smart Building Testing', 'IoT-Sensorik evaluieren', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
-                   ('Machine Learning Assistant', 'Modelle für Vorhersagen trainieren', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
-                   ('Webdesign Praktikum', 'Mitarbeit an responsiven Layouts', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
-                   ('Backoffice Assistant', 'Dokumentenmanagement und Kommunikation', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
-                   ('UX Research Praktikum', 'Interviews und Nutzeranalysen', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
-                   ('Energieoptimierung Praktikum', 'Auswertung von Verbrauchsdaten', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
-                   ('Cloud Infrastruktur Praktikum', 'Arbeiten mit AWS und Docker', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
-                   ('Technischer Redakteur', 'Erstellen technischer Dokumentationen', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
-                   ('App-Entwicklung iOS', 'Swift und Xcode kennenlernen', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
-                   ('DevOps Intern', 'CI/CD Pipelines automatisieren', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
-                   ('CRM Kampagnen', 'Salesforce nutzen und pflegen', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
-                   ('Security Audit Support', 'Penetration Testing und Berichte', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
-                   ('SEO Praktikum', 'Optimierung von Webseiten', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
+            VALUES ('Softwareentwickler Praktikum', 'job-postings/2.pdf', 2, NOW(), 800.00, '2025-06-30', 1, 12, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
+                   ('Frontend Entwickler', 'job-postings/2pdf', 3, NOW(), 850.00, '2025-07-15', 2, 5, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
+                   ('Data Analyst Praktikum', 'job-postings/2.pdf', 2, NOW(), 900.00, '2025-06-10', 7, 9, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
+                   ('Marketing Assistant', 'job-postings/2.pdf', 1, NOW(), 750.00, '2025-06-01', 4, 7, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
+                   ('Health App Tester', 'job-postings/2.pdf', 3, NOW(), 700.00, '2025-06-20', 3, 4, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
+                   ('E-Learning Content Creator', 'job-postings/2.pdf', 2, NOW(), 800.00, '2025-07-01', 4, 3, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
+                   ('Fahrzeugsimulation Praktikum', 'job-postings/2.pdf', 4, NOW(), 1000.00, '2025-07-10', 5, 6, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
+                   ('Smart Building Testing', 'job-postings/2.pdf', 2, NOW(), 850.00, '2025-07-05', 6, 2, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
+                   ('Machine Learning Assistant', 'job-postings/2.pdf', 3, NOW(), 950.00, '2025-08-01', 7, 8, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
+                   ('Webdesign Praktikum', 'job-postings/2.pdf', 1, NOW(), 700.00, '2025-06-25', 2, 4, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
+                   ('Backoffice Assistant', 'job-postings/2.pdf', 2, NOW(), 650.00, '2025-06-15', 1, 2, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
+                   ('UX Research Praktikum', 'job-postings/2.pdf', 3, NOW(), 800.00, '2025-07-20', 3, 5, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
+                   ('Energieoptimierung Praktikum', 'job-postings/2.pdf', 2, NOW(), 850.00, '2025-07-30', 2, 3, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
+                   ('Cloud Infrastruktur Praktikum', 'job-postings/2.pdf', 3, NOW(), 1000.00, '2025-08-10', 7, 6, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
+                   ('Technischer Redakteur', 'job-postings/2.pdf', 1, NOW(), 700.00, '2025-06-22', 6, 2, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
+                   ('App-Entwicklung iOS', 'job-postings/2.pdf', 3, NOW(), 900.00, '2025-07-05', 3, 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
+                   ('DevOps Intern', 'job-postings/2.pdf', 4, NOW(), 950.00, '2025-08-15', 5, 7, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
+                   ('CRM Kampagnen', 'job-postings/2.pdf', 2, NOW(), 800.00, '2025-06-18', 4, 5, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
+                   ('Security Audit Support', 'job-postings/2.pdf', 3, NOW(), 950.00, '2025-07-28', 1, 6, 1, 1, 'https://technova.at/jobs/security-audit-support'),
+                   ('SEO Praktikum', 'job-postings/2.pdf', 1, NOW(), 750.00, '2025-06-30', 2, 4, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
 
             -- Abteilungen zu Praktika
             INSERT INTO internship_department_map (internship_id, department_id)
