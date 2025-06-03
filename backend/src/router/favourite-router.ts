@@ -69,7 +69,7 @@ favouriteRouter.post("/create", async (req: Request, res: Response) => {
         }
 
     }catch (e) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
         return;
     }finally {
         await unit.complete();
@@ -130,7 +130,7 @@ favouriteRouter.delete("/delete", async (req: Request, res: Response) => {
         }
 
     }catch (e) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
         return;
     }finally {
         await unit.complete();
