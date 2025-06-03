@@ -36,13 +36,20 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
         return `tag-${category}`;
     };
 
+    const isDeadlineExpired = (deadline: string) => {
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        return deadlineDate < today;
+    };
+
     return <div
         className={cn(
             'group relative rounded-xl p-5 transition-all duration-300 ease-apple h-full flex flex-col',
             'border border-border hover:border-primary/20 hover:shadow-card min-h-80',
             isHovered ? 'scale-[1.01]' : 'scale-100',
-            className
-        )}
+            className,
+            isDeadlineExpired(internship.application_end ? 'bg-gray-100 hover:bg-gray-200 dark:bg-black/60 dark:hover:bg-black/40' : ''
+        ))}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
