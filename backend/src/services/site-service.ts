@@ -16,8 +16,8 @@ export class SiteService extends ServiceBase {
     }
 
     public async insert(site: ISite): Promise<boolean> {
-        const stmt = await this.unit.prepare(`INSERT INTO site (address, name, company_id, plz)
-                                              VALUES ($1, $2, $3, $4)`, [
+        const stmt = await this.unit.prepare(`INSERT INTO site (address, name, company_id, plz, city)
+                                              VALUES ($1, $2, $3, $4, $5)`, [
             site.address,
             site.name,
             site.company_id,
@@ -32,12 +32,14 @@ export class SiteService extends ServiceBase {
                                               SET address = $1,
                                                   name = $2,
                                                   company_id = $3,
-                                                  plz = $4
-                                              WHERE location_id = $5`, [
+                                                  plz = $4,
+                                                  city = $5
+                                              WHERE location_id = $6`, [
             site.address,
             site.name,
             site.company_id,
             site.plz,
+            site.city,
             site.location_id
         ]);
 

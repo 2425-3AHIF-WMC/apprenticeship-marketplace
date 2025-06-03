@@ -223,7 +223,7 @@ export class CompanyService extends ServiceBase {
                                                                   email_verification_timestamp,
                                                                   admin_verification_timestamp, company_logo_path)
                                               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $11, $12,
-                                                      $13,) RETURNING company_id, admin_verified, email_verified`, [
+                                                      $13) RETURNING company_id, admin_verified, email_verified`, [
             company.name,
             company.company_number,
             company.company_info ?? null,

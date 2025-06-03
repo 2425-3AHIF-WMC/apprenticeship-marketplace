@@ -135,7 +135,8 @@ export interface ISite {
     address: string,
     name: string,
     company_id: number,
-    plz: number
+    plz: number,
+    city:string
 }
 
 // Worktype Interface
