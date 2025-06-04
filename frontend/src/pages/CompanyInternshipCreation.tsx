@@ -37,6 +37,10 @@ import {de} from "date-fns/locale";
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {fetchCompanyProfile} from "@/lib/authUtils.ts";
 import html2pdf from 'html2pdf.js';
+import { XCircle, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useLocation } from "react-router-dom";
+import type { InternshipDetailsUIProps } from "@/utils/interfaces";
 
 const departmentOptions = [
     { id: 1, name: "Informatik" },
@@ -102,11 +106,19 @@ const formSchema = z
     .and(descriptionSchema);
 
 const CompanyInternshipCreation = () => {
+    const location = useLocation();
     const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description:string }>>([]);
     const [durations, setDurations] = useState<Array<{ internship_duration_id: number, description: string }>>([]);
     const [sites, setSites] = useState<Array<{location_id: number, address: string, name: string, company_id : number, plz : number }>>([]);
     const [companyId, setCompanyId] = useState<number>(0);
     const [loading, setLoading] = useState(true);
+    const [internshipId, setInternshipId] = useState<number | null>(location.state?.internshipId || null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogSuccess, setDialogSuccess] = useState<boolean | null>(null); // true = success, false = error
+    const [dialogMessage, setDialogMessage] = useState("");
+
+    const updating = location.state?.updating || false;
+    const [editData, setEditData] = useState<InternshipDetailsUIProps | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -156,6 +168,38 @@ const CompanyInternshipCreation = () => {
         fetchSites();
     }, [companyId]);
 
+    useEffect(() => {
+        if (updating && internshipId) {
+            // Hole die Daten vom Backend
+            fetch(`http://localhost:5000/api/internship/${internshipId}`)
+                .then(res => res.json())
+                .then(data => setEditData(data))
+                .catch(() => setEditData(null));
+        }
+    }, [updating, internshipId]);
+
+    useEffect(() => {
+        async function fetchPdfAndSetFile(pdfPath: string) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/media/${pdfPath}`);
+                const blob = await response.blob();
+                const file = new File([blob], 'praktikum.pdf', { type: 'application/pdf' });
+                form.setValue('pdfFile', file);
+            } catch (e) {
+                // Fehlerbehandlung, z.B. Datei nicht gefunden
+            }
+        }
+
+        if (updating && editData) {
+            const mapped = mapInternshipDetailsToFormValues(editData);
+            form.reset(mapped);
+            if (editData.pdf) {
+                fetchPdfAndSetFile(editData.pdf);
+            }
+            if (editData.id) setInternshipId(Number(editData.id));
+        }
+        // eslint-disable-next-line
+    }, [updating, editData]);
 
     const form = useForm<z.infer<typeof formSchema>>
     ({
@@ -194,22 +238,31 @@ const CompanyInternshipCreation = () => {
                     location_id: String(values.site),
                     worktype_id: String(values.workType),
                     internship_duration_id: String(values.duration),
-                    internship_application_link: values.internship_application_link
+                    internship_application_link: values.internship_application_link,
+                    internship_id: updating && editData?.id ? editData.id : undefined
                 })
             });
             if (!resp.ok) {
-                console.log('Fehler beim Speichern');
+                setDialogSuccess(false);
+                setDialogMessage('Es ist ein Fehler beim ' + (updating ? 'Aktualisieren' : 'Erstellen') + ' des Praktikums aufgetreten.');
+                setDialogOpen(true);
                 return;
             }
             // 2. ID aus Response holen
             const text = await resp.text();
-            let internshipId;
+            let newInternshipId: number | null = null;
             try {
-                internshipId = JSON.parse(text).internship_id;
+                newInternshipId = JSON.parse(text).internship_id;
             } catch {
-                internshipId = Number(text);
+                newInternshipId = Number(text);
             }
-            console.log(values.departments);
+            if (!newInternshipId) {
+                setDialogSuccess(false);
+                setDialogMessage('Es ist ein Fehler beim ' + (updating ? 'Aktualisieren' : 'Erstellen') + ' des Praktikums aufgetreten.');
+                setDialogOpen(true);
+                return;
+            }
+            setInternshipId(newInternshipId);
             const departmentsResponse = await fetch(`http://localhost:5000/api/departments/create/${internshipId}`, {
                 method: 'POST',
                 headers: {
@@ -218,7 +271,9 @@ const CompanyInternshipCreation = () => {
                 body: JSON.stringify({departments: values.departments})
             });
             if (!departmentsResponse.ok) {
-                console.log('Fehler beim Speichern der Abteilungen');
+                setDialogSuccess(false);
+                setDialogMessage('Es ist ein Fehler beim ' + (updating ? 'Aktualisieren' : 'Erstellen') + ' des Praktikums aufgetreten.');
+                setDialogOpen(true);
                 return;
             }
             // 3. PDF upload logic
@@ -229,7 +284,7 @@ const CompanyInternshipCreation = () => {
                 // Render the HTML into a hidden div
                 const container = document.getElementById('editor-pdf-content');
                 if (container) {
-                    container.innerHTML = `<div class="ql-editor">${values.editorContent}</div>`;
+                    container.innerHTML = `<div class=\"ql-editor\">${values.editorContent}</div>`;
 
                     const qlDiv = container.querySelector('.ql-editor');
                     if (qlDiv) {
@@ -248,7 +303,6 @@ const CompanyInternshipCreation = () => {
                 }
             }
             if (pdfFileToUpload) {
-                console.log("Uploading PDF");
                 const formData = new FormData();
                 formData.append('file', pdfFileToUpload);
                 const uploadResp = await fetch(`http://localhost:5000/api/media/upload/${internshipId}`, {
@@ -256,15 +310,21 @@ const CompanyInternshipCreation = () => {
                     body: formData
                 });
                 if (!uploadResp.ok) {
-                    console.log('Fehler beim PDF-Upload');
+                    setDialogSuccess(false);
+                    setDialogMessage('Es ist ein Fehler beim PDF-Upload aufgetreten.');
+                    setDialogOpen(true);
                     return;
                 }
-                const uploadResult = await uploadResp.json();
-                console.log('PDF erfolgreich hochgeladen:', uploadResult.pdfPath);
             }
-            console.log('Erfolgreich gespeichert');
+            // Erfolgsmeldung
+            setDialogSuccess(true);
+            setDialogMessage(updating ? 'Praktikum wurde erfolgreich aktualisiert!' : 'Praktikum wurde erfolgreich erstellt!');
+            setDialogOpen(true);
+            if (!updating) form.reset();
         } catch (error) {
-            console.log(error);
+            setDialogSuccess(false);
+            setDialogMessage('Es ist ein Fehler aufgetreten: ' + error);
+            setDialogOpen(true);
         }
         console.log(values);
     }
@@ -302,9 +362,9 @@ const CompanyInternshipCreation = () => {
                         <FadeIn>
                             <div className="flex flex-col gap-4">
                                 <div>
-                                    <h1 className="heading-md text-left">Praktika erstellen/hinzufügen</h1>
+                                    <h1 className="heading-md text-left">Praktika erstellen/updaten</h1>
                                     <p className="text-muted-foreground text-left">
-                                        Erstellen von Praktikas, oder Hinzufügen von bereits erstellten.
+                                        Erstellen von Praktikas, oder Aktualisieren von bereits erstellten.
                                     </p>
                                 </div>
 
@@ -680,8 +740,63 @@ const CompanyInternshipCreation = () => {
                     </main>
                 </div>
             </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="text-center">
+                    <div className="flex flex-col items-center gap-4">
+                        {dialogSuccess === true && <CheckCircle className="text-green-500 h-10 w-10" />}
+                        {dialogSuccess === false && <XCircle className="text-red-500 h-10 w-10" />}
+                        <DialogHeader>
+                            <DialogTitle>
+                                {dialogSuccess ? "Erfolg" : "Fehler"}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {dialogMessage}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Button onClick={() => setDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                            Schließen
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
 
 export default CompanyInternshipCreation;
+
+// Mapping function: InternshipDetailsUIProps -> form values
+function mapInternshipDetailsToFormValues(data: InternshipDetailsUIProps) {
+    // Determine salaryType
+    let salaryType: 'salary' | 'not_specified' = 'salary';
+    let salary: number | undefined = undefined;
+    let salaryReason = '';
+    if (isNaN(Number(data.salary))) {
+        salaryType = 'not_specified';
+        salaryReason = data.salary;
+    } else {
+        salaryType = 'salary';
+        salary = Number(data.salary);
+    }
+    return {
+        title: data.title || '',
+        internship_application_link: data.internship_link || '',
+        minYear: data.min_year ? data.min_year.replace(/\D/g, "") : "",
+        workType: data.work_type || '',
+        duration: data.duration || '',
+        departments: Array.isArray(data.category)
+            ? data.category.map((cat: string) => {
+                const found = departmentOptions.find(opt => opt.name === cat);
+                return found ? found.id : undefined;
+            }).filter((id): id is number => typeof id === 'number')
+            : [],
+        deadline: data.application_end ? new Date(data.application_end) : undefined,
+        site: data.location || '', // If you need to map location string to site id, adjust here
+        salaryType,
+        salary,
+        salaryReason,
+        descriptionType: "pdf" as const,
+        pdfFile: undefined, // will be set after fetching
+        editorContent: undefined
+    };
+}
