@@ -53,7 +53,7 @@ function CompanySites({ companyId }: Props) {
                 throw new Error("Fehler beim Laden der Standorte");
             }
             const data = await res.json();
-            const normalized = data.map((site: any) => ({
+            const normalized = data.map((site : any) => ({
                 ...site,
                 plz: Number(site.plz),
             }));
