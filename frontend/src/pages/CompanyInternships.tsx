@@ -75,6 +75,15 @@ const CompanyInternships = () => {
         }).format(date);
     };
 
+    const isDeadlineExpired = (deadline: string) => {
+        if (!deadline) return true;
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        if (isNaN(deadlineDate.getTime())) return false; // Invalid date, treat as not expired
+        today.setHours(0,0,0,0);
+        deadlineDate.setHours(0,0,0,0);
+        return deadlineDate < today;
+    };
 
     useEffect(() => {
         const fetchInternships = async () => {
@@ -250,8 +259,12 @@ const CompanyInternships = () => {
                                         </TableHeader>
                                         <TableBody>
                                             {filteredInternships.map((internship) => (
-                                                <TableRow key={internship.id}>
-                                                    <TableCell className="font-medium">{internship.title}</TableCell>
+                                                <TableRow key={internship.id} className={isDeadlineExpired(internship.application_end) ? 'bg-gray-100 dark:bg-black/20 text-muted-foreground' : ''}>
+                                                    <TableCell className="font-medium">{internship.title}
+                                                        {isDeadlineExpired(internship.application_end) && (
+                                                            <span className="ml-2 text-xs text-red-500">(Abgelaufen)</span>
+                                                        )}
+                                                    </TableCell>
                                                     <TableCell>
                                                         <div className="flex flex-wrap gap-2">
                                                             {internship.department.map((dep, index) => (
