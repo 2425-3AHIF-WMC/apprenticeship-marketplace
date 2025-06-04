@@ -116,6 +116,7 @@ const CompanyInternshipCreation = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogSuccess, setDialogSuccess] = useState<boolean | null>(null); // true = success, false = error
     const [dialogMessage, setDialogMessage] = useState("");
+    const [fileInputKey, setFileInputKey] = useState(0);
 
     const updating = location.state?.updating || false;
     const [editData, setEditData] = useState<InternshipDetailsUIProps | null>(null);
@@ -263,7 +264,7 @@ const CompanyInternshipCreation = () => {
                 return;
             }
             setInternshipId(newInternshipId);
-            const departmentsResponse = await fetch(`http://localhost:5000/api/departments/create/${internshipId}`, {
+            const departmentsResponse = await fetch(`http://localhost:5000/api/departments/create/${newInternshipId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -305,7 +306,7 @@ const CompanyInternshipCreation = () => {
             if (pdfFileToUpload) {
                 const formData = new FormData();
                 formData.append('file', pdfFileToUpload);
-                const uploadResp = await fetch(`http://localhost:5000/api/media/upload/${internshipId}`, {
+                const uploadResp = await fetch(`http://localhost:5000/api/media/upload/${newInternshipId}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -320,7 +321,10 @@ const CompanyInternshipCreation = () => {
             setDialogSuccess(true);
             setDialogMessage(updating ? 'Praktikum wurde erfolgreich aktualisiert!' : 'Praktikum wurde erfolgreich erstellt!');
             setDialogOpen(true);
-            if (!updating) form.reset();
+            if (!updating) {
+                form.reset();
+                setFileInputKey(prev => prev + 1);
+            }
         } catch (error) {
             setDialogSuccess(false);
             setDialogMessage('Es ist ein Fehler aufgetreten: ' + error);
@@ -406,7 +410,7 @@ const CompanyInternshipCreation = () => {
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Minimale Schulstufe</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Minimale Schulstufe auswählen"/>
@@ -430,7 +434,7 @@ const CompanyInternshipCreation = () => {
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Arbeitstyp</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Arbeitstyp wählen"/>
@@ -614,7 +618,7 @@ const CompanyInternshipCreation = () => {
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Praktikumsdauer</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Praktikumsdauer wählen"/>
@@ -638,7 +642,7 @@ const CompanyInternshipCreation = () => {
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel>Standort</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
                                                                 <SelectValue placeholder="Standort wählen"/>
@@ -717,6 +721,7 @@ const CompanyInternshipCreation = () => {
                                                         <FormLabel>PDF Datei</FormLabel>
                                                         <FormControl>
                                                             <Input
+                                                                key={fileInputKey}
                                                                 type="file"
                                                                 accept=".pdf"
                                                                 onChange={(e) => field.onChange(e.target.files?.[0])}
