@@ -63,6 +63,16 @@ const CompanyInternships = () => {
         return category.toLowerCase().includes(term.toLowerCase());
     };
 
+    const formatDate = (isoDate: string): string => {
+        const date = new Date(isoDate);
+        return new Intl.DateTimeFormat('de-DE', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).format(date);
+    };
+
+
     useEffect(() => {
         const fetchInternships = async () => {
             try {
@@ -79,7 +89,7 @@ const CompanyInternships = () => {
 
                 setCompanyId(companyId);
 
-                const response = await fetch(`http://localhost:5000/api/company/${companyId}/internships`);
+                const response = await fetch(`http://localhost:50da00/api/company/${companyId}/internships`);
                 if (!response.ok && response.status !== 404) {
                     throw new Error("Fehler beim Laden der Praktika");
                 }
@@ -112,7 +122,7 @@ const CompanyInternships = () => {
                 throw new Error('Kein Zugriffstoken gefunden');
             }
 
-            const response = await fetch(`/api/internships/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/internships/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -222,7 +232,7 @@ const CompanyInternships = () => {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Titel</TableHead>
-                                        <TableHead>Abteilung</TableHead>
+                                        <TableHead>Abteilung(en)</TableHead>
                                         <TableHead>Standort</TableHead>
                                         <TableHead>Bewerbungsfrist</TableHead>
                                         <TableHead className="text-right">Aktionen</TableHead>
@@ -240,13 +250,13 @@ const CompanyInternships = () => {
                                             <TableCell>
                                                 <div className="flex items-center text-muted-foreground">
                                                     <MapPin className="h-3.5 w-3.5 mr-1" />
-                                                    {internship.location}
+                                                    {internship.location || 'Remote'}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center text-muted-foreground">
                                                     <Clock className="h-3.5 w-3.5 mr-1" />
-                                                    {internship.application_end}
+                                                    {formatDate(internship.application_end)}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-right">
