@@ -151,7 +151,7 @@ const AdminToVerify = () => {
                           <X className="w-5 h-5" />
                         </Button>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/companies/${company.company_id}`}>
+                          <Link to={`/companies/${company.company_id}`} state={{ backPath: '/admin/to_verify' }}>
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Details
                           </Link>

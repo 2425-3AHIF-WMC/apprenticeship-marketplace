@@ -18,6 +18,7 @@ const StudentDashboard = () => {
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewedCount, setViewedCount] = useState(0);
 
   useEffect(() => {
     const fetchFavourites = async () => {
@@ -25,19 +26,10 @@ const StudentDashboard = () => {
       setError(null);
       try {
         if (!studentId) return;
-        // 1. Get favourite internship IDs
-        const res = await fetch(`http://localhost:5000/api/student/favourites/${studentId}`);
-        if (!res.ok) throw new Error('Fehler beim Laden der Favoriten-IDs');
-        const favIds = await res.json();
-        // 2. Fetch each internship by ID
-        const internshipPromises = favIds.map(async (id: number) => {
-          const res = await fetch(`http://localhost:5000/api/internship/${id}`);
-          if (!res.ok) throw new Error('Fehler beim Laden eines Praktikums');
-          const data = await res.json();
-          return mapBackendToInternshipProps(data);
-        });
-        const internships = (await Promise.all(internshipPromises)).filter(Boolean);
-        setFavoriteInternships(internships);
+        const res = await fetch(`http://localhost:5000/api/student/favourites_detailed/${studentId}`);
+        if (!res.ok) throw new Error('Fehler beim Laden der Favoriten');
+        const data = await res.json();
+        setFavoriteInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
       } catch (err: any) {
         setError(err.message || 'Unbekannter Fehler');
       } finally {
@@ -47,9 +39,17 @@ const StudentDashboard = () => {
     fetchFavourites();
   }, [studentId]);
 
-  // Beispielstatistiken
-  const viewedCount = Math.floor(Math.random() * 20) + 5;
-  
+  useEffect(() => {
+    const fetchViewed = async () => {
+      if (!studentId) return;
+      const res = await fetch(`http://localhost:5000/api/viewed_internship/${studentId}/countLast30Days`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setViewedCount(data);
+    };
+    fetchViewed();
+  }, [studentId]);
+
   return (
     <div className="flex min-h-screen">
       <StudentDashboardSidebar />
@@ -59,7 +59,7 @@ const StudentDashboard = () => {
             <div className="flex flex-col gap-2">
               <h1 className="heading-md">Willkommen, {studentName}!</h1>
               <p className="text-muted-foreground">
-                Hier findest du eine Übersicht über deine favorisierten Praktika und Bewerbungen.
+                Hier findest du eine Übersicht über deine favorisierten Praktika.
               </p>
             </div>
           </FadeIn>
@@ -138,7 +138,7 @@ const StudentDashboard = () => {
                                 </div>
                               </div>
                               <Button variant="outline" size="sm" asChild>
-                                <Link to={`/internships/${internship.id}`}>
+                                <Link to={`/internships/${internship.id}`} state={{ backPath: '/student/dashboard' }}>
                                   Details
                                 </Link>
                               </Button>

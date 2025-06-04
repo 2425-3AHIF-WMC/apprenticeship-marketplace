@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,8 @@ const formatDepartment = (department: string | string[]): string => {
 
 const InternshipDescription = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const backPath = location.state?.backPath || '/internships';
   const [copied, setCopied] = useState(false);
   const [internship, setInternship] = useState<InternshipDetailsUIProps | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +61,7 @@ const InternshipDescription = () => {
   const { studentId } = useAuth();
   const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
   const [isAdminUser, setIsAdminUser] = useState(false);
-
+  
   useEffect(() => {
     let mounted = true;
     if (studentId) {
@@ -113,6 +115,19 @@ const InternshipDescription = () => {
     fetchFavourites();
   }, [studentId]);
 
+  useEffect(() => {
+    const fetchViewed = async () => {
+      if (!studentId || !internship?.id) return;
+      const res = await fetch(`http://localhost:5000/api/viewed_internship/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: studentId, internshipId: internship.id })
+      });
+      if (!res.ok) return;
+    };
+    fetchViewed();
+  }, [studentId, internship?.id]);
+
   const handleToggleFavourite = async (internshipId: number) => {
     if (!studentId) return;
     const isFav = favouriteIds.includes(internshipId);
@@ -156,9 +171,9 @@ const InternshipDescription = () => {
                   className="mb-4"
                   asChild
                 >
-                  <Link to="/internships" className="flex items-center">
+                  <Link to={backPath} className="flex items-center">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Zurück zu Praktika
+                    Zurück
                   </Link>
                 </Button>
 
@@ -318,7 +333,7 @@ const InternshipDescription = () => {
                         </Link>
                       </Button>
                       <Button className="w-full" asChild>
-                        <Link to={`/companies/${internship.company_id}`}>
+                        <Link to={`/companies/${internship.company_id}`} state={{ backPath: `/internships/${internship.id}` }}>
                           Unternehmensinformationen
                         </Link>
                       </Button>

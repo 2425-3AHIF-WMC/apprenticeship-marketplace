@@ -25,6 +25,8 @@ export interface InternshipUIProps {
     department: string[];
     company_link: string;
     internship_link: string;
+    admin_verified: boolean;
+
 }
 
 export interface InternshipDetailsUIProps {
@@ -47,6 +49,12 @@ export interface InternshipDetailsUIProps {
     company_info: string;
     pdf: string;
 }
+
+export interface InternshipMappedProps extends Omit<InternshipUIProps, 'department' | 'id'> {
+    category: string[];
+    internship_id: string;
+}
+
 
 export interface CompanyUIPropsAdmin {
     company_id: number;
@@ -83,4 +91,14 @@ export interface ICompanyPayload {
     company_id: number,
     email_verified: boolean,
     admin_verified: boolean
+}
+
+// Site Interface
+export interface ISite {
+    location_id: number,
+    address: string,
+    name: string,
+    company_id: number,
+    plz: number,
+    city : string
 }

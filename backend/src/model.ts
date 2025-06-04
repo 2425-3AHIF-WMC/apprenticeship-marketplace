@@ -27,7 +27,7 @@ export interface IInternshipUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo_path: string;
+    company_logo_path: string | null;
     duration: string;
     added: string;
     views: number;
@@ -45,22 +45,22 @@ export interface IInternshipDetailsUIProps {
     min_year: string;
     location: string;
     work_type: string;
-    company_logo_path: string;
+    company_logo_path: string | null;
     duration: string;
     added: string;
     views: number;
     category: string[];
     company_link: string;
-    salary: string;
+    salary: string ;
     internship_link: string;
     company_id: string;
     company_info: string;
-    pdf_path: string;
+    pdf_path: string | null;
 }
 
 export interface IInternship{
     title: string,
-    pdf_path: string,
+    pdf_path: string | null,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -75,7 +75,7 @@ export interface IInternship{
 export interface IInternshipId {
     internship_id: string,
     title: string,
-    pdf_path: string,
+    pdf_path: string | null,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -131,11 +131,12 @@ export interface ICompanyPayload {
 }
 
 export interface ISite {
-    location_id: number,
+    location_id?: number,
     address: string,
     name: string,
     company_id: number,
-    plz: number
+    plz: number,
+    city:string
 }
 
 // Worktype Interface

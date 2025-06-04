@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "keycloak-js": "^26.2.0",
-    "pg": "^8.15.6"
-  }
-}

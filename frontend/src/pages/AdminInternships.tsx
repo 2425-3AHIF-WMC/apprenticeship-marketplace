@@ -88,11 +88,6 @@ const AdminInternships = () => {
         };
         filteredInternships = filteredInternships.sort(sortFn);
     }
-    const isDeadlineExpired = (deadline: string) => {
-        const today = new Date();
-        const deadlineDate = new Date(deadline);
-        return deadlineDate < today;
-    };
 
     const handleDelete = async (id: string) => {
         try {
@@ -111,7 +106,7 @@ const AdminInternships = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await fetch('http://localhost:5000/api/internship/current');
+                const res = await fetch('http://localhost:5000/api/internship/');
                 if (!res.ok) throw new Error('Fehler beim Laden der Praktika');
                 const data = await res.json();
                 setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
@@ -193,7 +188,7 @@ const AdminInternships = () => {
                                                 <FadeIn key={internship.id} delay={index * 50}>
                                                     <div
                                                         className={
-                                                            `relative ${isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200 dark:bg-black/60 dark:hover:bg-black/40' : ''}`
+                                                            `relative ${internship.admin_verified ? '' : 'opacity-50'}`
                                                         }
                                                     >
                                                         <button
@@ -203,7 +198,7 @@ const AdminInternships = () => {
                                                         >
                                                             <X className="w-5 h-5" />
                                                         </button>
-                                                        <InternshipCard internship={internship} />
+                                                        <InternshipCard internship={internship} backPath="/admin/internships" />
                                                     </div>
                                                 </FadeIn>
                                             ))}

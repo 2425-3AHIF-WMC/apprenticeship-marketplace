@@ -2,13 +2,13 @@ import {internshipRouter} from "./router/internship-router.js";
 import {companyRouter} from "./router/company-router.js";
 import {studentRouter} from "./router/student-router.js";
 import {standardRouter} from "./router/standard-router.js";
+import {favouriteRouter} from "./router/favourite-router.js";
+import {mediaRouter} from "./router/media-router.js";
+import {viewedInternshipRouter} from "./router/viewed_internship-router.js";
 import {Unit, insertSampleData, ensureTablesCreated} from "./unit.js";
 import cookieParser from 'cookie-parser';
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
-import {favouriteRouter} from "./router/favourite-router.js";
-import { mediaRouter } from "./router/media-router.js";
 
 const app = express();
 
@@ -18,6 +18,7 @@ app.use(cors({
     exposedHeaders: ['Authorization']
 }));
 
+// has to be here because it's about files
 app.use("/api/media", mediaRouter);
 
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use("/api/student", studentRouter);
 app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/favourite", favouriteRouter);
+app.use("/api/viewed_internship", viewedInternshipRouter);
 
 
 app.listen(5000, async () => {
@@ -35,5 +37,4 @@ app.listen(5000, async () => {
     await insertSampleData(unit);
     await unit.complete(true);
     console.log("Server running on port 5000");
-    // await ensureTablesCreated(); // sollte eigentlich nicht hier passieren, sondern in der Unit
 });
