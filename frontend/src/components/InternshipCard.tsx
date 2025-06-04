@@ -15,13 +15,13 @@ interface InternshipCardProps {
     onToggleFavourite?: (internshipId: number) => void;
     backPath: string;
 }
-
+/*
 // Helper to get YYYY-MM-DD string from a Date
 function toDateString(date: Date) {
   if (isNaN(date.getTime())) return ""; // Invalid date
   return date.toISOString().split('T')[0];
 }
-
+*/
 const InternshipCard = ({ internship, className, isFavourite = false, onToggleFavourite, backPath }: InternshipCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const { studentId } = useAuth();

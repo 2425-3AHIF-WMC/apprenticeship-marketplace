@@ -21,6 +21,7 @@ import CompanySites from "@/pages/CompanySites.tsx";
 import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
 import {Building, Upload} from "lucide-react";
 
+
 const formSchema = z.object({
     oldPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
     newPassword: z.string().regex(
@@ -51,6 +52,46 @@ const CompanySettings = () => {
     const companyId = getCompanyIdFromToken();
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [companyInfo, setCompanyInfo] = useState("");
+    const [savingInfo, setSavingInfo] = useState(false);
+
+    const handleSaveCompanyInfo = async () => {
+        if (!companyId) {
+            toast.error("Firma nicht erkannt. Bitte neu einloggen.");
+            return;
+        }
+
+        setSavingInfo(true);
+        try {
+            const token = await checkCompanyAuth();
+            if (!token) {
+                navigate("/");
+                return;
+            }
+
+            const res = await fetch(`http://localhost:5000/api/company/info/${companyId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    company_info: companyInfo
+                })
+            });
+
+            if (res.ok) {
+                toast.success("Unternehmensbeschreibung gespeichert.");
+            } else {
+                const text = await res.text();
+                toast.error("Speichern fehlgeschlagen: " + text);
+            }
+        } catch (err) {
+            toast.error("Fehler beim Speichern.");
+            console.error(err);
+        } finally {
+            setSavingInfo(false);
+        }
+    };
 
     useEffect(() => {
         if (!companyId) return;
@@ -244,6 +285,23 @@ const CompanySettings = () => {
                                 )}
                             </CardContent>
                         </Card>
+                        <div className="mt-12 space-y-2 max-w-xl">
+                            <h1 className="heading-md text-left">Unternehmensbeschreibung</h1>
+                            <p className="text-muted-foreground text-left">
+                                Beschreiben Sie kurz Ihr Unternehmen
+                            </p>
+                            <textarea
+                                className="w-full border border-gray-300 rounded-md p-3 text-sm min-h-[120px]"
+                                placeholder="IT-Firma mit Fokus auf Webentwicklung und Cloud-Lösungen..."
+                                value={companyInfo}
+                                onChange={(e) => setCompanyInfo(e.target.value)}
+                            />
+                            <div>
+                                <Button onClick={handleSaveCompanyInfo} disabled={savingInfo}>
+                                    {savingInfo ? "Speichern..." : "Beschreibung speichern"}
+                                </Button>
+                            </div>
+                        </div>
                         <div className="flex flex-col mt-12 gap-1">
                             <div>
                                 <h1 className="heading-md text-left">Passwort zurücksetzen</h1>

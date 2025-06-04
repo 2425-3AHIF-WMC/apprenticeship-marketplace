@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -277,13 +277,16 @@ const CompanyInternships = () => {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem asChild>
-                                                            <Link to={`/internships/${internship.id}`} className="cursor-pointer">
+                                                            <Link to={''/*`/internships/${internship.id}`*/} className="cursor-pointer">
                                                                 <Eye className="h-4 w-4 mr-2" />
                                                                 <span>Ansehen</span>
                                                             </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
-                                                            <Link to={`/company/create-internship/${internship.id}`} className="cursor-pointer">
+                                                            <Link
+                                                                to="/company/internship/create"
+                                                                state={{ updating: true, internshipId: internship.id }}
+                                                                className="cursor-pointer">
                                                                 <Edit className="h-4 w-4 mr-2" />
                                                                 <span>Bearbeiten</span>
                                                             </Link>
