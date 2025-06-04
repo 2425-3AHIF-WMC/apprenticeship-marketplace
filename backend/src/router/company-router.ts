@@ -401,7 +401,7 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
 
     try {
         if (isValidId(company_id) && await companyService.companyExists(company_id)) {
-            const viewedCount: number = await viewedService.getCountOfInternshipsOfCompany(company_id);
+            const viewedCount: number = await viewedService.getCountOfInternshipsByCompany(company_id);
 
             if (viewedCount > 0) {
                 res.status(StatusCodes.OK).json(viewedCount);

@@ -37,13 +37,12 @@ export class ViewedInternshipService extends ServiceBase {
         return stmt.rows[0].count || 0;
     }
 
-    public async getCountOfInternshipsOfCompany(companyId: number): Promise<number> {
+    public async getCountOfInternshipsByCompany(companyId: number): Promise<number> {
         const stmt = await this.unit.prepare(`select count(*)
                                               from viewed_internships vi
                                                        join internship i on (vi.internship_id = i.internship_id)
                                                        join site s on (i.location_id = s.location_id)
-                                                       join company c on (s.company_id = c.company_id)
-                                              where c.company_id=$1
+                                              where s.company_id=$1
                                                 and viewed_timestamp >= NOW() - INTERVAL '31 days'`, [companyId]);
         return stmt.rows[0].count || 0;
     }
