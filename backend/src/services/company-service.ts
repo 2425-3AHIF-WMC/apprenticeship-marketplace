@@ -91,7 +91,8 @@ export class CompanyService extends ServiceBase {
                                                      admin_verification_timestamp,
                                                      company_logo_path
                                               from company
-                                              where admin_verified = 'no' and email_verified = 'yes'`);
+                                              where admin_verified = 'no'
+                                                and email_verified = 'yes'`);
         return stmt.rows as ICompany[];
     }
 
@@ -223,7 +224,8 @@ export class CompanyService extends ServiceBase {
                                                                   email_verification_timestamp,
                                                                   admin_verification_timestamp, company_logo_path)
                                               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), $11, $12,
-                                                      $13) RETURNING company_id, admin_verified, email_verified`, [
+                                                      $13)
+                                              RETURNING company_id, admin_verified, email_verified`, [
             company.name,
             company.company_number,
             company.company_info ?? null,
@@ -299,9 +301,22 @@ export class CompanyService extends ServiceBase {
 
     public async updateLogoPath(company_id: number, logoPath: string | null): Promise<boolean> {
         const stmt = await this.unit.prepare(
-            `UPDATE company SET company_logo_path = $1 WHERE company_id = $2`,
+            `UPDATE company
+             SET company_logo_path = $1
+             WHERE company_id = $2`,
             [logoPath, company_id]
         );
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async updateCompanyInfo(company_id: number, company_info: string): Promise<boolean> {
+        const result = await this.unit.prepare(
+            `UPDATE company
+             SET company_info = $1
+             WHERE company_id = $2`,
+            [company_info, company_id]
+        );
+        return result.rowCount != null ? result.rowCount > 0 : false
+
     }
 }

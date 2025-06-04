@@ -407,7 +407,7 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
             if (viewedCount > 0) {
                 res.status(StatusCodes.OK).json(viewedCount);
             } else {
-                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+                res.status(StatusCodes.OK).json(viewedCount);
             }
 
         } else {
@@ -541,7 +541,7 @@ companyRouter.put("", async (req: Request, res: Response) => {
     try {
         const service = new CompanyService(unit);
         const companyExists: boolean = await service.companyExists(company.company_id);
-        const validWebsite: boolean = company.website.substring(0, 8) === "https://";
+        const validWebsite: boolean = !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim());
         const validEmail: boolean = company.email.includes('@');
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
@@ -829,6 +829,42 @@ companyRouter.patch("/reset-password/:token", async (req: Request, res: Response
         }
     });
 });
+
+companyRouter.put("/info/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(false);
+    try {
+        const company_id: number = parseInt(req.params.id);
+        const { company_info } = req.body;
+
+        if (!isValidId(company_id) || typeof company_info !== "string") {
+            res.sendStatus(StatusCodes.BAD_REQUEST);
+            return;
+        }
+
+        const service = new CompanyService(unit);
+        const exists = await service.companyExists(company_id);
+
+        if (!exists) {
+            res.status(StatusCodes.NOT_FOUND).send("Firma nicht gefunden");
+            return;
+        }
+
+        const updated = await service.updateCompanyInfo(company_id, company_info);
+        if (updated) {
+            await unit.complete(true);
+            res.status(StatusCodes.OK).send("Unternehmensbeschreibung aktualisiert");
+        } else {
+            await unit.complete(false);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+});
+
 
 // helper functions
 
