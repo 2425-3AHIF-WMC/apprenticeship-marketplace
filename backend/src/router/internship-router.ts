@@ -67,7 +67,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             let internship: IInternship = {
                 title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
-                location_id, clicks, worktype_id, internship_duration_id,
+                location_id, worktype_id, internship_duration_id,
                 internship_application_link
             }
 
@@ -94,7 +94,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             let internship: IInternship = {
                 title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
-                location_id, clicks, worktype_id, internship_duration_id,
+                location_id, worktype_id, internship_duration_id,
                 internship_application_link
             }
 
