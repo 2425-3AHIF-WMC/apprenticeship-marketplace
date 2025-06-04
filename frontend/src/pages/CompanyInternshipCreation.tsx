@@ -573,7 +573,7 @@ const CompanyInternshipCreation = () => {
                                                             ))
                                                             : (
                                                             <SelectItem key={0} value={"0"} disabled>
-                                                                Kein Standort vorhanden
+                                                                Kein Standort vorhanden - in den Einstellungen hinzufügen
                                                             </SelectItem>
                                                                  )}
                                                         </SelectContent>
