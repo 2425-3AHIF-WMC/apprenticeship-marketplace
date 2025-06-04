@@ -144,7 +144,7 @@ export async function ensureTablesCreated(): Promise<void> {
         (
             internship_id                 SERIAL        NOT NULL,
             title                         TEXT          NOT NULL,
-            pdf_path                      TEXT          NOT NULL,
+            pdf_path                      TEXT,
             min_year                      SMALLINT,
             internship_creation_timestamp TIMESTAMP     NOT NULL,
             salary                        NUMERIC(6, 2) NOT NULL,

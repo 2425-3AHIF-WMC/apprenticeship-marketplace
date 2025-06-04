@@ -55,12 +55,12 @@ export interface IInternshipDetailsUIProps {
     internship_link: string;
     company_id: string;
     company_info: string;
-    pdf_path: string;
+    pdf_path: string | null;
 }
 
 export interface IInternship{
     title: string,
-    pdf_path: string,
+    pdf_path: string | null,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
@@ -75,7 +75,7 @@ export interface IInternship{
 export interface IInternshipId {
     internship_id: string,
     title: string,
-    pdf_path: string,
+    pdf_path: string | null,
     min_year: string,
     internship_creation_timestamp: string,
     salary: string,
