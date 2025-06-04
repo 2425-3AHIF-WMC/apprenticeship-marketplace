@@ -1,9 +1,10 @@
 import express, {Request, Response} from "express";
-import {Unit} from "../unit.js";
 import {StatusCodes} from "http-status-codes";
+import {Unit} from "../unit.js";
 import {InternshipService} from "../services/internship-service.js";
-import {IInternship, IInternshipUIProps} from "../model";
+import {IInternship, IInternshipUIProps} from "../model.js";
 import {CompanyService} from "../services/company-service.js";
+import {FavouriteService} from "../services/favourite-service.js";
 
 export const internshipRouter = express.Router();
 
@@ -251,6 +252,34 @@ internshipRouter.get("/:id_prop", async (req: Request, res: Response) => {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
 
+    } finally {
+        await unit.complete();
+    }
+});
+
+internshipRouter.get("/:id/favourites/count", async (req: Request, res: Response) => {
+    const internship_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const internshipService = new InternshipService(unit);
+    const favouriteService = new FavouriteService(unit);
+
+    try {
+        if (isValidId(internship_id) && await internshipService.internshipExists(internship_id)) {
+            const viewedCount: number = await favouriteService.getCountOfFavouriteByInternship(internship_id);
+
+            if (viewedCount > 0) {
+                res.status(StatusCodes.OK).json(viewedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
     } finally {
         await unit.complete();
     }

@@ -8,15 +8,6 @@ import {IFavourite} from "../model";
 
 export const favouriteRouter = express.Router();
 
-
-const pool = new Pool({
-    user: "postgres",
-    host: "postgres",
-    database: "cruddb",
-    password: "postgres",
-    port: 5432,
-});
-
 favouriteRouter.post("/create", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const internship_id : number = parseInt(req.body.internship_id);
@@ -58,14 +49,11 @@ favouriteRouter.post("/create", async (req: Request, res: Response) => {
         const addedSuccessful = await service.insertFavourite(favourite);
 
         if(addedSuccessful != -1){
-            res.status(StatusCodes.OK).send("deleted successfully");
+            res.status(StatusCodes.OK).send("created successfully");
             return;
-
-
         } else  {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("could not be deleted");
             return;
-
         }
 
     }catch (e) {
