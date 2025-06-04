@@ -2,16 +2,16 @@ import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import FadeIn from "@/components/FadeIn.tsx";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import {
     Form,
-    FormControl, FormDescription,
+    FormControl,
     FormField,
     FormItem,
     FormLabel,
     FormMessage
 } from "@/components/ui/form"
-import {Input} from "@/components/ui/input.tsx";
+import { Input } from "@/components/ui/input.tsx";
 import {
     Select,
     SelectContent,
@@ -19,28 +19,31 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {Checkbox} from "@/components/ui/checkbox.tsx";
-import {useForm} from "react-hook-form";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Button} from "@/components/ui/button.tsx";
-import {Calendar} from "@/components/ui/calendar"
-import {cn} from "@/utils/utils.ts";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button.tsx";
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/utils/utils.ts";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import {CalendarIcon} from "lucide-react";
-import {format} from "date-fns";
-import {de} from "date-fns/locale";
-import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
-import {fetchCompanyProfile} from "@/lib/authUtils.ts";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { fetchCompanyProfile } from "@/lib/authUtils.ts";
 import html2pdf from 'html2pdf.js';
 import { XCircle, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useLocation } from "react-router-dom";
 import type { InternshipDetailsUIProps } from "@/utils/interfaces";
+import { HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const departmentOptions = [
     { id: 1, name: "Informatik" },
@@ -67,20 +70,20 @@ const salarySchema = z.discriminatedUnion('salaryType', [
     z.object({
         salaryType: z.literal('not_specified'),
         salary: z.optional(z.number().nullable()),
-        salaryReason: z.string({required_error: "Begründung benötigt (min. 10 Zeichen)" }).min(10, "Begründung benötigt (min. 10 Zeichen)"),
+        salaryReason: z.string({ required_error: "Begründung benötigt (min. 10 Zeichen)" }).min(10, "Begründung benötigt (min. 10 Zeichen)"),
     }),
 ]);
 
 const descriptionSchema = z.discriminatedUnion('descriptionType', [
     z.object({
         descriptionType: z.literal('editor'),
-        editorContent: z.string({ required_error: "Die Beschreibung muss mindestens 30 Zeichen enthalten" }).min(30, {message: "Die Beschreibung muss mindestens 30 Zeichen enthalten"}),
+        editorContent: z.string({ required_error: "Die Beschreibung muss mindestens 30 Zeichen enthalten" }).min(30, { message: "Die Beschreibung muss mindestens 30 Zeichen enthalten" }),
         pdfFile: z.undefined()
     }),
     z.object({
         descriptionType: z.literal('pdf'),
         editorContent: z.optional(z.string()),
-        pdfFile: z.instanceof(File, {message: "Eine PDF-Datei muss hochgeladen werden"})
+        pdfFile: z.instanceof(File, { message: "Eine PDF-Datei muss hochgeladen werden" })
     })
 ]);
 
@@ -107,9 +110,9 @@ const formSchema = z
 
 const CompanyInternshipCreation = () => {
     const location = useLocation();
-    const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description:string }>>([]);
+    const [workTypes, setWorkTypes] = useState<Array<{ worktype_id: string, name: string, description: string }>>([]);
     const [durations, setDurations] = useState<Array<{ internship_duration_id: number, description: string }>>([]);
-    const [sites, setSites] = useState<Array<{location_id: number, address: string, name: string, company_id : number, plz : number }>>([]);
+    const [sites, setSites] = useState<Array<{ location_id: number, address: string, name: string, company_id: number, plz: number }>>([]);
     const [companyId, setCompanyId] = useState<number>(0);
     const [loading, setLoading] = useState(true);
     const [internshipId, setInternshipId] = useState<number | null>(location.state?.internshipId || null);
@@ -117,9 +120,12 @@ const CompanyInternshipCreation = () => {
     const [dialogSuccess, setDialogSuccess] = useState<boolean | null>(null); // true = success, false = error
     const [dialogMessage, setDialogMessage] = useState("");
     const [fileInputKey, setFileInputKey] = useState(0);
+    const [isMdOrLarger, setIsMdOrLarger] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
 
     const updating = location.state?.updating || false;
     const [editData, setEditData] = useState<InternshipDetailsUIProps | null>(null);
+
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -203,21 +209,29 @@ const CompanyInternshipCreation = () => {
     }, [updating, editData]);
 
     const form = useForm<z.infer<typeof formSchema>>
-    ({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            title: '',
-            internship_application_link: '',
-            minYear: '',
-            departments: [],
-            salaryType: 'salary',
-            duration: undefined,
-            workType: undefined,
-            descriptionType: 'pdf'
-        }
-    });
+        ({
+            resolver: zodResolver(formSchema),
+            defaultValues: {
+                title: '',
+                internship_application_link: '',
+                minYear: '',
+                departments: [],
+                salaryType: 'salary',
+                duration: undefined,
+                workType: undefined,
+                descriptionType: 'pdf'
+            }
+        });
 
-    if(loading) {
+    useEffect(() => {
+        function handleResize() {
+            setIsMdOrLarger(window.innerWidth >= 768);
+        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    if (loading) {
         return null;
     }
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -269,7 +283,7 @@ const CompanyInternshipCreation = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({departments: values.departments})
+                body: JSON.stringify({ departments: values.departments })
             });
             if (!departmentsResponse.ok) {
                 setDialogSuccess(false);
@@ -330,7 +344,6 @@ const CompanyInternshipCreation = () => {
             setDialogMessage('Es ist ein Fehler aufgetreten: ' + error);
             setDialogOpen(true);
         }
-        console.log(values);
     }
 
 
@@ -338,13 +351,13 @@ const CompanyInternshipCreation = () => {
 
     const modules = {
         toolbar: [
-            [{'font': []}, {'size': []}],
+            [{ 'font': [] }, { 'size': [] }],
             ['bold', 'italic', 'underline', 'strike'],
-            [{'color': []}, {'background': []}],
-            [{'script': 'super'}, {'script': 'sub'}],
-            [{'header': '1'}, {'header': '2'}, 'blockquote', 'code-block'],
-            [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-            [{'align': []}],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'script': 'super' }, { 'script': 'sub' }],
+            [{ 'header': '1' }, { 'header': '2' }, 'blockquote', 'code-block'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'align': [] }],
             ['link', 'image', 'video'],
             ['clean']
         ]
@@ -360,9 +373,9 @@ const CompanyInternshipCreation = () => {
         <>
             <div id="editor-pdf-content" style={{ visibility: 'hidden', position: 'absolute', left: '-9999px', top: 0 }} />
             <div className="flex min-h-screen">
-                <CompanyDashboardSidebar/>
+                <CompanyDashboardSidebar />
                 <div className="flex-1 flex justify-center">
-                    <main className="w-full p-8 space-y-6 ">
+                    <main className="w-full p-8 space-y-6 relative">
                         <FadeIn>
                             <div className="flex flex-col gap-4">
                                 <div>
@@ -374,18 +387,18 @@ const CompanyInternshipCreation = () => {
 
                                 <Form {...form}>
                                     <form onSubmit={form.handleSubmit(onSubmit)}
-                                          className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField
                                             control={form.control}
                                             name="title"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Stellenbezeichnung</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             placeholder="z.B. Frontend-Entwickler Praktikum" {...field} />
                                                     </FormControl>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -393,13 +406,13 @@ const CompanyInternshipCreation = () => {
                                         <FormField
                                             control={form.control}
                                             name="internship_application_link"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Bewerbungslink</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="z.B. https://www.example.com/bewerbung" {...field} />
                                                     </FormControl>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -407,13 +420,13 @@ const CompanyInternshipCreation = () => {
                                         <FormField
                                             control={form.control}
                                             name="minYear"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Minimale Schulstufe</FormLabel>
                                                     <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Minimale Schulstufe auswählen"/>
+                                                                <SelectValue placeholder="Minimale Schulstufe auswählen" />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
@@ -423,7 +436,7 @@ const CompanyInternshipCreation = () => {
                                                             <SelectItem value="4">4. Jahrgang</SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -431,13 +444,13 @@ const CompanyInternshipCreation = () => {
                                         <FormField
                                             control={form.control}
                                             name="workType"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Arbeitstyp</FormLabel>
                                                     <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Arbeitstyp wählen"/>
+                                                                <SelectValue placeholder="Arbeitstyp wählen" />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
@@ -448,7 +461,7 @@ const CompanyInternshipCreation = () => {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -465,7 +478,7 @@ const CompanyInternshipCreation = () => {
                                                                 key={dept.id}
                                                                 control={form.control}
                                                                 name="departments"
-                                                                render={({field}) => {
+                                                                render={({ field }) => {
                                                                     return (
                                                                         <FormItem
                                                                             key={dept.id}
@@ -492,14 +505,14 @@ const CompanyInternshipCreation = () => {
                                                             />
                                                         ))}
                                                     </div>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
                                         <FormField
                                             control={form.control}
                                             name="deadline"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem className="flex flex-col">
                                                     <FormLabel>Bewerbungsfrist</FormLabel>
                                                     <Popover>
@@ -513,11 +526,11 @@ const CompanyInternshipCreation = () => {
                                                                     )}
                                                                 >
                                                                     {field.value ? (
-                                                                        format(field.value, "PPP", {locale: de})
+                                                                        format(field.value, "PPP", { locale: de })
                                                                     ) : (
                                                                         <span>Datum auswählen</span>
                                                                     )}
-                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50"/>
+                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                                 </Button>
                                                             </FormControl>
                                                         </PopoverTrigger>
@@ -531,7 +544,7 @@ const CompanyInternshipCreation = () => {
                                                             />
                                                         </PopoverContent>
                                                     </Popover>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -539,7 +552,7 @@ const CompanyInternshipCreation = () => {
                                         <FormField
                                             control={form.control}
                                             name="salaryType"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Gehaltsangabe</FormLabel>
                                                     <div className="flex flex-col space-y-6">
@@ -551,16 +564,16 @@ const CompanyInternshipCreation = () => {
                                                                 className="flex flex-col space-y-1"
                                                             >
                                                                 <div className="flex items-center space-x-3">
-                                                                    <RadioGroupItem value="salary" id="salary"/>
+                                                                    <RadioGroupItem value="salary" id="salary" />
                                                                     <FormLabel htmlFor="salary" className="font-normal">
                                                                         Gehalt angeben
                                                                     </FormLabel>
                                                                 </div>
                                                                 <div className="flex items-center space-x-3">
                                                                     <RadioGroupItem value="not_specified"
-                                                                                    id="not_specified"/>
+                                                                        id="not_specified" />
                                                                     <FormLabel htmlFor="not_specified"
-                                                                               className="font-normal">
+                                                                        className="font-normal">
                                                                         Keine Angabe
                                                                     </FormLabel>
                                                                 </div>
@@ -571,17 +584,17 @@ const CompanyInternshipCreation = () => {
                                                             <FormField
                                                                 control={form.control}
                                                                 name="salary"
-                                                                render={({field}) => (
+                                                                render={({ field }) => (
                                                                     <FormItem>
                                                                         <FormLabel>Gehalt in EUR</FormLabel>
                                                                         <FormControl>
                                                                             <Input type="number"
-                                                                                   placeholder="z.B. 800" {...field}
-                                                                                   onChange={(e) => field.onChange(e.target.valueAsNumber)
-                                                                            }
-                                                                                   value={Number.isNaN(field.value) || field.value === null || field.value === undefined ? "" : field.value}/>
+                                                                                placeholder="z.B. 800" {...field}
+                                                                                onChange={(e) => field.onChange(e.target.valueAsNumber)
+                                                                                }
+                                                                                value={Number.isNaN(field.value) || field.value === null || field.value === undefined ? "" : field.value} />
                                                                         </FormControl>
-                                                                        <FormMessage/>
+                                                                        <FormMessage />
                                                                     </FormItem>
                                                                 )}
                                                             />
@@ -590,38 +603,54 @@ const CompanyInternshipCreation = () => {
                                                             <FormField
                                                                 control={form.control}
                                                                 name="salaryReason"
-                                                                render={({field}) => (
+                                                                render={({ field }) => (
                                                                     <FormItem>
-                                                                        <FormLabel>Begründung für keine
-                                                                            Gehaltsangabe</FormLabel>
+                                                                        <FormLabel className="flex justify-between"><span>Begründung für keine
+                                                                            Gehaltsangabe</span>
+                                                                            {watchSalaryType === 'not_specified' && (
+                                                                                <div className="flex items-center mt-1">
+                                                                                    <TooltipProvider>
+                                                                                        <Tooltip>
+                                                                                            <TooltipTrigger asChild>
+                                                                                                <span className="inline-flex items-center justify-center w-5 h-5 text-muted-foreground cursor-pointer text-xs">
+                                                                                                    <HelpCircle className="w-4 h-4" />
+                                                                                                </span>
+                                                                                            </TooltipTrigger>
+                                                                                            <TooltipContent side="top">
+                                                                                                Diese Nachricht wird den Schülern angezeigt.
+                                                                                            </TooltipContent>
+                                                                                        </Tooltip>
+                                                                                    </TooltipProvider>
+                                                                                </div>
+                                                                            )}
+                                                                            </FormLabel>
                                                                         <FormControl>
                                                                             <Input
                                                                                 placeholder="Warum haben Sie kein Gehalt angegeben?" {...field} />
                                                                         </FormControl>
-                                                                        <FormDescription>
-                                                                            Diese Nachricht wird den Schülern angezeigt.
-                                                                        </FormDescription>
-                                                                        <FormMessage/>
+                                                                        <FormMessage />
                                                                     </FormItem>
                                                                 )}
                                                             />
                                                         )}
                                                     </div>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
 
+
+
                                         <FormField
                                             control={form.control}
                                             name="duration"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Praktikumsdauer</FormLabel>
                                                     <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Praktikumsdauer wählen"/>
+                                                                <SelectValue placeholder="Praktikumsdauer wählen" />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
@@ -632,36 +661,36 @@ const CompanyInternshipCreation = () => {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
                                         <FormField
                                             control={form.control}
                                             name="site"
-                                            render={({field}) => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Standort</FormLabel>
                                                     <Select onValueChange={field.onChange} value={field.value || ""}>
                                                         <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Standort wählen"/>
+                                                                <SelectValue placeholder="Standort wählen" />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                             {sites.length > 0 ? sites.map((site) => (
+                                                            {sites.length > 0 ? sites.map((site) => (
                                                                 <SelectItem key={site.location_id} value={site.location_id.toString()}>
                                                                     {site.name} | {site.address} - {site.plz}
                                                                 </SelectItem>
                                                             ))
-                                                            : (
-                                                            <SelectItem key={0} value={"0"} disabled>
-                                                                Kein Standort vorhanden - in den Einstellungen hinzufügen
-                                                            </SelectItem>
-                                                                 )}
+                                                                : (
+                                                                    <SelectItem key={0} value={"0"} disabled>
+                                                                        Kein Standort vorhanden - in den Einstellungen hinzufügen
+                                                                    </SelectItem>
+                                                                )}
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage/>
+                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -694,14 +723,14 @@ const CompanyInternshipCreation = () => {
                                             <FormField
                                                 control={form.control}
                                                 name="editorContent"
-                                                render={({field}) => (
+                                                render={({ field }) => (
                                                     <FormItem className="col-span-1 md:col-span-2 w-full">
                                                         <FormLabel>Beschreibung</FormLabel>
                                                         <FormControl>
                                                             <div className="w-full">
                                                                 <ReactQuill
                                                                     value={field.value}
-                                                                    onChange={(content) => {field.onChange(content);}}
+                                                                    onChange={(content) => { field.onChange(content); }}
                                                                     modules={modules}
                                                                     formats={formats}
                                                                     className="bg-primary-foreground text-black"
@@ -742,28 +771,35 @@ const CompanyInternshipCreation = () => {
                                 </Form>
                             </div>
                         </FadeIn>
+                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                            <DialogContent
+                                className="text-center"
+                                style={!isMobile ? {
+                                    left: 'calc(50% + 128px)',
+                                    transform: 'translate(-50%, -50%)',
+                                    position: 'fixed'
+                                } : undefined}
+                            >
+                                <div className="flex flex-col items-center gap-4">
+                                    {dialogSuccess === true && <CheckCircle className="text-green-500 h-10 w-10" />}
+                                    {dialogSuccess === false && <XCircle className="text-red-500 h-10 w-10" />}
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            {dialogSuccess ? "Erfolg" : "Fehler"}
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            {dialogMessage}
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <Button onClick={() => setDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                                        Schließen
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </main>
                 </div>
             </div>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="text-center">
-                    <div className="flex flex-col items-center gap-4">
-                        {dialogSuccess === true && <CheckCircle className="text-green-500 h-10 w-10" />}
-                        {dialogSuccess === false && <XCircle className="text-red-500 h-10 w-10" />}
-                        <DialogHeader>
-                            <DialogTitle>
-                                {dialogSuccess ? "Erfolg" : "Fehler"}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {dialogMessage}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <Button onClick={() => setDialogOpen(false)} className="mt-4 w-full max-w-xs">
-                            Schließen
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </>
     );
 }
