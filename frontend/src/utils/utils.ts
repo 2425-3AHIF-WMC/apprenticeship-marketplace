@@ -57,7 +57,7 @@ export function mapBackendToInternshipDetailsProps(item: any): InternshipDetails
         location: item.location || item.site,
         duration: item.duration,
         application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
-        salary: `${item.salary} €`,
+        salary: `${item.salary} ${isNaN(Number(item.salary)) ? '' : '€'}`,
         added: item.added,
         views: item.views,
         work_type: item.work_type,

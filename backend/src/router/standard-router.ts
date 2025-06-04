@@ -6,6 +6,7 @@ import {AdminService} from "../services/admin-service.js";
 import {StudentService} from "../services/student-service";
 import {WorktypeService} from "../services/worktype-service.js";
 import {InternshipDurationService} from "../services/internship_duration-service.js";
+import { DepartmentService } from "../services/department-service.js";
 
 export const standardRouter: Router = express.Router();
 
@@ -49,6 +50,23 @@ standardRouter.get('/internshipDuration', async (req : Request, res : Response) 
         const service = new InternshipDurationService(unit);
         const durations: IInternShipDuration[] = await service.getAll();
         res.status(StatusCodes.OK).json(durations);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+})
+
+standardRouter.post('/departments/create/:internshipId', async (req: Request, res: Response) => {
+    const internshipId: number = parseInt(req.params.internshipId);
+    const departments = req.body.departments;
+    console.log(departments);
+    const unit: Unit = await Unit.create(true);
+    try {
+        const service = new DepartmentService(unit);
+        const department = await service.insertDepartments(internshipId, departments);
+        res.status(StatusCodes.OK).json(department);
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);

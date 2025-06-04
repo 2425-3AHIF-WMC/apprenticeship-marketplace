@@ -38,6 +38,13 @@ import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {fetchCompanyProfile} from "@/lib/authUtils.ts";
 import html2pdf from 'html2pdf.js';
 
+const departmentOptions = [
+    { id: 1, name: "Informatik" },
+    { id: 2, name: "Medientechnik" },
+    { id: 3, name: "Elektronik" },
+    { id: 4, name: "Medizintechnik" },
+];
+
 const salarySchema = z.discriminatedUnion('salaryType', [
     z.object({
         salaryType: z.literal('salary'),
@@ -81,7 +88,7 @@ const formSchema = z
         minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
         workType: z.string({ required_error: "Eine Arbeitsart muss ausgewählt sein" }),
         duration: z.string({ required_error: "Eine Dauer muss ausgewählt sein" }),
-        departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
+        departments: z.array(z.number()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
         deadline: z.date({ message: "Eine Bewerbungsfrist muss ausgewählt sein" }),
         site: z.string({ required_error: "Bitte wählen Sie einen Standort aus." }),
         salaryType: z.enum(['salary', 'not_specified']),
@@ -179,10 +186,10 @@ const CompanyInternshipCreation = () => {
                 body: JSON.stringify({
                     clicks: String(1),
                     title: values.title,
-                    pdf_path: "pending",
+                    pdf_path: null,
                     min_year: String(values.minYear),
                     internship_creation_timestamp: new Date().toISOString(),
-                    salary: String(values.salary || 0),
+                    salary: String(values.salary || values.salaryReason),
                     application_end: values.deadline.toISOString().split('T')[0],
                     location_id: String(values.site),
                     worktype_id: String(values.workType),
@@ -201,6 +208,18 @@ const CompanyInternshipCreation = () => {
                 internshipId = JSON.parse(text).internship_id;
             } catch {
                 internshipId = Number(text);
+            }
+            console.log(values.departments);
+            const departmentsResponse = await fetch(`http://localhost:5000/api/departments/create/${internshipId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({departments: values.departments})
+            });
+            if (!departmentsResponse.ok) {
+                console.log('Fehler beim Speichern der Abteilungen');
+                return;
             }
             // 3. PDF upload logic
             let pdfFileToUpload = null;
@@ -377,31 +396,31 @@ const CompanyInternshipCreation = () => {
                                                 <FormItem>
                                                     <FormLabel>Abteilungen</FormLabel>
                                                     <div className="flex flex-col space-y-1">
-                                                        {['Informatik', 'Medientechnik', 'Medizintechnik', 'Elektronik'].map((dept) => (
+                                                        {departmentOptions.map((dept) => (
                                                             <FormField
-                                                                key={dept}
+                                                                key={dept.id}
                                                                 control={form.control}
                                                                 name="departments"
                                                                 render={({field}) => {
                                                                     return (
                                                                         <FormItem
-                                                                            key={dept}
+                                                                            key={dept.id}
                                                                             className="flex flex-row items-start space-x-3 space-y-0"
                                                                         >
                                                                             <FormControl>
                                                                                 <Checkbox
-                                                                                    checked={field.value?.includes(dept)}
+                                                                                    checked={field.value?.includes(dept.id)}
                                                                                     onCheckedChange={(checked) => {
                                                                                         if (checked) {
-                                                                                            field.onChange([...(field.value || []), dept]);
+                                                                                            field.onChange([...(field.value || []), dept.id]);
                                                                                         } else {
-                                                                                            field.onChange(field.value?.filter((v) => v !== dept));
+                                                                                            field.onChange(field.value?.filter((v) => v !== dept.id));
                                                                                         }
                                                                                     }}
                                                                                 />
                                                                             </FormControl>
                                                                             <FormLabel className="font-normal">
-                                                                                {dept}
+                                                                                {dept.name}
                                                                             </FormLabel>
                                                                         </FormItem>
                                                                     )
