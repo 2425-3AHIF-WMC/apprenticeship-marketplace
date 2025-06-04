@@ -39,7 +39,7 @@ import { fetchCompanyProfile } from "@/lib/authUtils.ts";
 import html2pdf from 'html2pdf.js';
 import { XCircle, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useLocation } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import type { InternshipDetailsUIProps } from "@/utils/interfaces";
 import { HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -120,6 +120,7 @@ const CompanyInternshipCreation = () => {
     const [dialogSuccess, setDialogSuccess] = useState<boolean | null>(null); // true = success, false = error
     const [dialogMessage, setDialogMessage] = useState("");
     const [fileInputKey, setFileInputKey] = useState(0);
+    const navigate = useNavigate();
 
     const updating = location.state?.updating || false;
     const [editData, setEditData] = useState<InternshipDetailsUIProps | null>(null);
@@ -782,7 +783,7 @@ const CompanyInternshipCreation = () => {
                                             {dialogMessage}
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <Button onClick={() => setDialogOpen(false)} className="mt-4 w-full max-w-xs">
+                                    <Button onClick={() => {setDialogOpen(false); dialogSuccess ? navigate('/company/internships') : null}} className="mt-4 w-full max-w-xs">
                                         Schließen
                                     </Button>
                                 </div>
@@ -810,10 +811,13 @@ function mapInternshipDetailsToFormValues(data: InternshipDetailsUIProps) {
         salaryType = 'salary';
         salary = Number(data.salary);
     }
+    const minYearStr = data.min_year !== null && data.min_year !== undefined ? String(data.min_year) : "";
+    console.log(data)
+
     return {
         title: data.title || '',
         internship_application_link: data.internship_link || '',
-        minYear: data.min_year ? data.min_year.replace(/\D/g, "") : "",
+        minYear: data.min_year ? minYearStr.replace(/\D/g, "") : "",
         workType: data.work_type || '',
         duration: data.duration || '',
         departments: Array.isArray(data.category)
