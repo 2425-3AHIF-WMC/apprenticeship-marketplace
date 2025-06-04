@@ -36,6 +36,14 @@ import {format} from "date-fns";
 import {de} from "date-fns/locale";
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {fetchCompanyProfile} from "@/lib/authUtils.ts";
+import html2pdf from 'html2pdf.js';
+
+const departmentOptions = [
+    { id: 1, name: "Informatik" },
+    { id: 2, name: "Medientechnik" },
+    { id: 3, name: "Elektronik" },
+    { id: 4, name: "Medizintechnik" },
+];
 
 const salarySchema = z.discriminatedUnion('salaryType', [
     z.object({
@@ -76,11 +84,11 @@ const descriptionSchema = z.discriminatedUnion('descriptionType', [
 const formSchema = z
     .object({
         title: z.string().min(1, "Ein Titel muss vorhanden sein"),
-        internshipDescription: z.string().min(5, "Eine kurze Beschreibung muss vorhanden sein"),
+        internship_application_link: z.string().min(5, "Ein Bewerbungslink muss vorhanden sein"),
         minYear: z.string().min(1, "Eine Schulstufe muss ausgewählt sein"),
         workType: z.string({ required_error: "Eine Arbeitsart muss ausgewählt sein" }),
         duration: z.string({ required_error: "Eine Dauer muss ausgewählt sein" }),
-        departments: z.array(z.string()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
+        departments: z.array(z.number()).min(1, "Mindestens eine Abteilung muss ausgewählt sein"),
         deadline: z.date({ message: "Eine Bewerbungsfrist muss ausgewählt sein" }),
         site: z.string({ required_error: "Bitte wählen Sie einen Standort aus." }),
         salaryType: z.enum(['salary', 'not_specified']),
@@ -154,7 +162,7 @@ const CompanyInternshipCreation = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: '',
-            internshipDescription: '',
+            internship_application_link: '',
             minYear: '',
             departments: [],
             salaryType: 'salary',
@@ -169,34 +177,95 @@ const CompanyInternshipCreation = () => {
     }
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            // 1. Internship anlegen (ohne PDF)
             const resp = await fetch('http://localhost:5000/api/internship/change', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    clicks: 20,
+                    clicks: String(1),
                     title: values.title,
-                    description: values.internshipDescription,
-                    min_year: values.minYear,
+                    pdf_path: null,
+                    min_year: String(values.minYear),
                     internship_creation_timestamp: new Date().toISOString(),
-                    salary: values.salary || 0,
-                    application_end: values.deadline,
-                    location_id: values.site,
-                    worktype_id: values.workType,
-                    internship_duration_id: values.duration,
-                    internship_application_link: "sample"
+                    salary: String(values.salary || values.salaryReason),
+                    application_end: values.deadline.toISOString().split('T')[0],
+                    location_id: String(values.site),
+                    worktype_id: String(values.workType),
+                    internship_duration_id: String(values.duration),
+                    internship_application_link: values.internship_application_link
                 })
             });
             if (!resp.ok) {
                 console.log('Fehler beim Speichern');
-            } else {
-                console.log('Erfolgreich gespeichert');
+                return;
             }
+            // 2. ID aus Response holen
+            const text = await resp.text();
+            let internshipId;
+            try {
+                internshipId = JSON.parse(text).internship_id;
+            } catch {
+                internshipId = Number(text);
+            }
+            console.log(values.departments);
+            const departmentsResponse = await fetch(`http://localhost:5000/api/departments/create/${internshipId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({departments: values.departments})
+            });
+            if (!departmentsResponse.ok) {
+                console.log('Fehler beim Speichern der Abteilungen');
+                return;
+            }
+            // 3. PDF upload logic
+            let pdfFileToUpload = null;
+            if (values.descriptionType === 'pdf' && values.pdfFile) {
+                pdfFileToUpload = values.pdfFile;
+            } else if (values.descriptionType === 'editor' && values.editorContent) {
+                // Render the HTML into a hidden div
+                const container = document.getElementById('editor-pdf-content');
+                if (container) {
+                    container.innerHTML = `<div class="ql-editor">${values.editorContent}</div>`;
+
+                    const qlDiv = container.querySelector('.ql-editor');
+                    if (qlDiv) {
+                        const opt = {
+                            margin: 10,
+                            filename: 'editor-content.pdf',
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2 },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        };
+                        const pdfBlob = await html2pdf().set(opt).from(qlDiv).outputPdf('blob');
+                        pdfFileToUpload = new File([pdfBlob], 'editor-content.pdf', { type: 'application/pdf' });
+                    } else {
+                        console.error("Kein .ql-editor gefunden!");
+                    }
+                }
+            }
+            if (pdfFileToUpload) {
+                console.log("Uploading PDF");
+                const formData = new FormData();
+                formData.append('file', pdfFileToUpload);
+                const uploadResp = await fetch(`http://localhost:5000/api/media/upload/${internshipId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!uploadResp.ok) {
+                    console.log('Fehler beim PDF-Upload');
+                    return;
+                }
+                const uploadResult = await uploadResp.json();
+                console.log('PDF erfolgreich hochgeladen:', uploadResult.pdfPath);
+            }
+            console.log('Erfolgreich gespeichert');
         } catch (error) {
             console.log(error);
         }
-
         console.log(values);
     }
 
@@ -224,392 +293,394 @@ const CompanyInternshipCreation = () => {
         'image', 'video'
     ];
     return (
-        <div className="flex min-h-screen">
-            <CompanyDashboardSidebar/>
-            <div className="flex-1 flex justify-center">
-                <main className="w-full p-8 space-y-6 ">
-                    <FadeIn>
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <h1 className="heading-md text-left">Praktika erstellen/hinzufügen</h1>
-                                <p className="text-muted-foreground text-left">
-                                    Erstellen von Praktikas, oder Hinzufügen von bereits erstellten.
-                                </p>
-                            </div>
+        <>
+            <div id="editor-pdf-content" style={{ visibility: 'hidden', position: 'absolute', left: '-9999px', top: 0 }} />
+            <div className="flex min-h-screen">
+                <CompanyDashboardSidebar/>
+                <div className="flex-1 flex justify-center">
+                    <main className="w-full p-8 space-y-6 ">
+                        <FadeIn>
+                            <div className="flex flex-col gap-4">
+                                <div>
+                                    <h1 className="heading-md text-left">Praktika erstellen/hinzufügen</h1>
+                                    <p className="text-muted-foreground text-left">
+                                        Erstellen von Praktikas, oder Hinzufügen von bereits erstellten.
+                                    </p>
+                                </div>
 
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)}
-                                      className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Stellenbezeichnung</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="z.B. Frontend-Entwickler Praktikum" {...field} />
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="internshipDescription"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Kurzbeschreibung</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="z.B. IT-Entwicklung" {...field} />
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="minYear"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Minimale Schulstufe</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Minimale Schulstufe auswählen"/>
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="1">1. Jahrgang</SelectItem>
-                                                        <SelectItem value="2">2. Jahrgang</SelectItem>
-                                                        <SelectItem value="3">3. Jahrgang</SelectItem>
-                                                        <SelectItem value="4">4. Jahrgang</SelectItem>
-                                                        <SelectItem value="5">5. Jahrgang</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="workType"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Arbeitstyp</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Arbeitstyp wählen"/>
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {workTypes.map((type) => (
-                                                            <SelectItem key={type.worktype_id} value={type.worktype_id.toString()}>
-                                                                {type.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="departments"
-                                        render={() => (
-                                            <FormItem>
-                                                <FormLabel>Abteilungen</FormLabel>
-                                                <div className="flex flex-col space-y-1">
-                                                    {['Informatik', 'Medientechnik', 'Medizintechnik', 'Elektronik'].map((dept) => (
-                                                        <FormField
-                                                            key={dept}
-                                                            control={form.control}
-                                                            name="departments"
-                                                            render={({field}) => {
-                                                                return (
-                                                                    <FormItem
-                                                                        key={dept}
-                                                                        className="flex flex-row items-start space-x-3 space-y-0"
-                                                                    >
-                                                                        <FormControl>
-                                                                            <Checkbox
-                                                                                checked={field.value?.includes(dept)}
-                                                                                onCheckedChange={(checked) => {
-                                                                                    if (checked) {
-                                                                                        field.onChange([...(field.value || []), dept]);
-                                                                                    } else {
-                                                                                        field.onChange(field.value?.filter((v) => v !== dept));
-                                                                                    }
-                                                                                }}
-                                                                            />
-                                                                        </FormControl>
-                                                                        <FormLabel className="font-normal">
-                                                                            {dept}
-                                                                        </FormLabel>
-                                                                    </FormItem>
-                                                                )
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="deadline"
-                                        render={({field}) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel>Bewerbungsfrist</FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <FormControl>
-                                                            <Button
-                                                                variant={"outline"}
-                                                                className={cn(
-                                                                    "pl-3 text-left font-normal",
-                                                                    !field.value && "text-muted-foreground"
-                                                                )}
-                                                            >
-                                                                {field.value ? (
-                                                                    format(field.value, "PPP", {locale: de})
-                                                                ) : (
-                                                                    <span>Datum auswählen</span>
-                                                                )}
-                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50"/>
-                                                            </Button>
-                                                        </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0" align="start">
-                                                        <Calendar
-                                                            mode="single"
-                                                            selected={field.value}
-                                                            onSelect={field.onChange}
-                                                            initialFocus
-                                                            className={cn("p-3 pointer-events-auto")}
-                                                        />
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="salaryType"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Gehaltsangabe</FormLabel>
-                                                <div className="flex flex-col space-y-6">
-                                                    <FormControl>
-                                                        <RadioGroup
-                                                            onValueChange={field.onChange}
-                                                            defaultValue={field.value}
-                                                            value={field.value}
-                                                            className="flex flex-col space-y-1"
-                                                        >
-                                                            <div className="flex items-center space-x-3">
-                                                                <RadioGroupItem value="salary" id="salary"/>
-                                                                <FormLabel htmlFor="salary" className="font-normal">
-                                                                    Gehalt angeben
-                                                                </FormLabel>
-                                                            </div>
-                                                            <div className="flex items-center space-x-3">
-                                                                <RadioGroupItem value="not_specified"
-                                                                                id="not_specified"/>
-                                                                <FormLabel htmlFor="not_specified"
-                                                                           className="font-normal">
-                                                                    Keine Angabe
-                                                                </FormLabel>
-                                                            </div>
-                                                        </RadioGroup>
-                                                    </FormControl>
-
-                                                    {watchSalaryType === 'salary' && (
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="salary"
-                                                            render={({field}) => (
-                                                                <FormItem>
-                                                                    <FormLabel>Gehalt in EUR</FormLabel>
-                                                                    <FormControl>
-                                                                        <Input type="number"
-                                                                               placeholder="z.B. 800" {...field}
-                                                                               onChange={(e) => field.onChange(e.target.valueAsNumber)
-                                                                        }
-                                                                               value={Number.isNaN(field.value) || field.value === null || field.value === undefined ? "" : field.value}/>
-                                                                    </FormControl>
-                                                                    <FormMessage/>
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    )}
-                                                    {watchSalaryType === 'not_specified' && (
-                                                        <FormField
-                                                            control={form.control}
-                                                            name="salaryReason"
-                                                            render={({field}) => (
-                                                                <FormItem>
-                                                                    <FormLabel>Begründung für keine
-                                                                        Gehaltsangabe</FormLabel>
-                                                                    <FormControl>
-                                                                        <Input
-                                                                            placeholder="Warum haben Sie kein Gehalt angegeben?" {...field} />
-                                                                    </FormControl>
-                                                                    <FormDescription>
-                                                                        Diese Nachricht wird den Schülern angezeigt.
-                                                                    </FormDescription>
-                                                                    <FormMessage/>
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="duration"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Praktikumsdauer</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Praktikumsdauer wählen"/>
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {durations.map((duration) => (
-                                                            <SelectItem key={duration.internship_duration_id} value={duration.internship_duration_id.toString()}>
-                                                                {duration.description}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="site"
-                                        render={({field}) => (
-                                            <FormItem>
-                                                <FormLabel>Standort</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Standort wählen"/>
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                         {sites.length > 0 ? sites.map((site) => (
-                                                            <SelectItem key={site.location_id} value={site.location_id.toString()}>
-                                                                {site.name} | {site.address} - {site.plz}
-                                                            </SelectItem>
-                                                        ))
-                                                        : (
-                                                        <SelectItem key={0} value={"0"} disabled>
-                                                            Kein Standort vorhanden
-                                                        </SelectItem>
-                                                             )}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="descriptionType"
-                                        render={({ field }) => (
-                                            <FormItem className="col-span-1 md:col-span-2 w-full">
-                                                <FormLabel>Praktikumsausschreibung</FormLabel>
-                                                <RadioGroup
-                                                    onValueChange={field.onChange}
-                                                    value={field.value}
-                                                    className="flex space-x-4"
-                                                >
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="pdf" id="pdf" />
-                                                        <FormLabel htmlFor="pdf">Eigenes PDF hochladen</FormLabel>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="editor" id="editor" />
-                                                        <FormLabel htmlFor="editor">PDF erstellen</FormLabel>
-                                                    </div>
-                                                </RadioGroup>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    {form.watch('descriptionType') === 'editor' ? (
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onSubmit)}
+                                          className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField
                                             control={form.control}
-                                            name="editorContent"
+                                            name="title"
                                             render={({field}) => (
-                                                <FormItem className="col-span-1 md:col-span-2 w-full">
-                                                    <FormLabel>Beschreibung</FormLabel>
-                                                    <FormControl>
-                                                        <div className="w-full">
-                                                            <ReactQuill
-                                                                value={field.value}
-                                                                onChange={(content) => {field.onChange(content);}}
-                                                                modules={modules}
-                                                                formats={formats}
-                                                                className="bg-primary-foreground text-black"
-                                                            />
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    ) : (
-                                        <FormField
-                                            control={form.control}
-                                            name="pdfFile"
-                                            render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>PDF Datei</FormLabel>
+                                                    <FormLabel>Stellenbezeichnung</FormLabel>
                                                     <FormControl>
                                                         <Input
-                                                            type="file"
-                                                            accept=".pdf"
-                                                            onChange={(e) => field.onChange(e.target.files?.[0])}
-                                                        />
+                                                            placeholder="z.B. Frontend-Entwickler Praktikum" {...field} />
                                                     </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="internship_application_link"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Bewerbungslink</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="z.B. https://www.example.com/bewerbung" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="minYear"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Minimale Schulstufe</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Minimale Schulstufe auswählen"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="1">1. Jahrgang</SelectItem>
+                                                            <SelectItem value="2">2. Jahrgang</SelectItem>
+                                                            <SelectItem value="3">3. Jahrgang</SelectItem>
+                                                            <SelectItem value="4">4. Jahrgang</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="workType"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Arbeitstyp</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Arbeitstyp wählen"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {workTypes.map((type) => (
+                                                                <SelectItem key={type.worktype_id} value={type.worktype_id.toString()}>
+                                                                    {type.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="departments"
+                                            render={() => (
+                                                <FormItem>
+                                                    <FormLabel>Abteilungen</FormLabel>
+                                                    <div className="flex flex-col space-y-1">
+                                                        {departmentOptions.map((dept) => (
+                                                            <FormField
+                                                                key={dept.id}
+                                                                control={form.control}
+                                                                name="departments"
+                                                                render={({field}) => {
+                                                                    return (
+                                                                        <FormItem
+                                                                            key={dept.id}
+                                                                            className="flex flex-row items-start space-x-3 space-y-0"
+                                                                        >
+                                                                            <FormControl>
+                                                                                <Checkbox
+                                                                                    checked={field.value?.includes(dept.id)}
+                                                                                    onCheckedChange={(checked) => {
+                                                                                        if (checked) {
+                                                                                            field.onChange([...(field.value || []), dept.id]);
+                                                                                        } else {
+                                                                                            field.onChange(field.value?.filter((v) => v !== dept.id));
+                                                                                        }
+                                                                                    }}
+                                                                                />
+                                                                            </FormControl>
+                                                                            <FormLabel className="font-normal">
+                                                                                {dept.name}
+                                                                            </FormLabel>
+                                                                        </FormItem>
+                                                                    )
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="deadline"
+                                            render={({field}) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel>Bewerbungsfrist</FormLabel>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                    variant={"outline"}
+                                                                    className={cn(
+                                                                        "pl-3 text-left font-normal",
+                                                                        !field.value && "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    {field.value ? (
+                                                                        format(field.value, "PPP", {locale: de})
+                                                                    ) : (
+                                                                        <span>Datum auswählen</span>
+                                                                    )}
+                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50"/>
+                                                                </Button>
+                                                            </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0" align="start">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={field.value}
+                                                                onSelect={field.onChange}
+                                                                initialFocus
+                                                                className={cn("p-3 pointer-events-auto")}
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="salaryType"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Gehaltsangabe</FormLabel>
+                                                    <div className="flex flex-col space-y-6">
+                                                        <FormControl>
+                                                            <RadioGroup
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                                value={field.value}
+                                                                className="flex flex-col space-y-1"
+                                                            >
+                                                                <div className="flex items-center space-x-3">
+                                                                    <RadioGroupItem value="salary" id="salary"/>
+                                                                    <FormLabel htmlFor="salary" className="font-normal">
+                                                                        Gehalt angeben
+                                                                    </FormLabel>
+                                                                </div>
+                                                                <div className="flex items-center space-x-3">
+                                                                    <RadioGroupItem value="not_specified"
+                                                                                    id="not_specified"/>
+                                                                    <FormLabel htmlFor="not_specified"
+                                                                               className="font-normal">
+                                                                        Keine Angabe
+                                                                    </FormLabel>
+                                                                </div>
+                                                            </RadioGroup>
+                                                        </FormControl>
+
+                                                        {watchSalaryType === 'salary' && (
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="salary"
+                                                                render={({field}) => (
+                                                                    <FormItem>
+                                                                        <FormLabel>Gehalt in EUR</FormLabel>
+                                                                        <FormControl>
+                                                                            <Input type="number"
+                                                                                   placeholder="z.B. 800" {...field}
+                                                                                   onChange={(e) => field.onChange(e.target.valueAsNumber)
+                                                                            }
+                                                                                   value={Number.isNaN(field.value) || field.value === null || field.value === undefined ? "" : field.value}/>
+                                                                        </FormControl>
+                                                                        <FormMessage/>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        )}
+                                                        {watchSalaryType === 'not_specified' && (
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="salaryReason"
+                                                                render={({field}) => (
+                                                                    <FormItem>
+                                                                        <FormLabel>Begründung für keine
+                                                                            Gehaltsangabe</FormLabel>
+                                                                        <FormControl>
+                                                                            <Input
+                                                                                placeholder="Warum haben Sie kein Gehalt angegeben?" {...field} />
+                                                                        </FormControl>
+                                                                        <FormDescription>
+                                                                            Diese Nachricht wird den Schülern angezeigt.
+                                                                        </FormDescription>
+                                                                        <FormMessage/>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="duration"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Praktikumsdauer</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Praktikumsdauer wählen"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {durations.map((duration) => (
+                                                                <SelectItem key={duration.internship_duration_id} value={duration.internship_duration_id.toString()}>
+                                                                    {duration.description}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="site"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Standort</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Standort wählen"/>
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                             {sites.length > 0 ? sites.map((site) => (
+                                                                <SelectItem key={site.location_id} value={site.location_id.toString()}>
+                                                                    {site.name} | {site.address} - {site.plz}
+                                                                </SelectItem>
+                                                            ))
+                                                            : (
+                                                            <SelectItem key={0} value={"0"} disabled>
+                                                                Kein Standort vorhanden - in den Einstellungen hinzufügen
+                                                            </SelectItem>
+                                                                 )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="descriptionType"
+                                            render={({ field }) => (
+                                                <FormItem className="col-span-1 md:col-span-2 w-full">
+                                                    <FormLabel>Praktikumsausschreibung</FormLabel>
+                                                    <RadioGroup
+                                                        onValueChange={field.onChange}
+                                                        value={field.value}
+                                                        className="flex space-x-4"
+                                                    >
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem value="pdf" id="pdf" />
+                                                            <FormLabel htmlFor="pdf">Eigenes PDF hochladen</FormLabel>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem value="editor" id="editor" />
+                                                            <FormLabel htmlFor="editor">PDF erstellen</FormLabel>
+                                                        </div>
+                                                    </RadioGroup>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-                                    )}
-                                    <div className="col-span-1 md:col-span-2 w-full mt-4 flex justify-center">
-                                        <Button type="submit" className="md:w-auto">
-                                            Praktikum erstellen
-                                        </Button>
-                                    </div>
 
-                                </form>
-                            </Form>
-                        </div>
-                    </FadeIn>
-                </main>
+                                        {form.watch('descriptionType') === 'editor' ? (
+                                            <FormField
+                                                control={form.control}
+                                                name="editorContent"
+                                                render={({field}) => (
+                                                    <FormItem className="col-span-1 md:col-span-2 w-full">
+                                                        <FormLabel>Beschreibung</FormLabel>
+                                                        <FormControl>
+                                                            <div className="w-full">
+                                                                <ReactQuill
+                                                                    value={field.value}
+                                                                    onChange={(content) => {field.onChange(content);}}
+                                                                    modules={modules}
+                                                                    formats={formats}
+                                                                    className="bg-primary-foreground text-black"
+                                                                />
+                                                            </div>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ) : (
+                                            <FormField
+                                                control={form.control}
+                                                name="pdfFile"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>PDF Datei</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="file"
+                                                                accept=".pdf"
+                                                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        )}
+                                        <div className="col-span-1 md:col-span-2 w-full mt-4 flex justify-center">
+                                            <Button type="submit" className="md:w-auto">
+                                                Praktikum erstellen
+                                            </Button>
+                                        </div>
+
+                                    </form>
+                                </Form>
+                            </div>
+                        </FadeIn>
+                    </main>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

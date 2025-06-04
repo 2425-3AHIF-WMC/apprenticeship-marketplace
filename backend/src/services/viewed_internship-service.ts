@@ -22,18 +22,28 @@ export class ViewedInternshipService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async getCountOfStudent(studentId: number): Promise<number> {
+    public async getCountOfInternship(studentId: number): Promise<number> {
         const stmt = await this.unit.prepare(`select count(*)
-                                              from viewed_internships
-                                              where student_id = $1`, [studentId]);
+                                                                from viewed_internships
+                                                                where internship_id = $1`, [studentId]);
         return stmt.rows[0].count || 0;
     }
 
     public async getCountOfStudentLast30Days(studentId: number): Promise<number> {
         const stmt = await this.unit.prepare(`SELECT COUNT(*)
-                                                  FROM viewed_internships
-                                                  WHERE student_id = $1
-                                                    AND viewed_timestamp >= NOW() - INTERVAL '31 days'`, [studentId]);
+                                              FROM viewed_internships
+                                              WHERE student_id = $1
+                                                AND viewed_timestamp >= NOW() - INTERVAL '31 days'`, [studentId]);
+        return stmt.rows[0].count || 0;
+    }
+
+    public async getCountOfInternshipsByCompany(companyId: number): Promise<number> {
+        const stmt = await this.unit.prepare(`select count(*)
+                                              from viewed_internships vi
+                                                       join internship i on (vi.internship_id = i.internship_id)
+                                                       join site s on (i.location_id = s.location_id)
+                                              where s.company_id=$1
+                                                and viewed_timestamp >= NOW() - INTERVAL '31 days'`, [companyId]);
         return stmt.rows[0].count || 0;
     }
 

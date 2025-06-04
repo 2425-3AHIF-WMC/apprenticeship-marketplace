@@ -8,3 +8,12 @@ Content-Type:application/json
   "internship_id": 1,
   "student_id": 1
 }
+
+### post a new favourite
+POST {{BaseUrl}}/create HTTP/1.1
+Content-Type:application/json
+
+{
+  "internship_id": 1,
+  "student_id": 1
+}

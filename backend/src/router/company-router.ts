@@ -21,6 +21,7 @@ import {Unit} from "../unit.js";
 import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
+import {ViewedInternshipService} from "../services/viewed_internship-service.js";
 
 dotenv.config();
 
@@ -391,7 +392,34 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
     } finally {
         await unit.complete();
     }
+});
 
+companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const viewedService = new ViewedInternshipService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const viewedCount: number = await viewedService.getCountOfInternshipsByCompany(company_id);
+
+            if (viewedCount > 0) {
+                res.status(StatusCodes.OK).json(viewedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
 });
 
 companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
