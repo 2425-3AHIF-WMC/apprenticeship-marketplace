@@ -122,7 +122,8 @@ const CompanyInternships = () => {
             }
             console.log(id);
             const response = await fetch(`http://localhost:5000/api/internship/delete/${id}`, {
-                method: 'DELETE'});
+                method: 'DELETE'
+            });
             console.log(response.status)
             if (!response.ok) {
                 throw new Error('Fehler beim Löschen des Praktikums');

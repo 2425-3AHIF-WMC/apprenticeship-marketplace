@@ -1,6 +1,6 @@
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import FadeIn from "@/components/FadeIn.tsx";
-import {useState} from "react";
+import {ChangeEvent, useEffect, useState} from "react";
 import {
     Form,
     FormControl,
@@ -18,6 +18,8 @@ import {checkCompanyAuth} from "@/lib/authUtils.ts";
 import {useNavigate} from "react-router-dom";
 import {toast, Toaster} from "sonner";
 import CompanySites from "@/pages/CompanySites.tsx";
+import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {Building, Upload} from "lucide-react";
 
 const formSchema = z.object({
     oldPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
@@ -47,7 +49,83 @@ const CompanySettings = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const companyId = getCompanyIdFromToken();
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
 
+    useEffect(() => {
+        if (!companyId) return;
+        fetch(`http://localhost:5000/api/media/company-logo/${companyId}`, { method: "HEAD" })
+            .then(res => {
+                if (res.ok) setLogoUrl(`http://localhost:5000/api/media/company-logo/${companyId}?t=${Date.now()}`);
+                else setLogoUrl(null);
+            })
+            .catch(() => setLogoUrl(null));
+    }, [companyId]);
+
+
+    async function handleLogoUpload(e: ChangeEvent<HTMLInputElement>) {
+        if (!companyId) {
+            toast.error("Firma nicht erkannt. Bitte neu einloggen.");
+            return;
+        }
+
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const allowedTypes = ["image/png", "image/jpeg", "image/svg+xml"];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error("Nur JPG, PNG oder SVG erlaubt.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        setUploading(true);
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/media/company-logo/${companyId}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (res.ok) {
+                toast.success("Logo erfolgreich hochgeladen.");
+                setLogoUrl(`http://localhost:5000/api/media/company-logo/${companyId}?t=${Date.now()}`);
+            } else {
+                const err = await res.text();
+                toast.error("Upload fehlgeschlagen: " + err);
+            }
+        } catch (error) {
+            toast.error("Fehler beim Hochladen");
+        } finally {
+            setUploading(false);
+            e.target.value = "";
+        }
+    }
+
+    async function handleLogoDelete() {
+        if (!companyId) {
+            return toast.error("Firma nicht erkannt");
+        }
+        setUploading(true);
+        try {
+            const res = await fetch(`http://localhost:5000/api/media/company-logo/${companyId}`, {
+                method: "DELETE",
+            });
+            if (res.ok) {
+                toast.success("Logo entfernt");
+                setLogoUrl(null);
+            } else {
+                const text = await res.text();
+                toast.error("Löschen fehlgeschlagen: " + text);
+            }
+        } catch {
+            toast.error("Fehler beim Löschen");
+        } finally {
+            setUploading(false);
+        }
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -109,7 +187,63 @@ const CompanySettings = () => {
                             <p>Firma nicht erkannt. Bitte neu einloggen.</p>
                         )}
 
-
+                        <div>
+                            <h1 className="heading-md text-left pt-5">Firmenlogo</h1>
+                            <p className="text-muted-foreground text-left">
+                                Verwalten Sie ihr Firmenlogo
+                            </p>
+                        </div>
+                        <Card className="max-w-md">
+                            <CardHeader>
+                            </CardHeader>
+                            <CardContent className="space-y-4 flex flex-col items-center">
+                                <div className="h-32 w-32 rounded-md border border-dashed border-muted-foreground/50 flex items-center justify-center mb-4 overflow-hidden">
+                                    {logoUrl ? (
+                                        <img src={logoUrl} alt="Firmenlogo" className="h-full w-full object-contain" />
+                                    ) : (
+                                        <Building className="text-muted-foreground/70 text-6xl select-none"/>
+                                    )}
+                                </div>
+                                <p className="text-sm text-muted-foreground text-center mb-4">
+                                    Laden Sie ein Logo im JPG, PNG oder SVG Format hoch. Empfohlene Größe: 400x400 Pixel.
+                                </p>
+                                <label
+                                    htmlFor="logo-upload"
+                                    className="cursor-pointer inline-flex items-center justify-center p-2 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                                >
+                                    <svg
+                                        className="h-4 w-4 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        aria-hidden="true"
+                                    >
+                                        <Upload/>
+                                    </svg>
+                                    <span className="text-sm">{uploading ? "Lädt..." : "Logo hochladen"}</span>
+                                    <input
+                                        id="logo-upload"
+                                        type="file"
+                                        accept="image/png, image/jpeg, image/svg+xml"
+                                        className="hidden"
+                                        onChange={handleLogoUpload}
+                                        disabled={uploading}
+                                    />
+                                </label>
+                                {logoUrl && (
+                                    <Button
+                                        variant="ghost"
+                                        className="text-destructive mt-2 h-auto p-1 text-xs"
+                                        onClick={handleLogoDelete}
+                                        disabled={uploading}
+                                    >
+                                        Logo entfernen
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
                         <div className="flex flex-col mt-12 gap-1">
                             <div>
                                 <h1 className="heading-md text-left">Passwort zurücksetzen</h1>

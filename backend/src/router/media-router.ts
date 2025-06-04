@@ -8,11 +8,69 @@ import { Request, Response } from "express";
 
 const mediaRouter = express.Router();
 const mediaDir = path.resolve("/app/media");
+const companyLogoDir = path.join(mediaDir, "company-logos");
 
 mediaRouter.get("/", (req, res) => {
     res.send("Hello World");
 });
 
+const uploadCompanyLogo = multer({
+    storage: multer.diskStorage({
+        destination: (_req, _file, cb) => cb(null, companyLogoDir),
+        filename: (req, file, cb) => {
+            const companyId = req.params.companyId;
+            const ext = path.extname(file.originalname).toLowerCase();
+            cb(null, `${companyId}${ext}`);
+        },
+    }),
+    fileFilter: (_req, file, cb) => {
+        const allowed = ["image/png", "image/jpeg", "image/svg+xml"];
+        if (!allowed.includes(file.mimetype)) {
+            return cb(new Error("Nur JPG, PNG oder SVG erlaubt"));
+        }
+        cb(null, true);
+    },
+});
+
+mediaRouter.get("/company-logo/:companyId", (req, res) => {
+    const companyId = req.params.companyId;
+    const files = fs.readdirSync(companyLogoDir);
+    const file = files.find((f) => f.startsWith(companyId + "."));
+    if (!file) {
+        res.status(404).send("Logo nicht gefunden");
+        return;
+    }
+
+    const fullPath = path.join(companyLogoDir, file);
+    res.sendFile(fullPath);
+});
+
+mediaRouter.post("/company-logo/:companyId", uploadCompanyLogo.single("file"), (req, res) => {
+        if (!req.file) {
+            res.status(400).send("Keine Datei hochgeladen");
+            return;
+        }
+        res.status(200).json({ message: "Logo erfolgreich hochgeladen" });
+    }
+);
+
+mediaRouter.delete("/company-logo/:companyId", (req, res) => {
+    const companyId = req.params.companyId;
+    const files = fs.readdirSync(companyLogoDir);
+    const file = files.find((f) => f.startsWith(companyId + "."));
+    if (!file) {
+        res.status(404).send("Logo nicht gefunden");
+        return;
+    }
+
+    const fullPath = path.join(companyLogoDir, file);
+    try {
+        fs.unlinkSync(fullPath);
+        res.status(200).send("Logo gelöscht")
+    } catch (e) {
+        res.status(500).send("Fehler beim Löschen des Logos");
+    }
+});
 mediaRouter.get<{ requestedPath: string }>("/:requestedPath(.*)", (req, res) => {
     const filePath = req.params.requestedPath;
     if (!filePath) {
