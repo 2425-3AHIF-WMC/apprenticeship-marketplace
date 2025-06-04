@@ -89,13 +89,13 @@ const CompanyInternships = () => {
 
                 setCompanyId(companyId);
 
-                const response = await fetch(`http://localhost:50da00/api/company/${companyId}/internships`);
+                const response = await fetch(`http://localhost:5000/api/company/${companyId}/internships`);
                 if (!response.ok && response.status !== 404) {
                     throw new Error("Fehler beim Laden der Praktika");
                 }
 
                 const data = await response.json() as InternshipMappedProps[];
-                const transformed : InternshipUIProps[] = data.map((item : InternshipMappedProps) => ({
+                const transformed : InternshipUIProps[] = data.map((item: InternshipMappedProps) => ({
                     ...item,
                     department: item.category
                 }));
@@ -159,25 +159,41 @@ const CompanyInternships = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-                <LoadingIndicator />
+            <div className="flex min-h-screen">
+                <CompanyDashboardSidebar/>
+                <div className="flex-1 flex justify-center">
+                    <main className="w-full p-8 space-y-8">
+
+                        <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+                            <LoadingIndicator/>
+                        </div>
+                    </main>
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                    <FilePlus className="h-8 w-8 text-muted-foreground" />
+            <div className="flex min-h-screen">
+                <CompanyDashboardSidebar/>
+                <div className="flex-1 flex justify-center">
+                    <main className="w-full p-8 space-y-8">
+
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
+                                <FilePlus className="h-8 w-8 text-muted-foreground"/>
+                            </div>
+                            <h3 className="text-lg font-medium mb-2">Fehler beim Laden</h3>
+                            <p className="text-muted-foreground mb-4 max-w-md">
+                                {error}
+                            </p>
+                            <Button variant="outline" onClick={() => window.location.reload()}>
+                                Erneut versuchen
+                            </Button>
+                        </div>
+                    </main>
                 </div>
-                <h3 className="text-lg font-medium mb-2">Fehler beim Laden</h3>
-                <p className="text-muted-foreground mb-4 max-w-md">
-                    {error}
-                </p>
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                    Erneut versuchen
-                </Button>
             </div>
         );
     }
