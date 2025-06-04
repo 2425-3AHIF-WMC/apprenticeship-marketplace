@@ -43,7 +43,7 @@ import {
     DialogFooter,
     DialogClose
 } from "@/components/ui/dialog";
-import { toast } from 'sonner';
+import {toast, Toaster} from 'sonner';
 import FadeIn from '@/components/FadeIn';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
@@ -97,15 +97,14 @@ const CompanyInternships = () => {
                 const data = await response.json() as InternshipMappedProps[];
                 const transformed : InternshipUIProps[] = data.map((item: InternshipMappedProps) => ({
                     ...item,
+                    id: item.internship_id,
                     department: item.category
                 }));
                 setInternships(transformed);
 
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
-                toast.error('Fehler beim Laden', {
-                    description: 'Die Praktikumsangebote konnten nicht geladen werden.',
-                });
+                toast.error('Fehler beim Laden der Praktika');
             } finally {
                 setIsLoading(false);
             }
@@ -121,26 +120,18 @@ const CompanyInternships = () => {
             if (!token) {
                 throw new Error('Kein Zugriffstoken gefunden');
             }
-
-            const response = await fetch(`http://localhost:5000/api/internships/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
+            console.log(id);
+            const response = await fetch(`http://localhost:5000/api/internship/delete/${id}`, {
+                method: 'DELETE'});
+            console.log(response.status)
             if (!response.ok) {
                 throw new Error('Fehler beim Löschen des Praktikums');
             }
 
             setInternships(prev => prev.filter(internship => internship.id !== id));
-            toast.success("Praktikum gelöscht", {
-                description: "Das Praktikum wurde erfolgreich gelöscht.",
-            });
+            toast.success("Praktikum erfolgreich gelöscht");
         } catch (err) {
-            toast.error('Fehler beim Löschen', {
-                description: err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten'
-            });
+            toast.error(err instanceof Error ? err.message : 'Fehler beim Löschen');
         }
     };
 
@@ -200,6 +191,7 @@ const CompanyInternships = () => {
 
     return (
         <div className="flex min-h-screen">
+            <Toaster richColors position="top-center" closeButton/>
             <CompanyDashboardSidebar/>
             <div className="flex-1 flex justify-center">
                 <main className="w-full p-8 space-y-8 ">
