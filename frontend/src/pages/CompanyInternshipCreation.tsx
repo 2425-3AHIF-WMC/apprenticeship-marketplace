@@ -120,7 +120,6 @@ const CompanyInternshipCreation = () => {
     const [dialogSuccess, setDialogSuccess] = useState<boolean | null>(null); // true = success, false = error
     const [dialogMessage, setDialogMessage] = useState("");
     const [fileInputKey, setFileInputKey] = useState(0);
-    const [isMdOrLarger, setIsMdOrLarger] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
 
     const updating = location.state?.updating || false;
     const [editData, setEditData] = useState<InternshipDetailsUIProps | null>(null);
@@ -222,14 +221,6 @@ const CompanyInternshipCreation = () => {
                 descriptionType: 'pdf'
             }
         });
-
-    useEffect(() => {
-        function handleResize() {
-            setIsMdOrLarger(window.innerWidth >= 768);
-        }
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     if (loading) {
         return null;

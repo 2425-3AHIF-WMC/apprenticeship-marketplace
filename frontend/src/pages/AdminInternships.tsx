@@ -106,7 +106,7 @@ const AdminInternships = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await fetch('http://localhost:5000/api/internship/current');
+                const res = await fetch('http://localhost:5000/api/internship/');
                 if (!res.ok) throw new Error('Fehler beim Laden der Praktika');
                 const data = await res.json();
                 setInternships(Array.isArray(data) ? data.map(mapBackendToInternshipProps) : []);
@@ -198,7 +198,7 @@ const AdminInternships = () => {
                                                         >
                                                             <X className="w-5 h-5" />
                                                         </button>
-                                                        <InternshipCard internship={internship} />
+                                                        <InternshipCard internship={internship} backPath="/admin/internships" />
                                                     </div>
                                                 </FadeIn>
                                             ))}

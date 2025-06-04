@@ -24,6 +24,22 @@ internshipRouter.get("/current", async (req: Request, res: Response) => {
     }
 });
 
+internshipRouter.get("/", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    try {
+        const service = new InternshipService(unit);
+
+        const internship = await service.getAll();
+
+        res.status(StatusCodes.OK).json(internship);
+
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
+    } finally {
+        await unit.complete();
+    }
+});
+
 internshipRouter.put("/change", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);

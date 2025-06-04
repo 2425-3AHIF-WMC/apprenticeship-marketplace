@@ -195,7 +195,7 @@ const StudentFavourites = () => {
                                                     <div
                                                         className="relative"
                                                     >
-                                                        <InternshipCard internship={internship} isFavourite={true} onToggleFavourite={() => removeFromFavourites(internship.id)} />
+                                                        <InternshipCard internship={internship} isFavourite={true} onToggleFavourite={() => removeFromFavourites(internship.id)} backPath="/student/favourites" />
                                                     </div>
                                                 </FadeIn>
                                             ))}

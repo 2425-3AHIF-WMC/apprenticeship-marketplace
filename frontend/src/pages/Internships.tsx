@@ -235,6 +235,7 @@ const Internships = () => {
                                             internship={internship}
                                             isFavourite={favouriteIds.includes(Number(internship.id))}
                                             onToggleFavourite={handleToggleFavourite}
+                                            backPath="/internships"
                                         />
                                     </FadeIn>
                                 ))}
