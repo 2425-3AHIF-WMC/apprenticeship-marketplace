@@ -65,7 +65,7 @@ const CompanyDashboard = () => {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen">
             <CompanyDashboardSidebar />
             <main className="flex-1 p-8 flex flex-col gap-12">
                 {!adminVerified && (
@@ -79,7 +79,7 @@ const CompanyDashboard = () => {
                 </FadeIn>
 
                 <div className="max-w-3xl mr-auto">
-                    <div className="bg-white rounded-lg shadow-md p-6 flex items-center gap-4">
+                    <div className="bg-accent rounded-lg shadow-md p-6 flex items-center gap-4">
                         <div className="p-3 bg-blue-100 rounded-full">
                             <Eye className="h-8 w-8 text-blue-600" />
                         </div>
