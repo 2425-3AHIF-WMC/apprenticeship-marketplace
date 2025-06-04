@@ -296,4 +296,12 @@ export class CompanyService extends ServiceBase {
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
+
+    public async updateLogoPath(company_id: number, logoPath: string | null): Promise<boolean> {
+        const stmt = await this.unit.prepare(
+            `UPDATE company SET company_logo_path = $1 WHERE company_id = $2`,
+            [logoPath, company_id]
+        );
+        return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
 }
