@@ -13,9 +13,16 @@ interface InternshipCardProps {
     className?: string;
     isFavourite?: boolean;
     onToggleFavourite?: (internshipId: number) => void;
+    backPath: string;
 }
 
-const InternshipCard = ({ internship, className, isFavourite = false, onToggleFavourite }: InternshipCardProps) => {
+// Helper to get YYYY-MM-DD string from a Date
+function toDateString(date: Date) {
+  if (isNaN(date.getTime())) return ""; // Invalid date
+  return date.toISOString().split('T')[0];
+}
+
+const InternshipCard = ({ internship, className, isFavourite = false, onToggleFavourite, backPath }: InternshipCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const { studentId } = useAuth();
     const [isAdminUser, setIsAdminUser] = useState(false);
@@ -37,8 +44,12 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
     };
 
     const isDeadlineExpired = (deadline: string) => {
+        if (!deadline) return true;
         const today = new Date();
         const deadlineDate = new Date(deadline);
+        if (isNaN(deadlineDate.getTime())) return false; // Invalid date, treat as not expired
+        today.setHours(0,0,0,0);
+        deadlineDate.setHours(0,0,0,0);
         return deadlineDate < today;
     };
 
@@ -48,8 +59,8 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
             'border border-border hover:border-primary/20 hover:shadow-card min-h-80',
             isHovered ? 'scale-[1.01]' : 'scale-100',
             className,
-            isDeadlineExpired(internship.application_end ? 'bg-gray-100 hover:bg-gray-200 dark:bg-black/60 dark:hover:bg-black/40' : ''
-        ))}
+            isDeadlineExpired(internship.application_end) ? 'bg-gray-100 hover:bg-gray-200 dark:bg-muted/20 dark:hover:bg-muted/40' : ' dark:bg-black/60 dark:hover:bg-black/40'
+        )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
@@ -140,7 +151,7 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
 
         <div className="flex items-center justify-between pt-3 border-t border-border mt-auto">
             <Button asChild variant="outline" size="sm">
-                <Link to={`/internships/${internship.id}`}>
+                <Link to={`/internships/${internship.id}`} state={{ backPath: `${backPath}` }}>
                     Details ansehen
                 </Link>
             </Button>

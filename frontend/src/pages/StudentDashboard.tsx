@@ -138,7 +138,7 @@ const StudentDashboard = () => {
                                 </div>
                               </div>
                               <Button variant="outline" size="sm" asChild>
-                                <Link to={`/internships/${internship.id}`}>
+                                <Link to={`/internships/${internship.id}`} state={{ backPath: '/student/dashboard' }}>
                                   Details
                                 </Link>
                               </Button>
