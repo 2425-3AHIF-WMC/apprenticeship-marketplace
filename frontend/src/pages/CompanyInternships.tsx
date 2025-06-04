@@ -47,7 +47,7 @@ import { toast } from 'sonner';
 import FadeIn from '@/components/FadeIn';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
-import {InternshipUIProps} from "@/utils/interfaces.ts";
+import {InternshipMappedProps, InternshipUIProps} from "@/utils/interfaces.ts";
 
 const CompanyInternships = () => {
     const [internships, setInternships] = useState<InternshipUIProps[]>([]);
@@ -84,10 +84,10 @@ const CompanyInternships = () => {
                     throw new Error("Fehler beim Laden der Praktika");
                 }
 
-                const data = await response.json();
-                const transformed = data.map(item => ({
+                const data = await response.json() as InternshipMappedProps[];
+                const transformed : InternshipUIProps[] = data.map((item : InternshipMappedProps) => ({
                     ...item,
-                    category: item.department
+                    department: item.category
                 }));
                 setInternships(transformed);
 
