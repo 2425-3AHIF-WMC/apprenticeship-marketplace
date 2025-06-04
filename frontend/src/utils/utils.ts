@@ -29,7 +29,7 @@ export function mapBackendToCompanyUIPropsAdmin(item: any): CompanyUIPropsAdmin 
     };
 }
 
-export function mapBackendToInternshipProps(item: any): InternshipUIProps {
+export async function mapBackendToInternshipProps(item: any): Promise<InternshipUIProps> {
     return {
         id: item.internship_id || item.id,
         title: item.title,
@@ -38,7 +38,7 @@ export function mapBackendToInternshipProps(item: any): InternshipUIProps {
         duration: item.duration,
         application_end: item.application_end ? new Date(item.application_end).toISOString().slice(0, 10) : '',
         added: item.added || '',
-        views: item.views || item.clicks || 0,
+        views: await getViews(item.internship_id) || 0,
         work_type: item.work_type,
         company_logo: item.company_logo_path,
         department: Array.isArray(item.department) ? item.department : Array.isArray(item.category) ? item.category : [item.department || item.category],
@@ -47,6 +47,13 @@ export function mapBackendToInternshipProps(item: any): InternshipUIProps {
         internship_link: item.internship_link || '',
         admin_verified: item.admin_verified === true || item.admin_verified === 'true' || item.admin_verified === 1,
     };
+}
+
+export async function getViews(internship_id: number): Promise<number> {
+    const response = await fetch(`http://localhost:5000/api/viewed_internship/${internship_id}/viewedCount`);
+    const data = await response.json();
+    console.log(data);
+    return data.viewedCount;
 }
 
 export function mapBackendToInternshipDetailsProps(item: any): InternshipDetailsUIProps {

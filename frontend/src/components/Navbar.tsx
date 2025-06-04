@@ -75,6 +75,7 @@ const Navbar = () => {
             setCompanyIsAuthenticated(false);
             setCompanyName(null);
         }
+        
     };
 
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
@@ -155,9 +156,11 @@ const Navbar = () => {
                                         </DropdownMenuItem>
                                     )}
                                     {(studentIsAuthenticated || companyIsAuthenticated) && (
-                                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                                            <LogOut className="h-4 w-4 mr-2" />
-                                            Abmelden
+                                        <DropdownMenuItem asChild className="text-destructive">
+                                            <Link to="/login" onClick={handleLogout}>
+                                                <LogOut className="h-4 w-4 mr-2" />
+                                                Abmelden
+                                            </Link>
                                         </DropdownMenuItem>)}
                                 </DropdownMenuContent>
                             </DropdownMenu>
