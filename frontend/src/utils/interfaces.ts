@@ -50,6 +50,10 @@ export interface InternshipDetailsUIProps {
     pdf: string;
 }
 
+export interface InternshipMappedProps extends Omit<InternshipUIProps, 'category'> {
+    department: string[];
+}
+
 export interface CompanyUIPropsAdmin {
     company_id: number;
     name: string;

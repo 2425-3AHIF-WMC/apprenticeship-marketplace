@@ -46,8 +46,8 @@ import {
 import { toast } from 'sonner';
 import FadeIn from '@/components/FadeIn';
 import LoadingIndicator from '@/components/LoadingIndicator';
-import {InternshipUIProps} from "@/utils/interfaces.ts";
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
+import {InternshipUIProps} from "@/utils/interfaces.ts";
 
 const CompanyInternships = () => {
     const [internships, setInternships] = useState<InternshipUIProps[]>([]);
@@ -85,7 +85,12 @@ const CompanyInternships = () => {
                 }
 
                 const data = await response.json();
-                setInternships(data);
+                const transformed = data.map(item => ({
+                    ...item,
+                    category: item.department
+                }));
+                setInternships(transformed);
+
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
                 toast.error('Fehler beim Laden', {

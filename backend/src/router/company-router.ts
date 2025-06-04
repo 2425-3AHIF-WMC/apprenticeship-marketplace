@@ -375,6 +375,7 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
             const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
             if (internships.length > 0) {
+                console.log(internships)
                 res.status(StatusCodes.OK).json(internships);
             } else {
                 res.status(StatusCodes.NOT_FOUND).json([]);
