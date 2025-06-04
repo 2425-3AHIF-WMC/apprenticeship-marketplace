@@ -39,18 +39,19 @@ viewedInternshipRouter.put("/", async (req: Request, res: Response) => {
 
 });
 
-viewedInternshipRouter.get("/:studentId/count", async (req: Request, res: Response) => {
-    const studentId: number = parseInt(req.params.studentId);
+viewedInternshipRouter.get("/:internshipId/viewedCount", async (req: Request, res: Response) => {
+    const inernshipId: number = parseInt(req.params.internshipId);
     const unit: Unit = await Unit.create(true);
     const studentService = new StudentService(unit);
 
-    if (!isValidId(studentId) || !(await studentService.studentExists(studentId))) {
+    if (!isValidId(inernshipId) || !(await studentService.studentExists(inernshipId))) {
         res.status(StatusCodes.BAD_REQUEST).json({"viewedCount": "0"});
+        return;
     }
 
     try {
         const viewedService = new ViewedInternshipService(unit);
-        const viewedCount: number = await viewedService.getCountOfStudent(studentId);
+        const viewedCount: number = await viewedService.getCountOfInternship(inernshipId);
 
         res.status(StatusCodes.OK).json(viewedCount);
     } catch (e) {
