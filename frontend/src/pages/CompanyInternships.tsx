@@ -277,7 +277,7 @@ const CompanyInternships = () => {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem asChild>
-                                                            <Link to={''/*`/internships/${internship.id}`*/} className="cursor-pointer">
+                                                            <Link to={`/internships/${internship.id}`} state={{ backPath: '/company/internships' }} className="cursor-pointer">
                                                                 <Eye className="h-4 w-4 mr-2" />
                                                                 <span>Ansehen</span>
                                                             </Link>
