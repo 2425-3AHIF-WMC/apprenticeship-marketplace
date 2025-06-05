@@ -27,7 +27,6 @@ Content-Type:application/json
 {
   "internship_id": 1,
   "title": "Softwareentwickler Praktikum",
-  "pdf_path": "job-postings/2.pdf",
   "min_year": 3,
   "internship_creation_timestamp": "2025-06-04 13:16:54.358484",
   "salary": "800.00",
