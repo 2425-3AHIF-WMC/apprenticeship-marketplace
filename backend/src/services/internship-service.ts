@@ -149,18 +149,17 @@ export class InternshipService extends ServiceBase{
         const stmt = await this.unit.prepare(`UPDATE internship 
                                                                     set 
                                                                         title = $1,
-                                                                        pdf_path = $2,
-                                                                        min_year = $3,
-                                                                        internship_creation_timestamp = $4,
-                                                                        salary = $5,
-                                                                        application_end = $6,
-                                                                        location_id = $7,
-                                                                        worktype_id = $8,
-                                                                        internship_duration_id = $9,
-                                                                        internship_application_link = $10
-                                                                    WHERE internship_id=$11
+                                                                        min_year = $2,
+                                                                        internship_creation_timestamp = $3,
+                                                                        salary = $4,
+                                                                        application_end = $5,
+                                                                        location_id = $6,
+                                                                        worktype_id = $7,
+                                                                        internship_duration_id = $8,
+                                                                        internship_application_link = $9
+                                                                    WHERE internship_id=$10
                                                                     RETURNING internship_id`
-                                                            , [i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link, id]);
+                                                            , [i.title, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link, id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
