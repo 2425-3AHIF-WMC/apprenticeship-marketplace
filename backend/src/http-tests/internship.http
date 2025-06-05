@@ -15,10 +15,27 @@ Content-Type:application/json
   "salary": 950.00,
   "application_end": "2025-08-05",
   "location_id": 5,
-  "clicks": 6,
   "worktype_id": 1,
   "internship_duration_id": 2,
   "internship_application_link": "https://ai-solutions.at/karriere/ki-chatbot-entwicklung"
+}
+
+### update a internship
+PUT {{BaseUrl}}change HTTP/1.1
+Content-Type:application/json
+
+{
+  "internship_id": 1,
+  "title": "Softwareentwickler Praktikum",
+  "pdf_path": "job-postings/2.pdf",
+  "min_year": 3,
+  "internship_creation_timestamp": "2025-06-04 13:16:54.358484",
+  "salary": "800.00",
+  "application_end": "2025-06-30",
+  "location_id": 1,
+  "worktype_id": 1,
+  "internship_duration_id": 1,
+  "internship_application_link": "https://technova.at/karriere/softwareentwickler-praktikum"
 }
 
 
