@@ -187,11 +187,11 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             return;
         }
 
-        const validWebsite: boolean = !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim())
+        const validWebsite: boolean = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim())
         const validEmail: boolean = company.email.includes('@');
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
-        if (validWebsite && validEmail && validVerifications && isValidCompanyNumber(company.company_number)) {
+        if (validWebsite && validEmail && validVerifications) {
             const companyPayload: ICompanyPayload = await service.insertAndReturn(company);
             await unit.complete(true);
 
@@ -546,7 +546,6 @@ companyRouter.put("", async (req: Request, res: Response) => {
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
-        && isValidCompanyNumber(company.company_number)
         && isValidDate(company.company_registration_timestamp)
         && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
         && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
@@ -867,11 +866,4 @@ companyRouter.put("/info/:id", async (req: Request, res: Response) => {
 
 
 // helper functions
-
-function isValidCompanyNumber(number: string): boolean {
-    const nums: number = parseInt(number.substring(0, 6));
-    const letter: number = parseInt(number.substring(6));
-
-    return !isNaN(nums) && isNaN(letter);
-}
 
