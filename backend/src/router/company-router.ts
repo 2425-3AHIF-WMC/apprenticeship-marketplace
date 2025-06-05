@@ -376,6 +376,7 @@ companyRouter.get("/:id/internships", async (req: Request, res: Response) => {
             const internships: IInternshipUIProps[] = await internshipService.getByCompanyId(company_id);
 
             if (internships.length > 0) {
+                console.log(internships)
                 res.status(StatusCodes.OK).json(internships);
             } else {
                 res.status(StatusCodes.NOT_FOUND).json([]);
@@ -406,7 +407,7 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
             if (viewedCount > 0) {
                 res.status(StatusCodes.OK).json(viewedCount);
             } else {
-                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+                res.status(StatusCodes.OK).json(viewedCount);
             }
 
         } else {
@@ -434,7 +435,7 @@ companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
             if (sites.length > 0) {
                 res.status(StatusCodes.OK).json(sites);
             } else {
-                res.status(StatusCodes.NOT_FOUND).json([]);
+                res.status(StatusCodes.OK).json([]);
             }
 
         } else {
@@ -444,6 +445,68 @@ companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
     } catch (e) {
         console.log(e);
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.put("/site", async (req: Request, res: Response) => {
+    const site: ISite = req.body;
+    const unit: Unit = await Unit.create(true);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (!isValidId(site.company_id)) {
+            res.status(StatusCodes.BAD_REQUEST).send("Invalid company id");
+            return;
+        }
+
+        const isUpdate = site.location_id && await siteService.exists(site.location_id);
+
+        const success = isUpdate
+            ? await siteService.update(site)
+            : await siteService.insert(site);
+
+        if (success) {
+            await unit.complete(true);
+            res.status(isUpdate ? StatusCodes.NO_CONTENT : StatusCodes.CREATED).json(site);
+            return;
+        } else {
+            await unit.complete(false);
+            res.status(StatusCodes.BAD_REQUEST).send("Updating or creating was not successful");
+            return;
+        }
+
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.delete("/site/:id", async (req: Request, res: Response) => {
+    const location_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const siteService = new SiteService(unit);
+
+    try {
+        if (!isValidId(location_id)) {
+            await unit.complete(false);
+            res.status(StatusCodes.BAD_REQUEST).send("Invalid site id");
+            return;
+        }
+
+        const success = await siteService.delete(location_id);
+
+        await unit.complete(success);
+        res.sendStatus(success ? StatusCodes.NO_CONTENT : StatusCodes.NOT_FOUND);
+        return;
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
     } finally {
         await unit.complete();
     }
@@ -478,7 +541,7 @@ companyRouter.put("", async (req: Request, res: Response) => {
     try {
         const service = new CompanyService(unit);
         const companyExists: boolean = await service.companyExists(company.company_id);
-        const validWebsite: boolean = company.website.substring(0, 8) === "https://";
+        const validWebsite: boolean = !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim());
         const validEmail: boolean = company.email.includes('@');
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
@@ -766,6 +829,42 @@ companyRouter.patch("/reset-password/:token", async (req: Request, res: Response
         }
     });
 });
+
+companyRouter.put("/info/:id", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(false);
+    try {
+        const company_id: number = parseInt(req.params.id);
+        const { company_info } = req.body;
+
+        if (!isValidId(company_id) || typeof company_info !== "string") {
+            res.sendStatus(StatusCodes.BAD_REQUEST);
+            return;
+        }
+
+        const service = new CompanyService(unit);
+        const exists = await service.companyExists(company_id);
+
+        if (!exists) {
+            res.status(StatusCodes.NOT_FOUND).send("Firma nicht gefunden");
+            return;
+        }
+
+        const updated = await service.updateCompanyInfo(company_id, company_info);
+        if (updated) {
+            await unit.complete(true);
+            res.status(StatusCodes.OK).send("Unternehmensbeschreibung aktualisiert");
+        } else {
+            await unit.complete(false);
+            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete(false);
+    }
+});
+
 
 // helper functions
 

@@ -113,7 +113,7 @@ export async function ensureTablesCreated(): Promise<void> {
         
         CREATE TABLE IF NOT EXISTS site
         (
-            location_id SMALLINT NOT NULL,
+            location_id SERIAL NOT NULL,
             address     TEXT     NOT NULL,
             name        TEXT,
             company_id  INTEGER  NOT NULL,
@@ -263,14 +263,14 @@ export async function insertSampleData(unit: Unit): Promise<void> {
             ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/ZenithTech_Logo.png');
 
             -- Standorte
-            INSERT INTO site (location_id, address, name, company_id, plz, city)
-            VALUES (1, 'Kärntner Straße 1', 'TechNova HQ', 1, 1010, 'Wien'),
-                   (2, 'Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020, 'Linz'),
-                   (3, 'Getreidegasse 3', 'MediCare Zentrum', 3, 5020, 'Salzburg'),
-                   (4, 'Herrengasse 5', 'EduLearn Graz', 4, 8010, 'Graz'),
-                   (5, 'Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020, 'Innsbruck'),
-                   (6, 'Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100, 'St. Pölten'),
-                   (7, 'Neuer Platz 1', 'DataOcean Süd', 7, 9020, 'Klagenfurt');
+            INSERT INTO site (address, name, company_id, plz, city)
+            VALUES ('Kärntner Straße 1', 'TechNova HQ', 1, 1010, 'Wien'),
+                   ('Landstraße 10', 'GreenFuture Oberösterreich', 2, 4020, 'Linz'),
+                   ('Getreidegasse 3', 'MediCare Zentrum', 3, 5020, 'Salzburg'),
+                   ('Herrengasse 5', 'EduLearn Graz', 4, 8010, 'Graz'),
+                   ('Maria-Theresien-Straße 7', 'AutoDrive West', 5, 6020, 'Innsbruck'),
+                   ('Wiener Straße 12', 'BuildTech Niederösterreich', 6, 3100, 'St. Pölten'),
+                   ('Neuer Platz 1', 'DataOcean Süd', 7, 9020, 'Klagenfurt');
 
             -- Praktika
             INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, worktype_id, internship_duration_id, internship_application_link)

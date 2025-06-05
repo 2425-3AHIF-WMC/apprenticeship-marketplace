@@ -14,7 +14,6 @@ import StudentFavourites from "@/pages/StudentFavourites";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminInternships from "@/pages/AdminInternships";
 import AdminCompanies from "@/pages/AdminCompanies";
-import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute.tsx";
 import CompanyDashboard from "@/pages/CompanyDashboard.tsx";
 import AdminToVerify from "@/pages/AdminToVerify";
 import CompanyInternshipCreation from "@/pages/CompanyInternshipCreation.tsx";
@@ -22,6 +21,7 @@ import CompanyDetails from "@/pages/CompanyDetails";
 import VerifyEmail from "@/pages/VerifyEmail.tsx";
 import CompanySettings from "@/pages/CompanySettings.tsx";
 import ResetPassword from "@/pages/ResetPassword.tsx";
+import CompanyInternships from "@/pages/CompanyInternships.tsx";
 
 function App() {
     // Smooth scroll behavior for the entire app
@@ -49,12 +49,12 @@ function App() {
         <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/internships" element={
-                <ProtectedRoute>
+                <ProtectedRoute allow={['student', 'admin']}>
                     <Internships />
                 </ProtectedRoute>
             } />
             <Route path="/internships/:id" element={
-                <ProtectedRoute>
+                <ProtectedRoute allow={['student', 'admin', 'company']}>
                     <InternshipDescription />
                 </ProtectedRoute>
             } />
@@ -62,7 +62,7 @@ function App() {
             <Route
                 path="/student/dashboard"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['student']}>
                         <StudentDashboard />
                     </ProtectedRoute>
                 }
@@ -70,7 +70,7 @@ function App() {
             <Route
                 path="/student/favourites"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['student']}>
                         <StudentFavourites />
                     </ProtectedRoute>
                 }
@@ -78,7 +78,7 @@ function App() {
             <Route
                 path="/admin/dashboard"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['admin']}>
                         <AdminDashboard />
                     </ProtectedRoute>
                 }
@@ -86,7 +86,7 @@ function App() {
             <Route
                 path="/admin/internships"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['admin']}>
                         <AdminInternships />
                     </ProtectedRoute>
                 }
@@ -94,7 +94,7 @@ function App() {
             <Route
                 path="/admin/companies"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['admin']}>
                         <AdminCompanies />
                     </ProtectedRoute>
                 }
@@ -102,7 +102,7 @@ function App() {
             <Route
                 path="/admin/companies/verify"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['admin']}>
                         <AdminToVerify />
                     </ProtectedRoute>
                 }
@@ -110,7 +110,7 @@ function App() {
             <Route
                 path="/companies/:id"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allow={['student', 'admin', 'company']}>
                         <CompanyDetails />
                     </ProtectedRoute>
                 }
@@ -119,27 +119,37 @@ function App() {
             <Route
                 path="/company/dashboard"
                 element={
-                    <ProtectedCompanyRoute>
+                    <ProtectedRoute allow={['company']}>
                         <CompanyDashboard/>
-                    </ProtectedCompanyRoute>
+                    </ProtectedRoute>
                 }
             />
             <Route
                 path="/company/internship/create"
                 element={
-                <ProtectedCompanyRoute>
+                <ProtectedRoute allow={['company']}>
                     <CompanyInternshipCreation/>
-                </ProtectedCompanyRoute>
+                </ProtectedRoute>
                 }
             />
             <Route
                 path="/company/settings"
                 element={
-                    <ProtectedCompanyRoute>
+                    <ProtectedRoute allow={['company']}>
                         <CompanySettings/>
-                    </ProtectedCompanyRoute>
+                    </ProtectedRoute>
                 }
             />
+
+            <Route
+                path="/company/internships"
+                element={
+                    <ProtectedRoute allow={['company']}>
+                        <CompanyInternships/>
+                    </ProtectedRoute>
+                }
+            />
+
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/verify-email/:token" element={<VerifyEmail/>} />

@@ -1,7 +1,7 @@
 import {ServiceBase} from "./service-base.js";
 import {Unit} from '../unit.js';
 
-import {IInternship, IInternshipDetailsUIProps, IInternshipUIProps} from "../model";
+import {IInternship, IInternshipDetailsUIProps, IInternshipId, IInternshipUIProps} from "../model";
 
 export class InternshipService extends ServiceBase{
     constructor(unit: Unit) {
@@ -22,8 +22,7 @@ export class InternshipService extends ServiceBase{
                                                                            join internship_duration id on (i.internship_duration_id = id.internship_duration_id)
                                                                            left join internship_department_map idm on (i.internship_id = idm.internship_id)
                                                                            left join department d ON d.department_id = idm.department_id
-                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description
-                                                                         , i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info,c.admin_verified;`);
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, c.admin_verified;`);
         return await stmt.rows as IInternshipUIProps[];
     }
 
@@ -196,5 +195,11 @@ export class InternshipService extends ServiceBase{
             [pdfPath, internshipId]
         );
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
+    }
+
+    public async getSimpleById(id: number): Promise<IInternshipId>{
+        const stmt = await this.unit.prepare(`select internship_id, title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link
+                                                                  where i.internship_id = $1`, [id]);
+        return stmt.rows[0] as IInternshipId;
     }
 }

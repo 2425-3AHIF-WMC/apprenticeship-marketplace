@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import { cn } from "@/utils/utils";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,12 +25,16 @@ const Navbar = () => {
     const { studentIsAuthenticated, studentUsername, logout } = useAuth();
     const [companyName, setCompanyName] = useState<string | null>(null);
     const [companyIsAuthenticated, setCompanyIsAuthenticated] = useState(false);
+    const [companyIsLoading, setCompanyIsLoading] = useState(true);
+    const navigate = useNavigate();
+
     useEffect(() => {
         (async () => {
             const token = await checkCompanyAuth();
             if (!token) {
                 setCompanyIsAuthenticated(false);
                 setCompanyName(null);
+                setCompanyIsLoading(false);
                 return;
             }
 
@@ -49,6 +53,7 @@ const Navbar = () => {
                 setCompanyIsAuthenticated(false);
                 setCompanyName("None");
             }
+            setCompanyIsLoading(false);
         })();
     }, []);
 
@@ -72,9 +77,11 @@ const Navbar = () => {
             await logout();
         } else if (companyIsAuthenticated) {
             await logoutCompany();
-            setCompanyIsAuthenticated(false);
-            setCompanyName(null);
         }
+        setCompanyIsAuthenticated(false);
+        setCompanyName(null);
+
+        navigate("/login");
     };
 
     const logoSrc = theme === 'light' ? "/assets/htllogo-big-black.png" : "/assets/htllogo-big-white.png";
@@ -84,6 +91,9 @@ const Navbar = () => {
     const dashboardLink =
         studentIsAuthenticated ? (studentUsername === 'if220183' ? '/admin/dashboard' : '/student/dashboard') : companyIsAuthenticated ? "/company/dashboard" : null;
 
+    if (companyIsLoading) {
+        return null;
+    }
     return (
         <header
             className=
@@ -155,9 +165,11 @@ const Navbar = () => {
                                         </DropdownMenuItem>
                                     )}
                                     {(studentIsAuthenticated || companyIsAuthenticated) && (
-                                        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                                            <LogOut className="h-4 w-4 mr-2" />
-                                            Abmelden
+                                        <DropdownMenuItem asChild className="text-destructive">
+                                            <button onClick={handleLogout} className="w-full text-left flex items-center gap-2">
+                                                <LogOut className="h-4 w-4 mr-2" />
+                                                Abmelden
+                                            </button>
                                         </DropdownMenuItem>)}
                                 </DropdownMenuContent>
                             </DropdownMenu>
