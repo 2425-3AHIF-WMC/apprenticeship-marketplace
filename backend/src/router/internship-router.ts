@@ -45,16 +45,16 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
 
     const {
-        title, pdf_path, min_year,
+        title, min_year,
         internship_creation_timestamp, salary, application_end,
         location_id, worktype_id, internship_duration_id,
         internship_application_link
     } = req.body;
 
+    const pdf_path = null;
 
     if (
         title == null || title === "" ||
-        pdf_path == null || pdf_path === "" ||
         min_year == null ||
         internship_creation_timestamp == null ||
         salary === null || salary === "" ||
