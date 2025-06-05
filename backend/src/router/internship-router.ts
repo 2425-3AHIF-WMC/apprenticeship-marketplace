@@ -27,7 +27,6 @@ internshipRouter.get("/current", async (req: Request, res: Response) => {
 internshipRouter.put("/change", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
-    const clicks = req.body.clicks ?? 0;
 
     const {
         title, pdf_path, min_year,
@@ -36,10 +35,18 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
         internship_application_link
     } = req.body;
 
-    if (!title || !pdf_path || !min_year
-        || !internship_creation_timestamp || !salary || !application_end
-        || !location_id || !clicks || !worktype_id || !internship_duration_id
-        || !internship_application_link) {
+    if (
+        title == null || title === "" ||
+        pdf_path == null || pdf_path === "" ||
+        min_year == null ||
+        internship_creation_timestamp == null ||
+        salary === null || salary === "" ||
+        application_end === null ||
+        location_id === null ||
+        worktype_id === null ||
+        internship_duration_id === null ||
+        internship_application_link === null || internship_application_link === ""
+    ) {
         res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
         return;
     }
@@ -87,7 +94,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
                                                     WHERE internship_id = $1`, [id]);
             let rowNumb = doesIdExist.rowCount ?? -1;
             if (rowNumb <= 0) {
-                res.status(StatusCodes.BAD_REQUEST).send("Id does not");
+                res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
                 return;
             }
 
@@ -99,12 +106,13 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             }
 
             const service = new InternshipService(unit);
-            const addedSuccessful = await service.updateInternship(internship);
+            const addedSuccessful = await service.updateInternship(internship, id);
+            console.log(addedSuccessful);
 
             if (addedSuccessful != -1) {
                 res.status(StatusCodes.CREATED).send("Internship updated successfully");
             } else {
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be updated");
                 return;
 
             }

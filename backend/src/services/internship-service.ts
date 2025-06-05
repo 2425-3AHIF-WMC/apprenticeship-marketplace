@@ -146,7 +146,7 @@ export class InternshipService extends ServiceBase{
         return result?.internship_id ?? -1;
     }
 
-    public async updateInternship(i: IInternship): Promise<number>{
+    public async updateInternship(i: IInternship, id: number): Promise<number>{
         const stmt = await this.unit.prepare(`UPDATE internship 
                                                                     set 
                                                                         title = $1,
@@ -156,10 +156,12 @@ export class InternshipService extends ServiceBase{
                                                                         salary = $5,
                                                                         application_end = $6,
                                                                         location_id = $7,
-                                                                        worktype_id = $9,
-                                                                        internship_duration_id = $10,
-                                                                        internship_application_link = $11`
-                                                            , [i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+                                                                        worktype_id = $8,
+                                                                        internship_duration_id = $9,
+                                                                        internship_application_link = $10
+                                                                    WHERE internship_id=$11
+                                                                    RETURNING internship_id`
+                                                            , [i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link, id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
