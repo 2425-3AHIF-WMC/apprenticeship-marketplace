@@ -136,6 +136,7 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
             }
         }
     } catch (e) {
+        console.error("Error in /change route:", e);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
     } finally {
         await unit.complete();

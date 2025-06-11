@@ -65,6 +65,8 @@ standardRouter.post('/departments/create/:internshipId', async (req: Request, re
     const unit: Unit = await Unit.create(true);
     try {
         const service = new DepartmentService(unit);
+        await service.deleteDepartmentsByInternshipId(internshipId)
+
         const department = await service.insertDepartments(internshipId, departments);
         res.status(StatusCodes.OK).json(department);
     } catch (e) {

@@ -16,4 +16,11 @@ export class DepartmentService extends ServiceBase {
         }
         return true;
     }
+
+    public async deleteDepartmentsByInternshipId(internshipId: number): Promise<void> {
+        const stmt = await this.unit.prepare(`DELETE FROM internship_department_map WHERE internship_id = $1`,
+            [internshipId]);
+        const result = await stmt.rows[0];
+
+    }
 }
