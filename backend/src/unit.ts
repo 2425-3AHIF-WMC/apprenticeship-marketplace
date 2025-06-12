@@ -77,13 +77,12 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS admin
         (
             admin_id INTEGER NOT NULL,
+            email    TEXT    NOT NULL,
             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
             CONSTRAINT fk_admin_person FOREIGN KEY (admin_id)
                 REFERENCES person (person_id)
                 ON DELETE CASCADE
         );
-        
-        
         
         CREATE TABLE IF NOT EXISTS company
         (
@@ -202,6 +201,20 @@ export async function ensureTablesCreated(): Promise<void> {
                 REFERENCES student (student_id)
                 ON DELETE CASCADE,
             CONSTRAINT fk_view_internship FOREIGN KEY (internship_id)
+                REFERENCES internship (internship_id)
+                ON DELETE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS clicked_apply_internships
+        (
+            student_id        INTEGER   NOT NULL,
+            internship_id     SMALLINT  NOT NULL,
+            clicked_timestamp TIMESTAMP NOT NULL,
+            CONSTRAINT pk_clicked_apply_internships FOREIGN KEY (student_id, internship_id),
+            CONSTRAINT fk_apply_click_student FOREIGN KEY (student_id)
+                REFERENCES student (student_id)
+                ON DELETE CASCADE,
+            CONSTRAINT fk_apply_click_internship FOREIGN KEY (internship_id)
                 REFERENCES internship (internship_id)
                 ON DELETE CASCADE
         );
