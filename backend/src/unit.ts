@@ -59,6 +59,7 @@ export async function ensureTablesCreated(): Promise<void> {
         (
             person_id                 SERIAL    NOT NULL,
             username                  TEXT      NOT NULL,
+            email                     TEXT      NOT NULL,
             person_creation_timestamp TIMESTAMP NOT NULL,
             persontype                TEXT      NOT NULL,
             CONSTRAINT pk_person PRIMARY KEY (person_id),
@@ -77,7 +78,6 @@ export async function ensureTablesCreated(): Promise<void> {
         CREATE TABLE IF NOT EXISTS admin
         (
             admin_id INTEGER NOT NULL,
-            email    TEXT    NOT NULL,
             CONSTRAINT pk_admin PRIMARY KEY (admin_id),
             CONSTRAINT fk_admin_person FOREIGN KEY (admin_id)
                 REFERENCES person (person_id)
