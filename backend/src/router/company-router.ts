@@ -22,6 +22,7 @@ import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
+import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
 
 dotenv.config();
 
@@ -407,7 +408,35 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
             if (viewedCount > 0) {
                 res.status(StatusCodes.OK).json(viewedCount);
             } else {
-                res.status(StatusCodes.OK).json(viewedCount);
+                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:id/clicked_apply_internships/count/last_90_days", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const clickedService = new ClickedApplyInternshipService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const clickedCount: number = await clickedService.getCountOfInternshipsByCompanyLast90Days(company_id);
+
+            if (clickedCount > 0) {
+                res.status(StatusCodes.OK).json(clickedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(clickedCount);
             }
 
         } else {
