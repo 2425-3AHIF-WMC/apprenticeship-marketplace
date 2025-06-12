@@ -4,8 +4,9 @@ import {studentRouter} from "./router/student-router.js";
 import {standardRouter} from "./router/standard-router.js";
 import {favouriteRouter} from "./router/favourite-router.js";
 import {mediaRouter} from "./router/media-router.js";
+import {clickedApplyInternshipRouter} from "./router/clicked_apply_internship-router.js";
 import {viewedInternshipRouter} from "./router/viewed_internship-router.js";
-import {Unit, insertSampleData, ensureTablesCreated} from "./unit.js";
+import {Unit, insertSampleData} from "./unit.js";
 import cookieParser from 'cookie-parser';
 import express from "express";
 import cors from "cors";
@@ -30,6 +31,7 @@ app.use("/api/internship", internshipRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/favourite", favouriteRouter);
 app.use("/api/viewed_internship", viewedInternshipRouter);
+app.use("/api/clicked_apply_internship", clickedApplyInternshipRouter);
 
 
 app.listen(5000, async () => {

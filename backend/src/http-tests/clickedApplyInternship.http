@@ -1,0 +1,10 @@
+@BaseUrl = http://localhost:5000/api/clicked_apply_internship/
+
+### create a new viewed internship
+PUT {{BaseUrl}}/ HTTP/1.1
+Content-Type:application/json
+
+{
+  "studentId": "1",
+  "internshipId": "9"
+}
