@@ -59,7 +59,7 @@ export async function ensureTablesCreated(): Promise<void> {
         (
             person_id                 SERIAL    NOT NULL,
             username                  TEXT      NOT NULL,
-            email                     TEXT      NOT NULL,
+            email                     TEXT,
             person_creation_timestamp TIMESTAMP NOT NULL,
             persontype                TEXT      NOT NULL,
             CONSTRAINT pk_person PRIMARY KEY (person_id),
