@@ -5,7 +5,7 @@ import {
     IInternshipUIProps,
     isValidId,
     isValidDate,
-    ISite, ICompanyPayload
+    ISite, ICompanyPayload, IStudent
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
@@ -23,6 +23,7 @@ import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
 import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
+import {StudentService} from "../services/student-service.js";
 
 dotenv.config();
 
@@ -204,7 +205,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             const token = generateEmailToken(payload);
             const verificationLink = `http://localhost:8081/verify-email/${token}`;
 
-            await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship marketplace',
+            await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship Marketplace',
                 `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
             res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
         } else {
@@ -653,8 +654,14 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
 
         try {
             const service = new CompanyService(unit);
-
-            if (await service.companyExists(company_id)) {
+            const studentService = new StudentService(unit);
+            const company = await service.getById(company_id);
+            if (company != null) {
+                console.log(company.email_verified);
+                if (company.email_verified == "true") {
+                    res.status(StatusCodes.OK).send("Email has already been verified.");
+                    return;
+                }
                 const success = await service.verifyEmail(company_id);
 
                 if (success) {
@@ -677,9 +684,27 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
                         .header('Authorization', `Bearer ${newAccessToken}`)
                         .status(StatusCodes.OK)
                         .json({accessToken: newAccessToken});
+                    const admins: IStudent[] = await studentService.getAdmins();
+                    console.log(admins);
+                    for (const admin of admins) {
+                        const verifyCompaniesLink = `http://localhost:8081/admin/companies/verify`;
+                        await service.sendMail(
+                            admin.email,
+                            "Unternehmensbestätigung | Apprenticeship Marketplace",
+                            `
+                                <p>Hallo ${admin.username},</p>
+                                <p>Ein neues Unternehmen (<strong>${company.name}</strong>) hat sich angemeldet und wartet auf die Bestätigung zur öffentlichen Einsichtbarkeit seiner Praktika.</p>
+                                <p>
+                                  <a href="${verifyCompaniesLink}">
+                                    Unternehmen verifizieren
+                                  </a>
+                                </p>
+                                <p></p>`,);
+
+                    }
                 } else {
                     await unit.complete(false);
-                    res.status(StatusCodes.CONFLICT).send("E-Mail Konnte nicht geupadetet werden");
+                    res.status(StatusCodes.CONFLICT).send("E-Mail konnte nicht geupdatet werden");
                     return;
                 }
             } else {
@@ -862,7 +887,7 @@ companyRouter.put("/info/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(false);
     try {
         const company_id: number = parseInt(req.params.id);
-        const { company_info } = req.body;
+        const {company_info} = req.body;
 
         if (!isValidId(company_id) || typeof company_info !== "string") {
             res.sendStatus(StatusCodes.BAD_REQUEST);
