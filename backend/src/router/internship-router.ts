@@ -186,6 +186,21 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
     }
 });
 
+internshipRouter.get("/expired/over30days", async (req, res) =>{
+    const unit: Unit = await Unit.create(true);
+    const service = new InternshipService(unit);
+
+    try {
+        const count: number[] = await service.getInternshipsWhichExpired();
+        res.status(StatusCodes.OK).json({count});
+    } catch (e) {
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
 internshipRouter.get("/admin_verified", async (req, res) => {
     const unit: Unit = await Unit.create(true);
     try {
