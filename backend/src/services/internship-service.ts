@@ -206,6 +206,7 @@ export class InternshipService extends ServiceBase{
     public async getInternshipsWhichExpired(): Promise<number[]>{
         const stmt = await this.unit.prepare(`SELECT internship_id, (application_end + INTERVAL '30 days'), NOW()
                                                                     FROM internship
-                                                                    WHERE (application_end + INTERVAL '30 days') <= NOW();`)
+                                                                    WHERE (application_end + INTERVAL '30 days') <= NOW();`);
+        return stmt.rows as number[];
     }
 }
