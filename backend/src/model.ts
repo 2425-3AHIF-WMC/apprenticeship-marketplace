@@ -4,6 +4,7 @@
 export interface IStudent {
     studentId: string;
     username: string;
+    mail: string;
     added: Date;
     personType: string;
 }

@@ -8,17 +8,17 @@ export class StudentService extends ServiceBase{
     }
 
     public async getAll(): Promise<IStudent[]> {
-        const stmt = await this.unit.prepare(`select person_id, username, person_creation_timestamp, persontype from person where persontype = 'Student'`);
+        const stmt = await this.unit.prepare(`select person_id, username, email, person_creation_timestamp, persontype from person where persontype = 'Student'`);
         return stmt.rows as IStudent[];
     }
 
     public async getAllPersons(): Promise<IStudent[]> {
-        const stmt = await this.unit.prepare(`select person_id, username, person_creation_timestamp, persontype from person`);
+        const stmt = await this.unit.prepare(`select person_id, username, email, person_creation_timestamp, persontype from person`);
         return stmt.rows as IStudent[];
     }
 
     public async getById(id: number): Promise<IStudent>{
-        const stmt = await this.unit.prepare("select person_id, username, person_creation_timestamp, persontype from person where person_id=$1 and persontype = 'Student'", [id]);
+        const stmt = await this.unit.prepare("select person_id, username, email, person_creation_timestamp, persontype from person where person_id=$1 and persontype = 'Student'", [id]);
         return stmt.rows[0] as IStudent;
     }
 
@@ -56,19 +56,19 @@ export class StudentService extends ServiceBase{
         return stmt.rows as IInternshipUIProps[];
     }
 
-    public async insert(username: string): Promise<boolean> {
+    public async insert(username: string, mail: string): Promise<boolean> {
         const stmt =  await this.unit.prepare(
             ` WITH new_person AS (
               INSERT
-              INTO person (username, person_creation_timestamp, persontype)
-              VALUES ($1, NOW(), $2)
+              INTO person (username, email, person_creation_timestamp, persontype)
+              VALUES ($1, $2, NOW(), $3)
                   RETURNING person_id
                   )
 
               INSERT
               INTO student (student_id)
             SELECT person_id
-            FROM new_person;`, [username, PersonType.Student]);
+            FROM new_person;`, [username, mail, PersonType.Student]);
 
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
@@ -90,5 +90,10 @@ export class StudentService extends ServiceBase{
         const count: number = parseInt(stmt.rows[0].count, 10);
 
         return count === 1;
+    }
+
+    public async getAdmins(): Promise<IStudent[]> {
+        const stmt = await this.unit.prepare(`SELECT person_id, username, email, person_creation_timestamp, persontype FROM person WHERE persontype = 'Admin'`);
+        return stmt.rows as IStudent[];
     }
 }
