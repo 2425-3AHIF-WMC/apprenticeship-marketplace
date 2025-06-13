@@ -197,8 +197,9 @@ export class InternshipService extends ServiceBase{
     }
 
     public async getSimpleById(id: number): Promise<IInternshipId>{
-        const stmt = await this.unit.prepare(`select internship_id, title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link
-                                                                  where i.internship_id = $1`, [id]);
+        const stmt = await this.unit.prepare(`SELECT internship_id, title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link
+                                                                    FROM internship
+                                                                  WHERE internship_id = $1`, [id]);
         return stmt.rows[0] as IInternshipId;
     }
 
