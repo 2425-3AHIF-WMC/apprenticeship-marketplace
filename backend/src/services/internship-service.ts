@@ -18,11 +18,11 @@ export class InternshipService extends ServiceBase{
                                                                     ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
                                                                     c.website AS "company_link", i.internship_application_link AS "internship_link", c.admin_verified
                                                                   FROM internship i
-                                                                           JOIN site s                  ON (i.location_id = s.location_id)
-                                                                           JOIN company c               ON (s.company_id = c.company_id)
-                                                                           JOIN worktype w              ON (i.worktype_id = w.worktype_id)
-                                                                           JOIN internship_duration id  ON (i.internship_duration_id = id.internship_duration_id)
-                                                                           LEFT JOIN idm                ON (i.internship_id = idm.internship_id)
+                                                                           JOIN site s                              ON (i.location_id = s.location_id)
+                                                                           JOIN company c                           ON (s.company_id = c.company_id)
+                                                                           JOIN worktype w                          ON (i.worktype_id = w.worktype_id)
+                                                                           JOIN internship_duration id              ON (i.internship_duration_id = id.internship_duration_id)
+                                                                           LEFT JOIN internship_department_map idm  ON (i.internship_id = idm.internship_id)
                                                                            LEFT JOIN ent_id = idm.department_id
                                                                   GROUP BY i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, c.admin_verified;`);
         return await stmt.rows as IInternshipUIProps[];
