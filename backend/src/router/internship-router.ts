@@ -70,7 +70,6 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
     }
 
     try {
-
         const doesLocationExist = await unit.prepare(`SELECT location_id
                                                       FROM site
                                                       WHERE location_id = $1`, [location_id]);
@@ -87,7 +86,6 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
 
         }
 
-        console.log(id);
         if (id === -1) {
             let internship: IInternship = {
                 title, pdf_path, min_year,
@@ -115,7 +113,6 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
                 res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
                 return;
             }
-
             let internship: IInternship = {
                 title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
@@ -125,10 +122,9 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
 
             const service = new InternshipService(unit);
             const addedSuccessful = await service.updateInternship(internship, id);
-            console.log(addedSuccessful);
 
             if (addedSuccessful != -1) {
-                res.status(StatusCodes.CREATED).send("Internship updated successfully");
+                res.status(StatusCodes.CREATED).json({ internship_id: addedSuccessful });
             } else {
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be updated");
                 return;

@@ -64,6 +64,7 @@ export interface InternshipDetailsUIProps {
     company_id: string;
     company_info: string;
     pdf: string;
+    location_id: string;
 }
 
 export interface InternshipMappedProps extends Omit<InternshipUIProps, 'department' | 'id'> {

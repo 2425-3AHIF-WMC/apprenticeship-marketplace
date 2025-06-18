@@ -25,7 +25,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button.tsx";
 import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/utils/utils.ts";
+import { cn, mapBackendToInternshipDetailsProps } from "@/utils/utils.ts";
 import {
     Popover,
     PopoverContent,
@@ -180,7 +180,7 @@ const CompanyInternshipCreation = () => {
             // Hole die Daten vom Backend
             fetch(`http://localhost:5000/api/internship/${internshipId}`)
                 .then(res => res.json())
-                .then(data => setEditData(data))
+                .then(data => setEditData(mapBackendToInternshipDetailsProps(data)))
                 .catch(() => setEditData(null));
         }
     }, [updating, internshipId]);
@@ -197,8 +197,8 @@ const CompanyInternshipCreation = () => {
             }
         }
 
-        if (updating && editData) {
-            const mapped = mapInternshipDetailsToFormValues(editData);
+        if (updating && editData && sites.length > 0 && workTypes.length > 0 && durations.length > 0) {
+            const mapped = mapInternshipDetailsToFormValues(editData, sites, workTypes, durations);
             form.reset(mapped);
             if (editData.pdf) {
                 fetchPdfAndSetFile(editData.pdf);
@@ -206,7 +206,7 @@ const CompanyInternshipCreation = () => {
             if (editData.id) setInternshipId(Number(editData.id));
         }
         // eslint-disable-next-line
-    }, [updating, editData]);
+    }, [updating, editData, sites, workTypes, durations]);
 
     const form = useForm<z.infer<typeof formSchema>>
         ({
@@ -249,7 +249,7 @@ const CompanyInternshipCreation = () => {
                     internship_id: updating && editData?.id ? editData.id : undefined
                 })
             });
-            if (!resp.ok) {
+            if (!resp.ok && resp.status !== 201) {
                 setDialogSuccess(false);
                 setDialogMessage('Es ist ein Fehler beim ' + (updating ? 'Aktualisieren' : 'Erstellen') + ' des Praktikums aufgetreten.');
                 setDialogOpen(true);
@@ -748,6 +748,12 @@ const CompanyInternshipCreation = () => {
                                                                 onChange={(e) => field.onChange(e.target.files?.[0])}
                                                             />
                                                         </FormControl>
+                                                        {/* Show current PDF if editing and a PDF exists */}
+                                                        {updating && editData?.pdf && (
+                                                            <div className="mt-2 text-sm text-muted-foreground text-left">
+                                                                Aktuelles PDF: <a href={`http://localhost:5000/api/media/${editData.pdf}`} target="_blank" rel="noopener noreferrer" className="underline">praktikum.pdf</a>
+                                                            </div>
+                                                        )}
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -799,27 +805,56 @@ const CompanyInternshipCreation = () => {
 export default CompanyInternshipCreation;
 
 // Mapping function: InternshipDetailsUIProps -> form values
-function mapInternshipDetailsToFormValues(data: InternshipDetailsUIProps) {
+function mapInternshipDetailsToFormValues(
+    data: InternshipDetailsUIProps,
+    sites: Array<{ location_id: number, address: string, name: string, company_id: number, plz: number }>,
+    workTypes: Array<{ worktype_id: string, name: string, description: string }>,
+    durations: Array<{ internship_duration_id: number, description: string }>
+) {
     // Determine salaryType
     let salaryType: 'salary' | 'not_specified' = 'salary';
     let salary: number | undefined = undefined;
     let salaryReason = '';
-    if (isNaN(Number(data.salary))) {
+    const salaryStr = typeof data.salary === 'string'
+        ? data.salary.slice(0, -2).trim()
+        : data.salary;
+    if (salaryStr && !isNaN(Number(salaryStr))) {
+        salaryType = 'salary';
+        salary = Number(salaryStr);
+        salaryReason = '';
+    } else {
         salaryType = 'not_specified';
         salaryReason = data.salary;
-    } else {
-        salaryType = 'salary';
-        salary = Number(data.salary);
+        salary = undefined;
     }
     const minYearStr = data.min_year !== null && data.min_year !== undefined ? String(data.min_year) : "";
-    console.log(data)
+    // Find site by id
+    let siteValue = '';
+    if (data.location) {
+        const foundSite = sites.find(site => String(site.location_id) === String(data.location_id));
+        if (foundSite) {
+            siteValue = foundSite.location_id.toString();
+        }
+    }
+
+    // Map workType and duration to their IDs
+    let workTypeValue = '';
+    if (data.work_type) {
+        const foundWorkType = workTypes.find(wt => wt.name === data.work_type);
+        if (foundWorkType) workTypeValue = foundWorkType.worktype_id.toString();
+    }
+    let durationValue = '';
+    if (data.duration) {
+        const foundDuration = durations.find(d => d.description === data.duration);
+        if (foundDuration) durationValue = foundDuration.internship_duration_id.toString();
+    }
 
     return {
         title: data.title || '',
         internship_application_link: data.internship_link || '',
         minYear: data.min_year ? minYearStr.replace(/\D/g, "") : "",
-        workType: data.work_type || '',
-        duration: data.duration || '',
+        workType: workTypeValue,
+        duration: durationValue,
         departments: Array.isArray(data.category)
             ? data.category.map((cat: string) => {
                 const found = departmentOptions.find(opt => opt.name === cat);
@@ -827,12 +862,13 @@ function mapInternshipDetailsToFormValues(data: InternshipDetailsUIProps) {
             }).filter((id): id is number => typeof id === 'number')
             : [],
         deadline: data.application_end ? new Date(data.application_end) : undefined,
-        site: data.location || '', // If you need to map location string to site id, adjust here
+        site: siteValue, // Use location_id as string if found by id
         salaryType,
         salary,
         salaryReason,
         descriptionType: "pdf" as const,
         pdfFile: undefined, // will be set after fetching
-        editorContent: undefined
+        editorContent: undefined,
+        location_id: data.location_id || ''
     };
 }

@@ -70,7 +70,7 @@ export class InternshipService extends ServiceBase{
 
     public async getById(id: number): Promise<IInternshipDetailsUIProps>{
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name as "company_name", i.application_end, i.min_year, s.city || ', ' || s.address  as location,
-                                                                         w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added", i.pdf_path as "pdf",
+                                                                         w.name as "work_type", c.company_logo_path, id.description as "duration", i.internship_creation_timestamp as "added", i.pdf_path as "pdf", s.location_id as "location_id",
                                                                          (select count(*)
                                                                           from viewed_internships vi
                                                                           where vi.internship_id = i.internship_id) as "views", ARRAY_REMOVE(ARRAY_AGG(DISTINCT d.name), NULL) AS category,
@@ -83,7 +83,7 @@ export class InternshipService extends ServiceBase{
                                                                            left join internship_department_map idm on (i.internship_id = idm.internship_id)
                                                                            left join department d ON d.department_id = idm.department_id
                                                                   where i.internship_id = $1
-                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
+                                                                  group by i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, s.location_id;
                         `, [id]);
         return stmt.rows[0] as IInternshipDetailsUIProps;
     }
