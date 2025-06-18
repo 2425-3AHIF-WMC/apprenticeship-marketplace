@@ -77,13 +77,13 @@ studentRouter.get("/", async (req: Request, res: Response) => {
 
 studentRouter.post("/", async (req: Request, res: Response) => {
     const username = req.body.username;
-
+    const mail = req.body.mail;
     const unit: Unit = await Unit.create(false);
 
     try {
         const service = new StudentService(unit);
         if(!(await service.studentExistsByUser(username))) {
-            const success: boolean = await service.insert(username);
+            const success: boolean = await service.insert(username, mail);
 
             if (success) {
                 res.status(StatusCodes.CREATED).send("User creation successful");
@@ -177,3 +177,16 @@ studentRouter.get("/by-username/:username", async (req: Request, res: Response) 
         await unit.complete();
     }
 });
+
+studentRouter.get("/admin/all", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    try {
+        const service = new StudentService(unit);
+        const admins: IStudent[] = await service.getAdmins();
+        res.status(StatusCodes.OK).json(admins);
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+    } finally {
+        await unit.complete();
+    }
+})

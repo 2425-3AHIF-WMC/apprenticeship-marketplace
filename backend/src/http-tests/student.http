@@ -10,3 +10,6 @@ Content-Type: application/json
 
 ### Delete a student
 DELETE {{BaseUrl}}/4
+
+### Get all Admins
+GET {{BaseUrl}}/admin/all

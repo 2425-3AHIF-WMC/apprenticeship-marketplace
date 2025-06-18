@@ -22,10 +22,10 @@ export class ViewedInternshipService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async getCountOfInternship(studentId: number): Promise<number> {
+    public async getCountOfInternship(internship_id: number): Promise<number> {
         const stmt = await this.unit.prepare(`select count(*)
                                                                 from viewed_internships
-                                                                where internship_id = $1`, [studentId]);
+                                                                where internship_id = $1`, [internship_id]);
         return stmt.rows[0].count || 0;
     }
 

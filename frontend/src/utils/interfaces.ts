@@ -1,9 +1,10 @@
 // Frontend interfaces matching backend/src/model.ts
 
 export interface Student {
-    studentId: string;
+    person_id: string;
     username: string;
-    added: string; // ISO date string
+    email: string;
+    person_creation_timestamp: string; // ISO date string
     personType: string;
 }
 

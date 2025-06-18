@@ -59,6 +59,7 @@ export async function ensureTablesCreated(): Promise<void> {
         (
             person_id                 SERIAL    NOT NULL,
             username                  TEXT      NOT NULL,
+            email                     TEXT,
             person_creation_timestamp TIMESTAMP NOT NULL,
             persontype                TEXT      NOT NULL,
             CONSTRAINT pk_person PRIMARY KEY (person_id),
@@ -82,8 +83,6 @@ export async function ensureTablesCreated(): Promise<void> {
                 REFERENCES person (person_id)
                 ON DELETE CASCADE
         );
-        
-        
         
         CREATE TABLE IF NOT EXISTS company
         (
@@ -206,6 +205,20 @@ export async function ensureTablesCreated(): Promise<void> {
                 ON DELETE CASCADE
         );
         
+        CREATE TABLE IF NOT EXISTS clicked_apply_internships
+        (
+            student_id        INTEGER   NOT NULL,
+            internship_id     SMALLINT  NOT NULL,
+            clicked_timestamp TIMESTAMP NOT NULL,
+            CONSTRAINT pk_clicked_apply_internships PRIMARY KEY (student_id, internship_id),
+            CONSTRAINT fk_apply_click_student FOREIGN KEY (student_id)
+                REFERENCES student (student_id)
+                ON DELETE CASCADE,
+            CONSTRAINT fk_apply_click_internship FOREIGN KEY (internship_id)
+                REFERENCES internship (internship_id)
+                ON DELETE CASCADE
+        );
+        
         COMMIT;
     `);
 }
@@ -250,17 +263,17 @@ export async function insertSampleData(unit: Unit): Promise<void> {
                 email_verification_timestamp, admin_verification_timestamp, company_logo_path
             )
             VALUES 
-            ('CarlaCo Enterprises', '890123a', 'Business-Lösungen für moderne Unternehmen', 'https://carlaco.com', 'info@carlaco.com', '06641234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/CarlaCoEnterprises_Logo.png'),
-            ('Elektronic Design', '901234b', 'Elektronikentwicklung und PCB Design', 'https://elektronicdesign.com', 'contact@elektronicdesign.com', '06761234567', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/ElektronicDesign_Logo.png'),
-            ('Elysee Industries', '912345c', 'Industrielösungen und Automation', 'https://elyseeindustries.com', 'service@elyseeindustries.com', '0316123456', 'pass123', 'Y', 'N', NOW(), null, null, 'company-logos/ElyseeIndustries_Logo.png'),
-            ('IT Media Solutions', '923456d', 'Digitale Medien- und IT-Dienstleistungen', 'https://itmediasolutions.com', 'hello@itmediasolutions.com', '06991234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/ITMediaSolutions_Logo.png'),
-            ('LT Studios', '934567e', 'Kreative Studio- und Designlösungen', 'https://lt-studios.com', 'studio@lt-studios.com', '0720123456', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/LT-Studios_Logo.png'),
-            ('LuminaTech', '945678f', 'Beleuchtungstechnologien der Zukunft', 'https://luminatech.com', 'kontakt@luminatech.com', '06601234567', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/LuminaTech_Logo.png'),
-            ('MeliCorp', '956789g', 'Globale Logistik- und Handelslösungen', 'https://melicorp.com', 'info@melicorp.com', '01 23456789', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/MeliCorp_Logo.png'),
-            ('Nebula Dynamics', '967890h', 'Cloud Computing & Datenanalyse', 'https://nebuladynamics.com', 'team@nebuladynamics.com', '0732123456', 'pass123', 'Y', 'N', NOW(), null, null, 'company-logos/NebulaDynamics_Logo.png'),
-            ('Nexus Solutions', '978901i', 'Innovative Unternehmenssoftware', 'https://nexussolutions.com', 'support@nexussolutions.com', '0551223456', 'pass123', 'Y', 'Y', NOW(), null, null, 'company-logos/NexusSolutions_Logo.png'),
-            ('TechMed Innovations', '989012j', 'Medizintechnologie & Forschung', 'https://techmedinnovations.com', 'contact@techmedinnovations.com', '06641230000', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/TechMed_Innovations_Logo.png'),
-            ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', 'pass123', 'N', 'N', NOW(), null, null, 'company-logos/ZenithTech_Logo.png');
+            ('CarlaCo Enterprises', '890123a', 'Business-Lösungen für moderne Unternehmen', 'https://carlaco.com', 'info@carlaco.com', '06641234567', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'Y', NOW(), null, null, 'company-logos/1.png'),
+            ('Elektronic Design', '901234b', 'Elektronikentwicklung und PCB Design', 'https://elektronicdesign.com', 'contact@elektronicdesign.com', '06761234567', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'N', 'N', NOW(), null, null, 'company-logos/2.png'),
+            ('Elysee Industries', '912345c', 'Industrielösungen und Automation', 'https://elyseeindustries.com', 'service@elyseeindustries.com', '0316123456', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'N', NOW(), null, null, 'company-logos/3.png'),
+            ('IT Media Solutions', '923456d', 'Digitale Medien- und IT-Dienstleistungen', 'https://itmediasolutions.com', 'hello@itmediasolutions.com', '06991234567', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'Y', NOW(), null, null, 'company-logos/4.png'),
+            ('LT Studios', '934567e', 'Kreative Studio- und Designlösungen', 'https://lt-studios.com', 'studio@lt-studios.com', '0720123456', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'N', 'N', NOW(), null, null, 'company-logos/5.png'),
+            ('LuminaTech', '945678f', 'Beleuchtungstechnologien der Zukunft', 'https://luminatech.com', 'kontakt@luminatech.com', '06601234567', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'Y', NOW(), null, null, 'company-logos/6.png'),
+            ('MeliCorp', '956789g', 'Globale Logistik- und Handelslösungen', 'https://melicorp.com', 'info@melicorp.com', '01 23456789', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'Y', NOW(), null, null, 'company-logos/7.png'),
+            ('Nebula Dynamics', '967890h', 'Cloud Computing & Datenanalyse', 'https://nebuladynamics.com', 'team@nebuladynamics.com', '0732123456', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'N', NOW(), null, null, 'company-logos/8.png'),
+            ('Nexus Solutions', '978901i', 'Innovative Unternehmenssoftware', 'https://nexussolutions.com', 'support@nexussolutions.com', '0551223456', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'Y', 'Y', NOW(), null, null, 'company-logos/9.png'),
+            ('TechMed Innovations', '989012j', 'Medizintechnologie & Forschung', 'https://techmedinnovations.com', 'contact@techmedinnovations.com', '06641230000', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'N', 'N', NOW(), null, null, 'company-logos/10.png'),
+            ('ZenithTech', '990123k', 'High-End Technologieentwicklung', 'https://zenithtech.com', 'info@zenithtech.com', '0463123456', '$argon2id$v=19$m=65536,t=3,p=2$ov7Wkgt4OHTdBvO3x7NiRg$B86J1gI171aKbSgx0PLgmlHqM0WlfiT6fi+CN2CVDQk', 'N', 'N', NOW(), null, null, 'company-logos/11.png');
 
             -- Standorte
             INSERT INTO site (address, name, company_id, plz, city)

@@ -25,7 +25,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button.tsx";
 import { Calendar } from "@/components/ui/calendar"
-import { cn, mapBackendToInternshipDetailsProps } from "@/utils/utils.ts";
+import {cn, mapBackendToInternshipDetailsProps} from "@/utils/utils.ts";
 import {
     Popover,
     PopoverContent,
@@ -246,7 +246,7 @@ const CompanyInternshipCreation = () => {
                     worktype_id: String(values.workType),
                     internship_duration_id: String(values.duration),
                     internship_application_link: values.internship_application_link,
-                    internship_id: updating && editData?.id ? editData.id : undefined
+                    internship_id: updating && Number.isInteger(Number(editData?.id)) && editData?.id != null ? Number(editData.id) : undefined
                 })
             });
             if (!resp.ok && resp.status !== 201) {
