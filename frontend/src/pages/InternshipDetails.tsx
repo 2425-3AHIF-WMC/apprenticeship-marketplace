@@ -128,6 +128,19 @@ const InternshipDescription = () => {
     fetchViewed();
   }, [studentId, internship?.id]);
 
+  useEffect(() => {
+    const fetchClicks = async () =>{
+      if(!studentId || !internship?.id) return;
+      const res = await fetch(`http://localhost:5000/api/clicked_apply_internship/`,{
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({studentId: studentId, internshipId: internship.id})
+      });
+      if(!res.ok) return;
+    };
+    fetchClicks();
+  }, [studentId, internship?.id]);
+
   const handleToggleFavourite = async (internshipId: number) => {
     if (!studentId) return;
     const isFav = favouriteIds.includes(internshipId);

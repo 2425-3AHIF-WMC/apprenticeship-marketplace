@@ -111,10 +111,16 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
+
+
+        fetchViews();
+    }, [companyId]);
+
+    useEffect(() => {
         const fetchClicks = async () =>{
             setLoadingViews(true);
             try{
-                const res = await fetch(`/:id/clicked_apply_internships/count/last_90_days`);
+                const res = await fetch(`http://localhost:5000/api/clicked_apply_internship/${companyId}/clicked_apply_internships/count/last_90_days`);
                 if(!res.ok){
                     throw new Error("Fehler beim Laden der Click-Anzahl");
                 }
@@ -125,10 +131,8 @@ const CompanyDashboard = () => {
             } finally {
                 setLoadingViews(false);
             }
-        }
-
+        };
         fetchClicks();
-        fetchViews();
     }, [companyId]);
 
     const quickLinks = [
