@@ -171,6 +171,9 @@ const CompanyDashboard = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
+
+                            </FadeIn>
+                            <FadeIn delay={100}>
                                 <Card>
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Clicks</CardTitle>
