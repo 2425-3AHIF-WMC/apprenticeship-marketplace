@@ -18,6 +18,7 @@ const CompanyDashboard = () => {
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
     const [viewsCount, setViewsCount] = useState<number | null>(null);
+    const [clickCount, setClickCount] = useState<number | null>(null);
     const [loadingViews, setLoadingViews] = useState(false);
     const [loadingCompanyName, setLoadingCompanyName] = useState(true);
 
@@ -110,7 +111,23 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
+        const fetchClicks = async () =>{
+            setLoadingViews(true);
+            try{
+                const res = await fetch(`/:id/clicked_apply_internships/count/last_90_days`);
+                if(!res.ok){
+                    throw new Error("Fehler beim Laden der Click-Anzahl");
+                }
+                const data = await res.json();
+                setClickCount(data ?? 0);
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setLoadingViews(false);
+            }
+        }
 
+        fetchClicks();
         fetchViews();
     }, [companyId]);
 
@@ -140,7 +157,7 @@ const CompanyDashboard = () => {
                     </FadeIn>
 
                     <div className="space-y-8 mt-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 gap-6">
                             <FadeIn delay={100}>
                                 <Card>
                                     <CardHeader className="pb-2">
@@ -151,6 +168,18 @@ const CompanyDashboard = () => {
                                         <div className="flex items-center">
                                             <Eye className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{viewsCount ?? 0}</div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-lg font-medium">Clicks</CardTitle>
+                                        <CardDescription>Clicks in den letzten 30 Tagen auf Ihre Praktika</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-center">
+                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <div className="text-3xl font-semibold">{clickCount ?? 0}</div>
                                         </div>
                                     </CardContent>
                                 </Card>
