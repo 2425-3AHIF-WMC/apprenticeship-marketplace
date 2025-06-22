@@ -310,7 +310,7 @@ const CompanySettings = () => {
                                 </Button>
                             </div>
                         </div>
-                        <div className="flex flex-col mt-12 gap-1">
+                        <div className="flex flex-col mt-12 gap-1 w-full max-w-xl">
                             <div>
                                 <h1 className="heading-md text-left">Passwort ändern</h1>
                                 <p className="text-muted-foreground text-left">
@@ -318,9 +318,9 @@ const CompanySettings = () => {
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-lg p-6 shadow-sm">
+                            <div className="bg-card rounded-lg shadow-sm p-0 mt-2">
                                 <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-0">
                                         <FormField
                                             control={form.control}
                                             name="oldPassword"
