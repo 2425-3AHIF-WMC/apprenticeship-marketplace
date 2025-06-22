@@ -1,10 +1,10 @@
-import {ServiceBase} from "./service-base.js";
-import {Unit} from '../unit.js';
+import { ServiceBase } from "./service-base.js";
+import { Unit } from '../unit.js';
 
-import {IInternship, IInternshipDetailsUIProps, IInternshipId, IInternshipUIProps} from "../model";
-import {QueryResult} from "pg";
+import { IInternship, IInternshipDetailsUIProps, IInternshipId, IInternshipUIProps } from "../model";
+import { QueryResult } from "pg";
 
-export class InternshipService extends ServiceBase{
+export class InternshipService extends ServiceBase {
     constructor(unit: Unit) {
         super(unit);
     }
@@ -28,7 +28,7 @@ export class InternshipService extends ServiceBase{
         return await stmt.rows as IInternshipUIProps[];
     }
 
-    public async getAllCurrent(): Promise<IInternshipUIProps[]>{
+    public async getAllCurrent(): Promise<IInternshipUIProps[]> {
         const stmt = await this.unit.prepare(`select i.internship_id, i.title, c.name AS "company_name", i.application_end, i.min_year, s.city || ', ' || s.address AS location,
                                                                     w.name AS "work_type", c.company_logo_path, id.description AS "duration", i.internship_creation_timestamp AS "added",
                                                                     (select count(*)
@@ -51,7 +51,7 @@ export class InternshipService extends ServiceBase{
         return await stmt.rows as IInternshipUIProps[];
     }
 
-    public async getAllAdminVerified(): Promise<IInternshipUIProps[]>{
+    public async getAllAdminVerified(): Promise<IInternshipUIProps[]> {
         const stmt = await this.unit.prepare(`SELECT 
                                                                     i.internship_id, 
                                                                     i.title, 
@@ -82,7 +82,7 @@ export class InternshipService extends ServiceBase{
         return stmt.rows as IInternshipUIProps[];
     }
 
-    public async getById(id: number): Promise<IInternshipDetailsUIProps>{
+    public async getById(id: number): Promise<IInternshipDetailsUIProps> {
         const stmt = await this.unit.prepare(`SELECT
                                                                     i.internship_id, 
                                                                     i.title, c.name                                 AS "company_name", 
@@ -101,7 +101,8 @@ export class InternshipService extends ServiceBase{
                                                                     c.website                                       AS "company_link", 
                                                                     i.salary, i.internship_application_link         AS "internship_link", 
                                                                     c.company_id, 
-                                                                    c.company_info
+                                                                    c.company_info,
+                                                                    s.location_id
                                                                   FROM internship i
                                                                            JOIN site s                              ON (i.location_id = s.location_id)
                                                                            JOIN company c                           ON (s.company_id = c.company_id)
@@ -110,7 +111,7 @@ export class InternshipService extends ServiceBase{
                                                                            LEFT JOIN internship_department_map idm  ON (i.internship_id = idm.internship_id)
                                                                            LEFT JOIN department d                   ON d.department_id = idm.department_id
                                                                   WHERE i.internship_id = $1
-                                                                  GROUP BY i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
+                                                                  GROUP BY i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, s.location_id, i.pdf_path;
                         `, [id]);
         return stmt.rows[0] as IInternshipDetailsUIProps;
     }
@@ -161,17 +162,17 @@ export class InternshipService extends ServiceBase{
         return stmt.rows.map(row => row.internship_id) as number[];
     }
 
-    public async newInternship(i: IInternship): Promise<number>{
+    public async newInternship(i: IInternship): Promise<number> {
         const stmt = await this.unit.prepare(`INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, worktype_id, internship_duration_id, internship_application_link) 
                                                                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
                                                                    RETURNING internship_id;`
-                                                            , [ i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
+            , [i.title, i.pdf_path, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link]);
 
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
 
-    public async updateInternship(i: IInternship, id: number): Promise<number>{
+    public async updateInternship(i: IInternship, id: number): Promise<number> {
         const stmt = await this.unit.prepare(`UPDATE internship 
                                                                     SET 
                                                                         title = $1,
@@ -185,16 +186,16 @@ export class InternshipService extends ServiceBase{
                                                                         internship_application_link = $9
                                                                     WHERE internship_id=$10
                                                                     RETURNING internship_id`
-                                                            , [i.title, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link, id]);
+            , [i.title, i.min_year, i.internship_creation_timestamp, i.salary, i.application_end, i.location_id, i.worktype_id, i.internship_duration_id, i.internship_application_link, id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
 
-    public async deleteInternship(id: number): Promise<number>{
+    public async deleteInternship(id: number): Promise<number> {
         const stmt = await this.unit.prepare(`DELETE FROM internship 
                                                                    WHERE internship_id = $1
                                                                    RETURNING internship_id`
-                                                              , [id]);
+            , [id]);
         const result = await stmt.rows[0];
         return result?.internship_id ?? -1;
     }
@@ -224,14 +225,14 @@ export class InternshipService extends ServiceBase{
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async getSimpleById(id: number): Promise<IInternshipId>{
+    public async getSimpleById(id: number): Promise<IInternshipId> {
         const stmt = await this.unit.prepare(`SELECT internship_id, title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, clicks, worktype_id, internship_duration_id, internship_application_link
                                                                     FROM internship
                                                                   WHERE internship_id = $1`, [id]);
         return stmt.rows[0] as IInternshipId;
     }
 
-    public async getInternshipsWhichExpired(): Promise<number[]>{
+    public async getInternshipsWhichExpired(): Promise<number[]> {
         const stmt = await this.unit.prepare(`SELECT internship_id, (application_end + INTERVAL '30 days'), NOW()
                                                                     FROM internship
                                                                     WHERE (application_end + INTERVAL '30 days') <= NOW();`);
