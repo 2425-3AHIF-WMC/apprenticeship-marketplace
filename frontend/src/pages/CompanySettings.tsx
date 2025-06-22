@@ -18,8 +18,9 @@ import {checkCompanyAuth} from "@/lib/authUtils.ts";
 import {useNavigate} from "react-router-dom";
 import {toast, Toaster} from "sonner";
 import CompanySites from "@/pages/CompanySites.tsx";
-import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Building, Upload} from "lucide-react";
+import {Textarea} from "@/components/ui/textarea.tsx";
 
 
 const formSchema = z.object({
@@ -236,152 +237,155 @@ const CompanySettings = () => {
                             <p>Firma nicht erkannt. Bitte neu einloggen.</p>
                         )}
 
-                        <div>
-                            <h1 className="heading-md text-left pt-5">Firmenlogo</h1>
-                            <p className="text-muted-foreground text-left">
-                                Verwalten Sie ihr Firmenlogo
-                            </p>
-                        </div>
-                        <Card className="max-w-md">
-                            <CardHeader>
-                            </CardHeader>
-                            <CardContent className="space-y-4 flex flex-col items-center">
-                                <div className="h-32 w-32 rounded-md border border-dashed border-muted-foreground/50 flex items-center justify-center mb-4 overflow-hidden">
-                                    {logoUrl ? (
-                                        <img src={logoUrl} alt="Firmenlogo" className="h-full w-full object-contain" />
-                                    ) : (
-                                        <Building className="text-muted-foreground/70 text-6xl select-none"/>
-                                    )}
-                                </div>
-                                <p className="text-sm text-muted-foreground text-center mb-4">
-                                    Laden Sie ein Logo im JPG, PNG oder SVG Format hoch. Empfohlene Größe: 400x400 Pixel.
-                                </p>
-                                <label
-                                    htmlFor="logo-upload"
-                                    className="cursor-pointer inline-flex items-center justify-center p-2 bg-muted rounded-md hover:bg-muted/80 transition-colors"
-                                >
-                                    <svg
-                                        className="h-4 w-4 mr-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        aria-hidden="true"
-                                    >
-                                        <Upload/>
-                                    </svg>
-                                    <span className="text-sm">{uploading ? "Lädt..." : "Logo hochladen"}</span>
-                                    <input
-                                        id="logo-upload"
-                                        type="file"
-                                        accept="image/png, image/jpeg, image/svg+xml"
-                                        className="hidden"
-                                        onChange={handleLogoUpload}
-                                        disabled={uploading}
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pt-5 items-start">
+                            {/* === First Column: Description & Password === */}
+                            <div className="space-y-8">
+                                {/* Unternehmensbeschreibung Sektion */}
+                                <div className="space-y-2">
+                                    <div>
+                                        <h1 className="heading-md text-left">Unternehmensbeschreibung</h1>
+                                        <p className="text-muted-foreground text-left">
+                                            Beschreiben Sie kurz Ihr Unternehmen
+                                        </p>
+                                    </div>
+                                    <Textarea
+                                        className="min-h-[120px]"
+                                        placeholder="IT-Firma mit Fokus auf Webentwicklung und Cloud-Lösungen..."
+                                        value={companyInfo}
+                                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setCompanyInfo(e.target.value)}
                                     />
-                                </label>
-                                {logoUrl && (
-                                    <Button
-                                        variant="ghost"
-                                        className="text-destructive mt-2 h-auto p-1 text-xs"
-                                        onClick={handleLogoDelete}
-                                        disabled={uploading}
-                                    >
-                                        Logo entfernen
-                                    </Button>
-                                )}
-                            </CardContent>
-                        </Card>
-                        <div className="mt-12 space-y-2 max-w-xl">
-                            <h1 className="heading-md text-left">Unternehmensbeschreibung</h1>
-                            <p className="text-muted-foreground text-left">
-                                Beschreiben Sie kurz Ihr Unternehmen
-                            </p>
-                            <textarea
-                                className="w-full border border-gray-300 rounded-md p-3 text-sm min-h-[120px]"
-                                placeholder="IT-Firma mit Fokus auf Webentwicklung und Cloud-Lösungen..."
-                                value={companyInfo}
-                                onChange={(e) => setCompanyInfo(e.target.value)}
-                            />
-                            <div>
-                                <Button onClick={handleSaveCompanyInfo} disabled={savingInfo}>
-                                    {savingInfo ? "Speichern..." : "Beschreibung speichern"}
-                                </Button>
+                                    <div>
+                                        <Button onClick={handleSaveCompanyInfo} disabled={savingInfo}>
+                                            {savingInfo ? "Speichern..." : "Beschreibung speichern"}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Passwort ändern Sektion */}
+                                <div className="flex flex-col gap-1 w-full">
+                                    <div>
+                                        <h1 className="heading-md text-left">Passwort ändern</h1>
+                                        <p className="text-muted-foreground text-left">
+                                            Ändern Sie ihr derzeitiges Passwort
+                                        </p>
+                                    </div>
+                                    <div className="bg-card rounded-lg shadow-sm p-6 mt-2">
+                                        <Form {...form}>
+                                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="oldPassword"
+                                                    render={({field}) => (
+                                                        <FormItem>
+                                                            <FormLabel>Aktuelles Passwort</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="password"
+                                                                    placeholder="Aktuelles Passwort eingeben"
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="newPassword"
+                                                    render={({field}) => (
+                                                        <FormItem>
+                                                            <FormLabel>Neues Passwort</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="password"
+                                                                    placeholder="Neues Passwort eingeben"
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="confirmPassword"
+                                                    render={({field}) => (
+                                                        <FormItem>
+                                                            <FormLabel>Neues Passwort bestätigen</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="password"
+                                                                    placeholder="Neues Passwort wiederholen"
+                                                                    {...field}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <div className="pt-2">
+                                                    <Button type="submit" disabled={isLoading}>
+                                                        {isLoading ? "Wird verarbeitet..." : "Passwort ändern"}
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        </Form>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex flex-col mt-12 gap-1 w-full max-w-xl">
-                            <div>
-                                <h1 className="heading-md text-left">Passwort ändern</h1>
-                                <p className="text-muted-foreground text-left">
-                                    Ändern Sie ihr derzeitiges Passwort
-                                </p>
-                            </div>
 
-                            <div className="bg-card rounded-lg shadow-sm p-0 mt-2">
-                                <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-0">
-                                        <FormField
-                                            control={form.control}
-                                            name="oldPassword"
-                                            render={({field}) => (
-                                                <FormItem>
-                                                    <FormLabel>Aktuelles Passwort</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="Aktuelles Passwort eingeben"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage/>
-                                                </FormItem>
+                            {/* === Second Column: Logo === */}
+                            <div className="space-y-4">
+                                <div>
+                                    <h1 className="heading-md text-left">Firmenlogo</h1>
+                                    <p className="text-muted-foreground text-left">
+                                        Verwalten Sie Ihr Firmenlogo
+                                    </p>
+                                </div>
+                                <Card>
+                                    <CardHeader>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4 flex flex-col items-center">
+                                        <div
+                                            className="h-32 w-32 rounded-md border border-dashed border-muted-foreground/50 flex items-center justify-center mb-4 overflow-hidden">
+                                            {logoUrl ? (
+                                                <img src={logoUrl} alt="Firmenlogo"
+                                                     className="h-full w-full object-contain"/>
+                                            ) : (
+                                                <Building className="text-muted-foreground/70 text-6xl select-none"/>
                                             )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="newPassword"
-                                            render={({field}) => (
-                                                <FormItem>
-                                                    <FormLabel>Neues Passwort</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="Neues Passwort eingeben"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage/>
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="confirmPassword"
-                                            render={({field}) => (
-                                                <FormItem>
-                                                    <FormLabel>Neues Passwort bestätigen</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="Neues Passwort wiederholen"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage/>
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <div className="pt-2">
-                                            <Button type="submit" disabled={isLoading}>
-                                                {isLoading ? "Wird verarbeitet..." : "Passwort ändern"}
-                                            </Button>
                                         </div>
-                                    </form>
-                                </Form>
+                                        <p className="text-sm text-muted-foreground text-center mb-4">
+                                            Laden Sie ein Logo im JPG, PNG oder SVG Format hoch. Empfohlene Größe:
+                                            400x400 Pixel.
+                                        </p>
+                                        <label
+                                            htmlFor="logo-upload"
+                                            className="cursor-pointer inline-flex items-center justify-center p-2 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                                        >
+                                            <Upload className="h-4 w-4 mr-2"/>
+                                            <span className="text-sm">{uploading ? "Lädt..." : "Logo hochladen"}</span>
+                                            <input
+                                                id="logo-upload"
+                                                type="file"
+                                                accept="image/png, image/jpeg, image/svg+xml"
+                                                className="hidden"
+                                                onChange={handleLogoUpload}
+                                                disabled={uploading}
+                                            />
+                                        </label>
+                                        {logoUrl && (
+                                            <Button
+                                                variant="ghost"
+                                                className="text-destructive mt-2 h-auto p-1 text-xs"
+                                                onClick={handleLogoDelete}
+                                                disabled={uploading}
+                                            >
+                                                Logo entfernen
+                                            </Button>
+                                        )}
+                                    </CardContent>
+                                </Card>
                             </div>
                         </div>
                     </FadeIn>

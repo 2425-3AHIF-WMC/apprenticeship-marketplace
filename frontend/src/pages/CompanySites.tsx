@@ -29,7 +29,7 @@ const siteSchema = z.object({
     name: z.string().min(1, "Name ist erforderlich"),
     address: z.string().min(3, "Adresse ist erforderlich"),
     city: z.string().min(2, "Ort ist erforderlich"),
-    plz: z.coerce.number().min(1000, "PLZ ist erforderlich"), // coerce to number
+    plz: z.string().min(4, "PLZ muss 4-stellig sein").max(4, "PLZ muss 4-stellig sein"),
 });
 
 type SiteForm = z.infer<typeof siteSchema>;
@@ -48,7 +48,7 @@ function CompanySites({ companyId }: Props) {
 
     const form = useForm<SiteForm>({
         resolver: zodResolver(siteSchema),
-        defaultValues: { name: "", address: "", city: "", plz: 0 },
+        defaultValues: { name: "", address: "", city: "", plz: "" },
     });
 
     async function fetchSites() {
@@ -82,11 +82,11 @@ function CompanySites({ companyId }: Props) {
             setEditSite(site);
             form.reset({
                 ...site,
-                plz: Number(site.plz),
+                plz: String(site.plz),
             });
         } else {
             setEditSite(null);
-            form.reset({ name: "", address: "", city: "", plz: 0 });
+            form.reset({ name: "", address: "", city: "", plz: "" });
         }
         setDialogOpen(true);
     }
@@ -94,6 +94,7 @@ function CompanySites({ companyId }: Props) {
     async function onSubmit(data: SiteForm) {
         const payload = {
             ...data,
+            plz: Number(data.plz),
             company_id: companyId,
             location_id: editSite?.location_id,
         };
@@ -188,10 +189,12 @@ function CompanySites({ companyId }: Props) {
             )}
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-lg">
-                    <DialogTitle>
-                        {editSite ? "Standort bearbeiten" : "Neuen Standort hinzufügen"}
-                    </DialogTitle>
+                <DialogContent className="sm:max-w-lg bg-card text-card-foreground">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editSite ? "Standort bearbeiten" : "Neuen Standort hinzufügen"}
+                        </DialogTitle>
+                    </DialogHeader>
 
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -229,12 +232,16 @@ function CompanySites({ companyId }: Props) {
                                         <FormLabel>PLZ</FormLabel>
                                         <FormControl>
                                             <Input
-                                                type="number"
+                                                type="text"
                                                 placeholder="PLZ eingeben"
+                                                maxLength={4}
                                                 {...field}
-                                                onChange={(e) =>
-                                                    field.onChange(Number(e.target.value))
-                                                }
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (/^\d*$/.test(val)) {
+                                                        field.onChange(val);
+                                                    }
+                                                }}
                                             />
                                         </FormControl>
                                         <FormMessage />
