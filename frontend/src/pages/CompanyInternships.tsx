@@ -31,7 +31,7 @@ import {
     Edit,
     Trash2,
     Clock,
-    MapPin
+    MapPin, Star
 } from 'lucide-react';
 import {
     Dialog,
@@ -49,7 +49,6 @@ import LoadingIndicator from '@/components/LoadingIndicator';
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import { InternshipMappedProps, InternshipUIProps } from "@/utils/interfaces.ts";
 import { cn } from '@/utils/utils';
-import { useIsMobile } from "@/hooks/use-mobile";
 
 
 const CompanyInternships = () => {
@@ -58,7 +57,6 @@ const CompanyInternships = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [companyId, setCompanyId] = useState<number | null>(null);
-    const isMobile = useIsMobile();
     const departmentIncludesSearchTerm = (category: string | string[], term: string): boolean => {
         if (Array.isArray(category)) {
             return category.some(cat => cat.toLowerCase().includes(term.toLowerCase()));
@@ -107,12 +105,24 @@ const CompanyInternships = () => {
                 }
 
                 const data = await response.json() as InternshipMappedProps[];
-                const transformed: InternshipUIProps[] = data.map((item: InternshipMappedProps) => ({
-                    ...item,
-                    id: item.internship_id,
-                    department: item.category
-                }));
-                setInternships(transformed);
+                const withFavourites = await Promise.all(
+                    data.map(async (item: InternshipMappedProps) => {
+                        let favourite_count = 0;
+                        try {
+                            const favRes = await fetch(`http://localhost:5000/api/student/favourites/internship/${item.internship_id}`);
+                            if (favRes.ok) {
+                                favourite_count = await favRes.json();
+                            }
+                        } catch {}
+                        return {
+                            ...item,
+                            id: item.internship_id,
+                            department: item.category,
+                            favourite_count
+                        } as InternshipUIProps & { favourite_count: number };
+                    })
+                );
+                setInternships(withFavourites);
 
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
@@ -254,6 +264,7 @@ const CompanyInternships = () => {
                                                 <TableHead>Abteilung(en)</TableHead>
                                                 <TableHead>Standort</TableHead>
                                                 <TableHead>Bewerbungsfrist</TableHead>
+                                                <TableHead>Favorisiert</TableHead>
                                                 <TableHead className="text-right">Aktionen</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -292,6 +303,12 @@ const CompanyInternships = () => {
                                                             {formatDate(internship.application_end)}
                                                         </div>
                                                     </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center text-muted-foreground">
+                                                            <Star className="h-3.5 w-3.5 mr-1" />
+                                                            {(internship as any).favourite_count ?? 0}x gemerkt
+                                                        </div>
+                                                    </TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -322,12 +339,7 @@ const CompanyInternships = () => {
                                                                             <span>Löschen</span>
                                                                         </DropdownMenuItem>
                                                                     </DialogTrigger>
-                                                                    <DialogContent className="text-center"
-                                                                        style={!isMobile ? {
-                                                                            left: 'calc(50% + 128px)',
-                                                                            transform: 'translate(-50%, -50%)',
-                                                                            position: 'fixed'
-                                                                        } : undefined}>
+                                                                    <DialogContent className="text-center">
                                                                         <DialogHeader>
                                                                             <DialogTitle>Praktikum löschen</DialogTitle>
                                                                             <DialogDescription>

@@ -18,6 +18,8 @@ const CompanyDashboard = () => {
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
     const [viewsCount, setViewsCount] = useState<number | null>(null);
+    const [clickCount, setClickCount] = useState<number | null>(null);
+    const [favCount, setFavCount] = useState<number | null>(null);
     const [loadingViews, setLoadingViews] = useState(false);
     const [loadingCompanyName, setLoadingCompanyName] = useState(true);
 
@@ -110,8 +112,59 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
-
+        if(!companyId)
+        {
+            return;
+        }
         fetchViews();
+    }, [companyId]);
+
+    useEffect(() => {
+        const fetchClicks = async () =>{
+            setLoadingViews(true);
+            try{
+                const res = await fetch(`http://localhost:5000/api/company/${companyId}/clicked_apply_internships/count/last_90_days`);
+                if(!res.ok){
+                    throw new Error("Fehler beim Laden der Click-Anzahl");
+                }
+                const data = await res.json();
+                setClickCount(data ?? 0);
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setLoadingViews(false);
+            }
+        };
+        if(!companyId)
+        {
+            return;
+        }
+        fetchClicks();
+    }, [companyId]);
+
+    useEffect(() => {
+        const fetchFavourites = async () =>{
+
+            setLoadingViews(true);
+
+            try{
+                const res = await fetch(`http://localhost:5000/api/company/${companyId}/favourite_internships/count`);
+                if(!res.ok){
+                    throw new Error("Fehler beim Laden der Favorite-Anzahl");
+                }
+                const data = await res.json();
+                setFavCount(data ?? 0);
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setLoadingViews(false);
+            }
+        };
+        if(!companyId)
+        {
+            return;
+        }
+        fetchFavourites();
     }, [companyId]);
 
     const quickLinks = [
@@ -131,7 +184,7 @@ const CompanyDashboard = () => {
                 <main className="w-full max-w-7xl p-8">
                     {!adminVerified && (
                         <div className="rounded-md bg-yellow-200 border border-yellow-600 text-yellow-900 py-4 px-6 max-w-3xl mx-auto">
-                            Ihre Praktika sind derzeit nicht öffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
+                            Ihre Praktika sind derzeit nicht Ã¶ffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
                         </div>
                     )}
 
@@ -140,14 +193,14 @@ const CompanyDashboard = () => {
                     </FadeIn>
 
                     <div className="space-y-8 mt-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <FadeIn delay={100}>
-                                <Card>
+                                <Card className="flex flex-col h-full">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Views</CardTitle>
                                         <CardDescription>Views in den letzten 30 Tagen auf Ihre Praktika</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="mt-auto">
                                         <div className="flex items-center">
                                             <Eye className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{viewsCount ?? 0}</div>
@@ -156,6 +209,35 @@ const CompanyDashboard = () => {
                                 </Card>
                             </FadeIn>
 
+                            <FadeIn delay={100}>
+                                <Card className="flex flex-col h-full">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-lg font-medium">Applications</CardTitle>
+                                        <CardDescription>Bewerbungsbutton-klicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="mt-auto">
+                                        <div className="flex items-center">
+                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <div className="text-3xl font-semibold">{clickCount ?? 0}</div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </FadeIn>
+
+                            <FadeIn delay={100}>
+                                <Card className="flex flex-col h-full">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-lg font-medium">Favorites</CardTitle>
+                                        <CardDescription>Favoriten auf alle Ihre Praktika</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="mt-auto">
+                                        <div className="flex items-center">
+                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <div className="text-3xl font-semibold">{favCount ?? 0}</div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </FadeIn>
                         </div>
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -177,22 +259,22 @@ const CompanyDashboard = () => {
                                         <CardContent>
                                             {
                                                 loadingInternships ? (
-                                                    <div className="text-center py-8">
-                                                        <LoadingIndicator />
-                                                    </div>
-                                                ) :
-                                                    errorInternships ? (
                                                         <div className="text-center py-8">
-                                                            <ErrorIndicator />
+                                                            <LoadingIndicator />
                                                         </div>
                                                     ) :
+                                                    errorInternships ? (
+                                                            <div className="text-center py-8">
+                                                                <ErrorIndicator />
+                                                            </div>
+                                                        ) :
                                                         internships.length > 0 ? (
                                                             <div className="space-y-4">
                                                                 {internships.slice(0, 3).map((internship) => (
                                                                     <div key={internship.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                                                                         <div className="flex flex-col">
                                                                             <h3 className="font-medium">{internship.title}</h3>
-                                                                            
+
                                                                         </div>
                                                                         <Button variant="outline" size="sm" asChild>
                                                                             <Link to={`/internships/${internship.id}`} state={{ backPath: '/company/dashboard' }}>
@@ -224,7 +306,7 @@ const CompanyDashboard = () => {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Schnellzugriff</CardTitle>
-                                            <CardDescription>Häufig verwendete Aktionen</CardDescription>
+                                            <CardDescription>HÃ¤ufig verwendete Aktionen</CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             {quickLinks.map((link) => (

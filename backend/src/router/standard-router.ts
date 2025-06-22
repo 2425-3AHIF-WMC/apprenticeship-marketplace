@@ -60,19 +60,19 @@ standardRouter.get('/internshipDuration', async (req: Request, res: Response) =>
 
 standardRouter.post('/departments/create/:internshipId', async (req: Request, res: Response) => {
     const internshipId: number = parseInt(req.params.internshipId);
-    const departments = req.body.departments;
+    const departmentsReq = req.body.departments;
     const unit: Unit = await Unit.create(true);
     try {
         const service = new DepartmentService(unit);
-        const departments = await service.getDepartments(internshipId);
-        if (departments.length > 0) {
+        const existingDepartments = await service.getDepartments(internshipId);
+        if (existingDepartments.length > 0) {
             const departmentDeleted = await service.deleteDepartments(internshipId);
             if (!departmentDeleted) {
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Department could not be deleted");
                 return;
             }
         }
-        const department = await service.insertDepartments(internshipId, departments);
+        const department = await service.insertDepartments(internshipId, departmentsReq);
         res.status(StatusCodes.OK).json(department);
     } catch (e) {
         console.log(e);

@@ -111,6 +111,7 @@ export class InternshipService extends ServiceBase {
                                                                            LEFT JOIN internship_department_map idm  ON (i.internship_id = idm.internship_id)
                                                                            LEFT JOIN department d                   ON d.department_id = idm.department_id
                                                                   WHERE i.internship_id = $1
+                                                                  GROUP BY i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info;
                                                                   GROUP BY i.internship_id, i.title, c.name, i.application_end, i.min_year, location, w.name, c.company_logo_path, id.description, i.internship_creation_timestamp, c.website, i.salary, i.internship_application_link, c.company_id, c.company_info, s.location_id;
                         `, [id]);
         return stmt.rows[0] as IInternshipDetailsUIProps;
