@@ -686,8 +686,7 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
             const studentService = new StudentService(unit);
             const company = await service.getById(company_id);
             if (company != null) {
-                console.log(company.email_verified);
-                if (company.email_verified == "true") {
+                if (Boolean(company.email_verified)) {
                     res.status(StatusCodes.OK).send("Email has already been verified.");
                     return;
                 }
