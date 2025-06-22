@@ -24,6 +24,8 @@ import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
 import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
 import {StudentService} from "../services/student-service.js";
+import {FavouriteService} from "../services/favourite-service";
+import {favouriteRouter} from "./favourite-router";
 
 dotenv.config();
 
@@ -410,6 +412,34 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
                 res.status(StatusCodes.OK).json(viewedCount);
             } else {
                 res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:id/favourite_internships/count", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const favoriteService = new FavouriteService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const favCount: number = await favoriteService.getCountOfFavouriteByCompany(company_id);
+
+            if (favCount > 0) {
+                res.status(StatusCodes.OK).json(favCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(favCount);
             }
 
         } else {
