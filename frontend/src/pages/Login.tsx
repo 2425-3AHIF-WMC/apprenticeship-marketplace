@@ -18,6 +18,9 @@ import {Input} from "@/components/ui/input.tsx";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 import {Mail, MailWarning, ShieldAlert} from "lucide-react";
 import { isAdmin } from '@/lib/authUtils';
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -30,20 +33,6 @@ const Login = () => {
     const [isEmailExistsDialogOpen, setEmailExistsDialogOpen] = useState(false);
     const [isVerificationEmailSentDialogOpen, setVerificationEmailSentDialogOpen] = useState(false);
     const [isVerificationNeededDialogOpen, setVerificationNeededDialogOpen] = useState(false);
-    const [nameRegistration, setNameRegistration] = useState('');
-    const [companyNumberRegistration, setCompanyNumberRegistration] = useState('');
-    const [emailRegistration, setEmailRegistration] = useState('');
-    const [phoneNumberRegistration, setPhoneNumberRegistration] = useState('');
-    const [websiteRegistration, setWebsiteRegistration] = useState('');
-    const [passwordRegistration, setPasswordRegistration] = useState('');
-    const [errors, setErrors] = useState<{
-        name?: string;
-        companyNumber?: string;
-        email?: string;
-        phone?: string;
-        website?: string;
-        password?: string;
-    }>({});
     const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
     const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] = useState(false);
     const [isForgotPasswordSuccessDialogOpen, setIsForgotPasswordSuccessDialogOpen] = useState(false);
@@ -131,26 +120,43 @@ const Login = () => {
         }
     };
 
-    const handleCompanyRegistration = async () => {
-        if(!validateCompanyRegistrationFields()) {
-            return;
-        }
+    const companyRegistrationSchema = z.object({
+        name: z.string().min(1, "Firmenname ist erforderlich.").max(100, "Firmenname ist zu lang."),
+        companyNumber: z.string().min(1, "Firmenbuchnummer ist erforderlich.").max(50, "Firmenbuchnummer ist zu lang."),
+        email: z.string().email("Bitte geben Sie eine gültige E-Mail-Adresse ein."),
+        phone: z.string().regex(/^\+?[0-9\-()\s]+$/, "Bitte geben Sie eine gültige Telefonnummer ein."),
+        website: z.string().regex(/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i, "Bitte geben Sie eine gültige Webseite ein."),
+        password: z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:'",.<>/?]).{8,}$/, "Das Passwort muss mindestens 8 Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten."),
+    });
+
+    const companyRegistrationForm = useForm<z.infer<typeof companyRegistrationSchema>>({
+        resolver: zodResolver(companyRegistrationSchema),
+        mode: "onTouched",
+        defaultValues: {
+            name: "",
+            companyNumber: "",
+            email: "",
+            phone: "",
+            website: "",
+            password: "",
+        },
+    });
+
+    const handleCompanyRegistration = async (data?: z.infer<typeof companyRegistrationSchema>) => {
+        const values = data || companyRegistrationForm.getValues();
+        const isValid = await companyRegistrationForm.trigger();
+        if (!isValid) return;
         setIsLoading(true);
         try {
+            const { phone, ...rest } = values;
+            const payload = { ...rest, phoneNumber: phone };
             const res = await fetch('http://localhost:5000/api/company/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 credentials: "include",
-                body: JSON.stringify({
-                    name: nameRegistration,
-                    companyNumber: companyNumberRegistration,
-                    email: emailRegistration,
-                    phoneNumber: phoneNumberRegistration,
-                    website: websiteRegistration,
-                    password: passwordRegistration
-                })
+                body: JSON.stringify(payload)
             });
             if (res.status === 201) {
                 setVerificationEmailSentDialogOpen(true);
@@ -162,40 +168,6 @@ const Login = () => {
         } finally {
             setIsLoading(false);
         }
-    }
-
-
-    const validateCompanyRegistrationFields = () => {
-        const newErrors: typeof errors = {};
-
-        if (!nameRegistration.trim()) {
-            newErrors.name = "Firmenname ist erforderlich.";
-        }
-
-        if (!companyNumberRegistration.trim()) {
-            newErrors.companyNumber = "Firmenbuchnummer ist erforderlich.";
-        }
-
-        if (!emailRegistration || !/^\w+@\w+\.\w+$/.test(emailRegistration)) {
-            newErrors.email = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
-        }
-
-        if (!phoneNumberRegistration || !/^\+?[0-9\-()\s]+$/.test(phoneNumberRegistration)) {
-            newErrors.phone = "Bitte geben Sie eine gültige Telefonnummer ein.";
-        }
-
-        if (!websiteRegistration ||   !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(websiteRegistration.trim())) {
-            newErrors.website = "Bitte geben Sie eine gültige URL ein.";
-        }
-
-        if (!passwordRegistration || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:'",.<>/?]).{8,}$/.test(passwordRegistration)) {
-            newErrors.password = "Das Passwort muss mindestens 8 Zeichen lang sein, " +
-                "mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten.";
-        }
-
-        setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0;
     }
 
     const toggleCompanyRegisterForm = () => {
@@ -302,50 +274,57 @@ const Login = () => {
                                             </CardDescription>
                                         </CardHeader>
                                             <CardContent>
-                                                <label className="text-sm font-medium">Firmenname</label>
-                                                <Input type="text" value={nameRegistration} className={`mb-1 ${errors.name ? 'border-red-500' : ''}`}
-                                                       onChange={e => setNameRegistration(e.target.value)} placeholder="Firmenname eingeben"/>
-                                                {errors.name && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.name}</p>
-                                                )}
-                                                <label className="text-sm font-medium">Firmenbuchnummer</label>
-                                                <Input type="text" value={companyNumberRegistration} className={`mb-1 ${errors.companyNumber ? 'border-red-500' : ''}`}
-                                                       onChange={e => setCompanyNumberRegistration(e.target.value)} placeholder="Firmenbuchnummer eingeben"/>
-                                                {errors.companyNumber && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.companyNumber}</p>
-                                                )}
-                                                <label className="text-sm font-medium">E-Mail</label>
-                                                <Input type="email" value={emailRegistration} className={`mb-1 ${errors.email ? 'border-red-500' : ''}`}
-                                                       onChange={e => setEmailRegistration(e.target.value)} placeholder="E-Mail eingeben"/>
-                                                {errors.email && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.email}</p>
-                                                )}
-                                                <label className="text-sm font-medium">Telefonnummer</label>
-                                                <Input type="tel" value={phoneNumberRegistration} className={`mb-1 ${errors.phone ? 'border-red-500' : ''}`}
-                                                       onChange={e => setPhoneNumberRegistration(e.target.value)} placeholder="Telefonnummer eingeben"/>
-                                                {errors.phone && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.phone}</p>
-                                                )}
-                                                <label className="text-sm font-medium">Webseite</label>
-                                                <Input type="url" value={websiteRegistration} className={`mb-1 ${errors.website ? 'border-red-500' : ''}`}
-                                                       onChange={e => setWebsiteRegistration(e.target.value)} placeholder="Webseite eingeben"/>
-                                                {errors.website && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.website}</p>
-                                                )}
-                                                <label className="text-sm font-medium">Passwort</label>
-                                                <Input type="password" value={passwordRegistration} className={`mb-1 ${errors.password ? 'border-red-500' : ''}`}
-                                                       onChange={e => setPasswordRegistration(e.target.value)} placeholder="Passwort eingeben" />
-                                                {errors.password && (
-                                                    <p className="text-sm text-red-500 mb-3">{errors.password}</p>
-                                                )}
-                                                <Button
-                                                    className="w-full text-md"
-                                                    disabled={isLoading}
-                                                    onClick={handleCompanyRegistration}
-                                                >
-                                                    {isLoading ? "Registrierung läuft..." : "Registrieren"}
-                                                </Button>
-
+                                                <form onSubmit={companyRegistrationForm.handleSubmit(handleCompanyRegistration)}>
+                                                    <label className="text-sm font-medium">Firmenname</label>
+                                                    <Input type="text" {...companyRegistrationForm.register("name")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.name ? 'border-red-500' : ''}`}
+                                                        placeholder="Firmenname eingeben" />
+                                                    {companyRegistrationForm.formState.errors.name && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.name.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">Firmenbuchnummer</label>
+                                                    <Input type="text" {...companyRegistrationForm.register("companyNumber")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.companyNumber ? 'border-red-500' : ''}`}
+                                                        placeholder="Firmenbuchnummer eingeben" />
+                                                    {companyRegistrationForm.formState.errors.companyNumber && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.companyNumber.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">E-Mail</label>
+                                                    <Input type="email" {...companyRegistrationForm.register("email")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.email ? 'border-red-500' : ''}`}
+                                                        placeholder="E-Mail eingeben" />
+                                                    {companyRegistrationForm.formState.errors.email && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.email.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">Telefonnummer</label>
+                                                    <Input type="tel" {...companyRegistrationForm.register("phone")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.phone ? 'border-red-500' : ''}`}
+                                                        placeholder="Telefonnummer eingeben" />
+                                                    {companyRegistrationForm.formState.errors.phone && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.phone.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">Webseite</label>
+                                                    <Input type="text" {...companyRegistrationForm.register("website")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.website ? 'border-red-500' : ''}`}
+                                                        placeholder="Webseite eingeben" />
+                                                    {companyRegistrationForm.formState.errors.website && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.website.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">Passwort</label>
+                                                    <Input type="password" {...companyRegistrationForm.register("password")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.password ? 'border-red-500' : ''}`}
+                                                        placeholder="Passwort eingeben" />
+                                                    {companyRegistrationForm.formState.errors.password && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.password.message}</p>
+                                                    )}
+                                                    <Button
+                                                        className="w-full text-md"
+                                                        disabled={isLoading}
+                                                        type="submit"
+                                                    >
+                                                        {isLoading ? "Registrierung läuft..." : "Registrieren"}
+                                                    </Button>
+                                                </form>
                                             </CardContent>
                                         <CardFooter className="flex justify-center border-t pt-6 flex-col items-center gap-0.5">
                                             <p className="text-sm text-muted-foreground">
