@@ -18,7 +18,7 @@ import {checkCompanyAuth} from "@/lib/authUtils.ts";
 import {useNavigate} from "react-router-dom";
 import {toast, Toaster} from "sonner";
 import CompanySites from "@/pages/CompanySites.tsx";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
 import {Building, Upload} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea.tsx";
 

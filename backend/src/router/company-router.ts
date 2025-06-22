@@ -204,7 +204,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
                 email_verified: false
             }
             const token = generateEmailToken(payload);
-            const verificationLink = `http://localhost:8081/verify-email/${token}`;
+            const verificationLink = `http://localhost:8080/verify-email/${token}`;
 
             await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship Marketplace',
                 `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
@@ -743,7 +743,7 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
                     const admins: IStudent[] = await studentService.getAdmins();
                     console.log(admins);
                     for (const admin of admins) {
-                        const verifyCompaniesLink = `http://localhost:8081/admin/companies/verify`;
+                        const verifyCompaniesLink = `http://localhost:8080/admin/companies/verify`;
                         await service.sendMail(
                             admin.email,
                             "Unternehmensbestätigung | Apprenticeship Marketplace",
@@ -867,7 +867,7 @@ companyRouter.post("/send-password-reset-mail", async (req: Request, res: Respon
             email_verified: company.email_verified,
         };
         const token = generatePasswordResetToken(payload);
-        const resetLink = `http://localhost:8081/reset-password/${token}`;
+        const resetLink = `http://localhost:8080/reset-password/${token}`;
 
         await service.sendMail(
             company.email,
