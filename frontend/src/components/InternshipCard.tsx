@@ -39,19 +39,6 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
         return () => { mounted = false; };
     }, [studentId]);
 
-    useEffect(() => {
-        const fetchClicks = async () =>{
-            if(!studentId || !internship?.id) return;
-            const res = await fetch(`http://localhost:5000/api/clicked_apply_internship/`,{
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({studentId: studentId, internshipId: internship.id})
-            });
-            if(!res.ok) return;
-        };
-        fetchClicks();
-    }, [studentId, internship?.id]);
-
     const getCategoryClasses = (category: string) => {
         return `tag-${category}`;
     };
@@ -168,7 +155,19 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
                     Details ansehen
                 </Link>
             </Button>
-            <Button asChild size="sm">
+            <Button size="sm" onClick={async () => {
+                if (!studentId || !internship?.id) return;
+
+                try {
+                    await fetch(`http://localhost:5000/api/clicked_apply_internship/`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId: studentId, internshipId: internship.id }),
+                    });
+                } catch (error) {
+                    console.error('Fehler beim Loggen des Klicks:', error);
+                }
+            }}>
                 <Link
                     to={internship.internship_link}
                     target={internship.internship_link ? "_blank" : undefined}
