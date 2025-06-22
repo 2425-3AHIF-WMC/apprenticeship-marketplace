@@ -15,12 +15,12 @@ const VerifyEmail = () => {
                     credentials: "include"
                 });
                 if(response.ok) {
-                    alert("Email verified!");
+                    alert("Email verifiziert!");
                     const data = await response.json();
                     localStorage.setItem("companyAccessToken", data.accessToken);
                     navigate('/company/dashboard');
                 } else {
-                    alert("Verification failed.");
+                    alert("Verifizierung fehlgeschlagen.");
                     navigate("/")
                 }
             } catch (err) {
