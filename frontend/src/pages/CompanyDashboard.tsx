@@ -112,8 +112,10 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
-
-
+        if(!companyId)
+        {
+            return;
+        }
         fetchViews();
     }, [companyId]);
 
@@ -133,12 +135,18 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
+        if(!companyId)
+        {
+            return;
+        }
         fetchClicks();
     }, [companyId]);
 
     useEffect(() => {
         const fetchFavourites = async () =>{
+
             setLoadingViews(true);
+
             try{
                 const res = await fetch(`http://localhost:5000/api/company/${companyId}/favourite_internships/count`);
                 if(!res.ok){
@@ -152,6 +160,10 @@ const CompanyDashboard = () => {
                 setLoadingViews(false);
             }
         };
+        if(!companyId)
+        {
+            return;
+        }
         fetchFavourites();
     }, [companyId]);
 
