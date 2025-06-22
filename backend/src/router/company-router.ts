@@ -1,4 +1,4 @@
-import express, {Request, Response} from "express";
+import express, { Request, Response } from "express";
 import {
     ICompany,
     ICompanySmall,
@@ -7,8 +7,8 @@ import {
     isValidDate,
     ISite, ICompanyPayload, IStudent
 } from "../model.js";
-import {StatusCodes} from "http-status-codes";
-import jwt, {JwtPayload} from "jsonwebtoken";
+import { StatusCodes } from "http-status-codes";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import {
     generateAccessToken,
     generateEmailToken,
@@ -17,14 +17,14 @@ import {
 } from "../services/token-service.js";
 import dotenv from "dotenv";
 import argon2 from '@node-rs/argon2';
-import {Unit} from "../unit.js";
-import {CompanyService} from "../services/company-service.js";
-import {InternshipService} from "../services/internship-service.js";
-import {SiteService} from "../services/site-service.js";
-import {ViewedInternshipService} from "../services/viewed_internship-service.js";
-import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
-import {StudentService} from "../services/student-service.js";
-import {FavouriteService} from "../services/favourite-service.js";
+import { Unit } from "../unit.js";
+import { CompanyService } from "../services/company-service.js";
+import { InternshipService } from "../services/internship-service.js";
+import { SiteService } from "../services/site-service.js";
+import { ViewedInternshipService } from "../services/viewed_internship-service.js";
+import { ClickedApplyInternshipService } from "../services/clicked_apply_internships-service.js";
+import { StudentService } from "../services/student-service.js";
+import { FavouriteService } from "../services/favourite-service.js";
 
 dotenv.config();
 
@@ -53,7 +53,7 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(401).json({error: "No token"});
+        res.status(401).json({ error: "No token" });
         return;
     }
     const token = authHeader.split(" ")[1];
@@ -75,13 +75,13 @@ companyRouter.get("/me", async (req: Request, res: Response) => {
             await unit.complete();
         }
     } catch (err) {
-        res.status(StatusCodes.UNAUTHORIZED).json({error: "Invalid token"});
+        res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid token" });
     }
 });
 
 companyRouter.post("/login", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     try {
         const service = new CompanyService(unit);
@@ -114,7 +114,7 @@ companyRouter.post("/login", async (req: Request, res: Response) => {
                 })
                     .header('Authorization', `Bearer ${newAccessToken}`)
                     .status(StatusCodes.OK)
-                    .json({accessToken: newAccessToken});
+                    .json({ accessToken: newAccessToken });
             } else {
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
             }
@@ -149,9 +149,9 @@ companyRouter.post("/refresh", async (req: Request, res: Response) => {
 
         res.header('Authorization', `Bearer ${newAccessToken}`)
             .status(200)
-            .json({accessToken: newAccessToken})
+            .json({ accessToken: newAccessToken })
     } catch (err) {
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
@@ -186,7 +186,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
         const service = new CompanyService(unit);
         const emailExists: ICompany | null = await service.getByEmail(company.email);
         if (emailExists) {
-            res.status(409).json({error: "E-Mail is already in Use"});
+            res.status(409).json({ error: "E-Mail is already in Use" });
             return;
         }
 
@@ -216,7 +216,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
 
     } catch (err) {
         console.log(err);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({Error: err})
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ Error: err })
     } finally {
         await unit.complete(false);
     }
@@ -225,7 +225,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
 companyRouter.get("/verify", (req: Request, res: Response) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(401).json({error: "No token"});
+        res.status(401).json({ error: "No token" });
         return;
     }
 
@@ -233,9 +233,9 @@ companyRouter.get("/verify", (req: Request, res: Response) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!);
-        res.status(200).json({valid: true, decoded});
+        res.status(200).json({ valid: true, decoded });
     } catch (err) {
-        res.status(400).json({error: "Invalid token"});
+        res.status(400).json({ error: "Invalid token" });
     }
 });
 
@@ -247,9 +247,9 @@ companyRouter.post("/logout", (req: Request, res: Response) => {
             secure: false,
             maxAge: 0
         });
-        res.status(200).json({message: "Logged out"});
+        res.status(200).json({ message: "Logged out" });
     } catch (err) {
-        res.status(500).json({error: err});
+        res.status(500).json({ error: err });
     }
 });
 
@@ -310,10 +310,20 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
             }
 
             if (await service.companyExists(company_id)) {
+                const company: ICompany | null = await service.getById(company_id);
                 let success: boolean;
 
                 if (allowedBooleanTrueStrings.includes(adminVerified)) {
+                    if (company != null) {
+                        await service.sendMail(
+                            company.email,
+                            "Admin Bestätigung | Apprenticeship Marketplace",
+                            `<p>Hallo,</p>
+                         <p>Ihr Unternehmen wurde soeben von einem Admin verifiziert. Ihre Praktikas sind somit für alle einsehbar.</p>
+                         <p>Vielen Dank für Ihre Registrierung!</p>`)
+                    }
                     success = await service.verifyAdmin(company_id);
+
                 } else {
                     success = await service.unverifyAdmin(company_id);
                 }
@@ -342,7 +352,7 @@ companyRouter.patch("/:id/verify_admin", async (req: Request, res: Response) => 
 
 companyRouter.get("/:param_id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
-    const {param_id} = req.params;
+    const { param_id } = req.params;
     const id: number = parseInt(param_id);
 
     if (!isValidId(id)) {
@@ -605,9 +615,9 @@ companyRouter.put("", async (req: Request, res: Response) => {
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
-        && isValidDate(company.company_registration_timestamp)
-        && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
-        && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
+            && isValidDate(company.company_registration_timestamp)
+            && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
+            && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
 
             const success: boolean = await (companyExists ? service.update(company) : service.insert(company));
 
@@ -711,7 +721,7 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
                     })
                         .header('Authorization', `Bearer ${newAccessToken}`)
                         .status(StatusCodes.OK)
-                        .json({accessToken: newAccessToken});
+                        .json({ accessToken: newAccessToken });
                     const admins: IStudent[] = await studentService.getAdmins();
                     console.log(admins);
                     for (const admin of admins) {
@@ -751,11 +761,11 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
 
 // for password reset via dashboard
 companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
-    const {oldpassword, newpassword} = req.body;
+    const { oldpassword, newpassword } = req.body;
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(401).json({error: "No token"});
+        res.status(401).json({ error: "No token" });
         return;
     }
     const token = authHeader.split(" ")[1];
@@ -815,7 +825,7 @@ companyRouter.patch("/reset-password", async (req: Request, res: Response) => {
 });
 
 companyRouter.post("/send-password-reset-mail", async (req: Request, res: Response) => {
-    const {email} = req.body;
+    const { email } = req.body;
 
     if (!email) {
         res.status(400).send("E-Mail ist erforderlich.");
@@ -864,8 +874,8 @@ companyRouter.post("/send-password-reset-mail", async (req: Request, res: Respon
 
 // for password reset via email link
 companyRouter.patch("/reset-password/:token", async (req: Request, res: Response) => {
-    const {newpassword} = req.body;
-    const {token} = req.params;
+    const { newpassword } = req.body;
+    const { token } = req.params;
 
     jwt.verify(token, process.env.JWT_PASSWORD_RESET_SECRET!, async (err, decoded: any) => {
         if (err || !decoded?.company_id) {
@@ -915,7 +925,7 @@ companyRouter.put("/info/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(false);
     try {
         const company_id: number = parseInt(req.params.id);
-        const {company_info} = req.body;
+        const { company_info } = req.body;
 
         if (!isValidId(company_id) || typeof company_info !== "string") {
             res.sendStatus(StatusCodes.BAD_REQUEST);
