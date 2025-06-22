@@ -482,6 +482,34 @@ companyRouter.get("/:id/clicked_apply_internships/count/last_90_days", async (re
     }
 });
 
+companyRouter.get("/:id/clicked_apply_internships/count", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const clickedService = new ClickedApplyInternshipService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const clickedCount: number = await clickedService.getCountOfInternshipsByCompany(company_id);
+
+            if (clickedCount > 0) {
+                res.status(StatusCodes.OK).json(clickedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(clickedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
 companyRouter.get("/:id/sites", async (req: Request, res: Response) => {
     const company_id: number = parseInt(req.params.id);
     const unit: Unit = await Unit.create(true);
