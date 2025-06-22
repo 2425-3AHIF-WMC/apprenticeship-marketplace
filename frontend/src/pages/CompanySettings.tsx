@@ -95,12 +95,20 @@ const CompanySettings = () => {
 
     useEffect(() => {
         if (!companyId) return;
+        // Firmenlogo laden
         fetch(`http://localhost:5000/api/media/company-logo/${companyId}`, { method: "HEAD" })
             .then(res => {
                 if (res.ok) setLogoUrl(`http://localhost:5000/api/media/company-logo/${companyId}?t=${Date.now()}`);
                 else setLogoUrl(null);
             })
             .catch(() => setLogoUrl(null));
+        // Unternehmensbeschreibung laden
+        fetch(`http://localhost:5000/api/company/${companyId}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.company_info) setCompanyInfo(data.company_info);
+            })
+            .catch(() => {});
     }, [companyId]);
 
 
