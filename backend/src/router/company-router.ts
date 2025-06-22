@@ -24,8 +24,7 @@ import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
 import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
 import {StudentService} from "../services/student-service.js";
-import {FavouriteService} from "../services/favourite-service";
-import {favouriteRouter} from "./favourite-router";
+import {FavouriteService} from "../services/favourite-service.js";
 
 dotenv.config();
 
