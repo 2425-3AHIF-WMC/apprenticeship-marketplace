@@ -159,7 +159,7 @@ function CompanySites({ companyId }: Props) {
                             key={site.location_id}
                             className="flex justify-between items-center border p-4 rounded"
                         >
-                            <div>
+                            <div className="text-left">
                                 <p className="font-semibold">{site.name}</p>
                                 <p>{site.address}, {site.plz} {site.city}</p>
                             </div>

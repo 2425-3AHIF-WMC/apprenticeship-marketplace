@@ -761,7 +761,7 @@ const CompanyInternshipCreation = () => {
                                         )}
                                         <div className="col-span-1 md:col-span-2 w-full mt-4 flex justify-center">
                                             <Button type="submit" className="md:w-auto">
-                                                Praktikum erstellen
+                                                Praktikum {updating ? "aktualisieren" : "erstellen"}
                                             </Button>
                                         </div>
 
