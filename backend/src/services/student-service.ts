@@ -96,4 +96,10 @@ export class StudentService extends ServiceBase{
         const stmt = await this.unit.prepare(`SELECT person_id, username, email, person_creation_timestamp, persontype FROM person WHERE persontype = 'Admin'`);
         return stmt.rows as IStudent[];
     }
+
+    public async getFavouriteCount(internshipId: number): Promise<number> {
+        const stmt = await this.unit.prepare(`SELECT COUNT(*) AS count FROM favourite WHERE internship_id = $1`, [internshipId]);
+        const count: number = parseInt(stmt.rows[0].count);
+        return count;
+    }
 }
