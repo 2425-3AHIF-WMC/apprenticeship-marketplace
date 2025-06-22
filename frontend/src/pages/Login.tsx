@@ -20,7 +20,7 @@ import {Mail, MailWarning, ShieldAlert} from "lucide-react";
 import { isAdmin } from '@/lib/authUtils';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +120,7 @@ const Login = () => {
         }
     };
 
+    // Zod Schema für die Unternehmensregistrierung
     const companyRegistrationSchema = z.object({
         name: z.string().min(1, "Firmenname ist erforderlich.").max(100, "Firmenname ist zu lang."),
         companyNumber: z.string().min(1, "Firmenbuchnummer ist erforderlich.").max(50, "Firmenbuchnummer ist zu lang."),
@@ -127,6 +128,10 @@ const Login = () => {
         phone: z.string().regex(/^\+?[0-9\-()\s]+$/, "Bitte geben Sie eine gültige Telefonnummer ein."),
         website: z.string().regex(/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i, "Bitte geben Sie eine gültige Webseite ein."),
         password: z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:'",.<>/?]).{8,}$/, "Das Passwort muss mindestens 8 Zeichen lang sein, mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten."),
+        passwordConfirm: z.string().min(1, "Bitte bestätigen Sie Ihr Passwort."),
+    }).refine((data) => data.password === data.passwordConfirm, {
+        message: "Passwörter stimmen nicht überein.",
+        path: ["passwordConfirm"],
     });
 
     const companyRegistrationForm = useForm<z.infer<typeof companyRegistrationSchema>>({
@@ -139,8 +144,14 @@ const Login = () => {
             phone: "",
             website: "",
             password: "",
+            passwordConfirm: "",
         },
     });
+
+    const passwordValue = useWatch({ control: companyRegistrationForm.control, name: "password" });
+    useEffect(() => {
+        companyRegistrationForm.trigger("passwordConfirm");
+    }, [passwordValue]);
 
     const handleCompanyRegistration = async (data?: z.infer<typeof companyRegistrationSchema>) => {
         const values = data || companyRegistrationForm.getValues();
@@ -148,7 +159,7 @@ const Login = () => {
         if (!isValid) return;
         setIsLoading(true);
         try {
-            const { phone, ...rest } = values;
+            const { phone, passwordConfirm, ...rest } = values;
             const payload = { ...rest, phoneNumber: phone };
             const res = await fetch('http://localhost:5000/api/company/register', {
                 method: 'POST',
@@ -316,6 +327,13 @@ const Login = () => {
                                                         placeholder="Passwort eingeben" />
                                                     {companyRegistrationForm.formState.errors.password && (
                                                         <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.password.message}</p>
+                                                    )}
+                                                    <label className="text-sm font-medium">Passwort bestätigen</label>
+                                                    <Input type="password" {...companyRegistrationForm.register("passwordConfirm")}
+                                                        className={`mb-1 ${companyRegistrationForm.formState.errors.passwordConfirm ? 'border-red-500' : ''}`}
+                                                        placeholder="Passwort bestätigen" />
+                                                    {companyRegistrationForm.formState.errors.passwordConfirm && (
+                                                        <p className="text-sm text-red-500 mb-3">{companyRegistrationForm.formState.errors.passwordConfirm.message}</p>
                                                     )}
                                                     <Button
                                                         className="w-full text-md"
