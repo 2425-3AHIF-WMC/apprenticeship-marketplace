@@ -30,6 +30,15 @@ export class ClickedApplyInternshipService extends ServiceBase {
         return stmt.rows[0].count || 0;
     }
 
+    public async getCountOfInternshipsByCompany(companyId: number): Promise<number> {
+        const stmt = await this.unit.prepare(`select count(*)
+                                              from clicked_apply_internships cai
+                                                       join internship i on (cai.internship_id = i.internship_id)
+                                                       join site s on (i.location_id = s.location_id)
+                                              where s.company_id=$1`, [companyId]);
+        return stmt.rows[0].count || 0;
+    }
+
     public async getCountOfInternshipsByCompanyLast90Days(companyId: number): Promise<number> {
         const stmt = await this.unit.prepare(`select count(*)
                                               from clicked_apply_internships cai
