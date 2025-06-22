@@ -30,8 +30,7 @@ export class FavouriteService extends ServiceBase {
                                               from favourite f
                                                        join internship i on (f.internship_id = i.internship_id)
                                                        join site s on (i.location_id = s.location_id)
-                                              where s.company_id = $1
-                                                and viewed_timestamp >= NOW() - INTERVAL '31 days'`, [companyId]);
+                                              where s.company_id = $1`, [companyId]);
         return stmt.rows[0].count || 0;
     }
 
