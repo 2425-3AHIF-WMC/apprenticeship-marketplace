@@ -24,8 +24,7 @@ import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
 import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
 import {StudentService} from "../services/student-service.js";
-import {FavouriteService} from "../services/favourite-service";
-import {favouriteRouter} from "./favourite-router";
+import {FavouriteService} from "../services/favourite-service.js";
 
 dotenv.config();
 
@@ -715,8 +714,7 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
             const studentService = new StudentService(unit);
             const company = await service.getById(company_id);
             if (company != null) {
-                console.log(company.email_verified);
-                if (company.email_verified == "true") {
+                if (Boolean(company.email_verified)) {
                     res.status(StatusCodes.OK).send("Email has already been verified.");
                     return;
                 }
