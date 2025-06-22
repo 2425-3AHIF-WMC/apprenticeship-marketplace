@@ -19,6 +19,7 @@ const CompanyDashboard = () => {
     const [companyName, setCompanyName] = useState<string | null>(null);
     const [viewsCount, setViewsCount] = useState<number | null>(null);
     const [clickCount, setClickCount] = useState<number | null>(null);
+    const [favCount, setFavCount] = useState<number | null>(null);
     const [loadingViews, setLoadingViews] = useState(false);
     const [loadingCompanyName, setLoadingCompanyName] = useState(true);
 
@@ -135,6 +136,25 @@ const CompanyDashboard = () => {
         fetchClicks();
     }, [companyId]);
 
+    useEffect(() => {
+        const fetchFavourites = async () =>{
+            setLoadingViews(true);
+            try{
+                const res = await fetch(`http://localhost:5000/api/company/${companyId}/favourite_internships/count`);
+                if(!res.ok){
+                    throw new Error("Fehler beim Laden der Favorite-Anzahl");
+                }
+                const data = await res.json();
+                setFavCount(data ?? 0);
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setLoadingViews(false);
+            }
+        };
+        fetchFavourites();
+    }, [companyId]);
+
     const quickLinks = [
         { to: '/company/internships', icon: Files, label: 'Alle Praktika' },
         { to: '/company/internship/create', icon: Plus, label: 'Praktikum erstellen' },
@@ -181,7 +201,21 @@ const CompanyDashboard = () => {
                                 <Card>
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Clicks</CardTitle>
-                                        <CardDescription>Clicks in den letzten 30 Tagen auf Ihre Praktika</CardDescription>
+                                        <CardDescription>Clicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-center">
+                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <div className="text-3xl font-semibold">{clickCount ?? 0}</div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </FadeIn>
+                            <FadeIn delay={100}>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-lg font-medium">Favorites</CardTitle>
+                                        <CardDescription>Favoriten auf Ihre Praktika</CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex items-center">
