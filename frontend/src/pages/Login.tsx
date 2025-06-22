@@ -171,6 +171,8 @@ const Login = () => {
             });
             if (res.status === 201) {
                 setVerificationEmailSentDialogOpen(true);
+                companyRegistrationForm.reset();
+                setTimeout(() => companyRegistrationForm.clearErrors("passwordConfirm"), 0);
             } else if (!res.ok) {
                 setEmailExistsDialogOpen(true);
             }
