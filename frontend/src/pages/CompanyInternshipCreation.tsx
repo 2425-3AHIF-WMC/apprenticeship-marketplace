@@ -240,7 +240,7 @@ const CompanyInternshipCreation = () => {
                     pdf_path: null,
                     min_year: String(values.minYear),
                     internship_creation_timestamp: new Date().toISOString(),
-                    salary: String(values.salary || values.salaryReason),
+                    salary: String(values.salaryType === 'salary' ? values.salary : values.salaryReason),
                     application_end: `${values.deadline.getFullYear()}-${String(values.deadline.getMonth() + 1).padStart(2, '0')}-${String(values.deadline.getDate()).padStart(2, '0')}`,
                     location_id: String(values.site),
                     worktype_id: String(values.workType),
