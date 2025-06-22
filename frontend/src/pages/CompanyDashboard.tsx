@@ -172,7 +172,7 @@ const CompanyDashboard = () => {
                 <main className="w-full max-w-7xl p-8">
                     {!adminVerified && (
                         <div className="rounded-md bg-yellow-200 border border-yellow-600 text-yellow-900 py-4 px-6 max-w-3xl mx-auto">
-                            Ihre Praktika sind derzeit nicht öffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
+                            Ihre Praktika sind derzeit nicht Ã¶ffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
                         </div>
                     )}
 
@@ -215,7 +215,7 @@ const CompanyDashboard = () => {
                                 <Card>
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Favorites</CardTitle>
-                                        <CardDescription>Favoriten auf alle Ihre Praktika                  </CardDescription>
+                                        <CardDescription>Favoriten auf alle Ihre Praktika</CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex items-center">
@@ -246,22 +246,22 @@ const CompanyDashboard = () => {
                                         <CardContent>
                                             {
                                                 loadingInternships ? (
-                                                    <div className="text-center py-8">
-                                                        <LoadingIndicator />
-                                                    </div>
-                                                ) :
-                                                    errorInternships ? (
                                                         <div className="text-center py-8">
-                                                            <ErrorIndicator />
+                                                            <LoadingIndicator />
                                                         </div>
                                                     ) :
+                                                    errorInternships ? (
+                                                            <div className="text-center py-8">
+                                                                <ErrorIndicator />
+                                                            </div>
+                                                        ) :
                                                         internships.length > 0 ? (
                                                             <div className="space-y-4">
                                                                 {internships.slice(0, 3).map((internship) => (
                                                                     <div key={internship.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                                                                         <div className="flex flex-col">
                                                                             <h3 className="font-medium">{internship.title}</h3>
-                                                                            
+
                                                                         </div>
                                                                         <Button variant="outline" size="sm" asChild>
                                                                             <Link to={`/internships/${internship.id}`} state={{ backPath: '/company/dashboard' }}>
@@ -293,7 +293,7 @@ const CompanyDashboard = () => {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Schnellzugriff</CardTitle>
-                                            <CardDescription>Häufig verwendete Aktionen</CardDescription>
+                                            <CardDescription>HÃ¤ufig verwendete Aktionen</CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             {quickLinks.map((link) => (
