@@ -61,7 +61,7 @@ const InternshipDescription = () => {
   const { studentId } = useAuth();
   const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
   const [isAdminUser, setIsAdminUser] = useState(false);
-  
+
   useEffect(() => {
     let mounted = true;
     if (studentId) {
@@ -127,6 +127,20 @@ const InternshipDescription = () => {
     };
     fetchViewed();
   }, [studentId, internship?.id]);
+
+  const handleApplyClick = async () => {
+    if (!studentId || !internship?.id) return;
+    try {
+      await fetch(`http://localhost:5000/api/clicked_apply_internship/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, internshipId: internship.id })
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
 
   const handleToggleFavourite = async (internshipId: number) => {
     if (!studentId) return;
@@ -206,12 +220,12 @@ const InternshipDescription = () => {
                   </div>
 
                   <div className="flex gap-2">
-                  { studentId && !isAdminUser && <Button variant="outline" className={cn("flex items-center gap-2", isFavourite ? "bg-primary/10 text-primary hover:bg-primary/20 dark:hover:bg-primary/20 dark:hover:text-primary" : "")} 
+                  { studentId && !isAdminUser && <Button variant="outline" className={cn("flex items-center gap-2", isFavourite ? "bg-primary/10 text-primary hover:bg-primary/20 dark:hover:bg-primary/20 dark:hover:text-primary" : "")}
                     onClick={() => handleToggleFavourite(Number(internship.id))}>
                       {isFavourite ? (
                         <BookmarkCheck className="h-5 w-5" />
                       ) : (
-                        <BookmarkPlus className="h-5 w-5" /> 
+                        <BookmarkPlus className="h-5 w-5" />
                       )} {isFavourite ? 'Gespeichert' : 'Speichern'}
                     </Button>
 }
@@ -219,7 +233,7 @@ const InternshipDescription = () => {
                       <Share className="h-4 w-4" />
                       {copied ? 'Link kopiert!' : 'Teilen'}
                     </Button>
-                    <Button asChild>
+                    <Button asChild onClick={handleApplyClick}>
                       <Link to={internship.internship_link} className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
                         Jetzt bewerben

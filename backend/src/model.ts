@@ -4,6 +4,7 @@
 export interface IStudent {
     studentId: string;
     username: string;
+    email: string;
     added: Date;
     personType: string;
 }
@@ -66,7 +67,6 @@ export interface IInternship{
     salary: string,
     application_end: string,
     location_id: string,
-    clicks: string,
     worktype_id: string,
     internship_duration_id: string,
     internship_application_link: string;
@@ -81,7 +81,6 @@ export interface IInternshipId {
     salary: string,
     application_end: string,
     location_id: string,
-    clicks: string,
     worktype_id: string,
     internship_duration_id: string,
     internship_application_link: string;

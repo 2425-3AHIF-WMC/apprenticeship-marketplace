@@ -43,25 +43,33 @@ internshipRouter.get("/", async (req: Request, res: Response) => {
 internshipRouter.put("/change", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     const id: number = req.body.internship_id === undefined ? -1 : parseInt(req.body.internship_id);
-    const clicks = req.body.clicks ?? 0;
 
     const {
-        title, pdf_path, min_year,
+        title, min_year,
         internship_creation_timestamp, salary, application_end,
         location_id, worktype_id, internship_duration_id,
         internship_application_link
     } = req.body;
 
-    if (!title || !min_year
-        || !internship_creation_timestamp || !salary || !application_end
-        || !location_id || !clicks || !worktype_id || !internship_duration_id
-        || !internship_application_link) {
+    const pdf_path = null;
+
+    if (
+        title == null || title === "" ||
+        min_year == null ||
+        internship_creation_timestamp == null ||
+        salary === null || salary === "" ||
+        application_end === null ||
+        location_id === null ||
+        worktype_id === null ||
+        internship_duration_id === null ||
+        internship_application_link === null || internship_application_link === ""
+    ) {
+
         res.status(StatusCodes.BAD_REQUEST).send("Data was not valid");
         return;
     }
 
     try {
-
         const doesLocationExist = await unit.prepare(`SELECT location_id
                                                       FROM site
                                                       WHERE location_id = $1`, [location_id]);
@@ -78,12 +86,11 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
 
         }
 
-        console.log(id);
         if (id === -1) {
             let internship: IInternship = {
                 title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
-                location_id, clicks, worktype_id, internship_duration_id,
+                location_id, worktype_id, internship_duration_id,
                 internship_application_link
             }
 
@@ -103,29 +110,29 @@ internshipRouter.put("/change", async (req: Request, res: Response) => {
                                                     WHERE internship_id = $1`, [id]);
             let rowNumb = doesIdExist.rowCount ?? -1;
             if (rowNumb <= 0) {
-                res.status(StatusCodes.BAD_REQUEST).send("Id does not");
+                res.status(StatusCodes.BAD_REQUEST).send("Id does not exist");
                 return;
             }
-
             let internship: IInternship = {
                 title, pdf_path, min_year,
                 internship_creation_timestamp, salary, application_end,
-                location_id, clicks, worktype_id, internship_duration_id,
+                location_id, worktype_id, internship_duration_id,
                 internship_application_link
             }
 
             const service = new InternshipService(unit);
-            const addedSuccessful = await service.updateInternship(internship);
+            const addedSuccessful = await service.updateInternship(internship, id);
 
             if (addedSuccessful != -1) {
-                res.status(StatusCodes.CREATED).send("Internship updated successfully");
+                res.status(StatusCodes.CREATED).json({ internship_id: addedSuccessful });
             } else {
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be added");
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Internship could not be updated");
                 return;
 
             }
         }
     } catch (e) {
+        console.error("Error in /change route:", e);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(String(e));
     } finally {
         await unit.complete();
@@ -166,6 +173,21 @@ internshipRouter.get("/created/last30days", async (req: Request, res: Response) 
 
     try {
         const count: number = await service.getCountCreatedTheLast30Days();
+        res.status(StatusCodes.OK).json({count});
+    } catch (e) {
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+        return;
+    } finally {
+        await unit.complete();
+    }
+});
+
+internshipRouter.get("/expired/over30days", async (req, res) =>{
+    const unit: Unit = await Unit.create(true);
+    const service = new InternshipService(unit);
+
+    try {
+        const count: number[] = await service.getInternshipsWhichExpired();
         res.status(StatusCodes.OK).json({count});
     } catch (e) {
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
@@ -263,6 +285,29 @@ internshipRouter.get("/:id_prop", async (req: Request, res: Response) => {
     try {
         const service = new InternshipService(unit);
         const internship = await service.getById(id);
+        res.status(StatusCodes.OK).json(internship);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+
+    } finally {
+        await unit.complete();
+    }
+});
+
+internshipRouter.get("simple/:id_prop", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const {id_prop} = req.params;
+
+    let id: number = parseInt(id_prop);
+
+    if (!Number.isInteger(id) || id < 0 || id === null) {
+        res.sendStatus(StatusCodes.BAD_REQUEST);
+        return;
+    }
+    try {
+        const service = new InternshipService(unit);
+        const internship = await service.getSimpleById(id);
         res.status(StatusCodes.OK).json(internship);
     } catch (e) {
         console.log(e);

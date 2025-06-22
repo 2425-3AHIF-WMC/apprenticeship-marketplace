@@ -1,9 +1,10 @@
 // Frontend interfaces matching backend/src/model.ts
 
 export interface Student {
-    studentId: string;
+    person_id: string;
     username: string;
-    added: string; // ISO date string
+    email: string;
+    person_creation_timestamp: string; // ISO date string
     personType: string;
 }
 
@@ -29,6 +30,22 @@ export interface InternshipUIProps {
 
 }
 
+export interface IInternshipId {
+    internship_id: string,
+    title: string,
+    pdf_path: string | null,
+    min_year: string,
+    internship_creation_timestamp: string,
+    salary: string,
+    application_end: string,
+    location_id: string,
+    clicks: string,
+    worktype_id: string,
+    internship_duration_id: string,
+    internship_application_link: string;
+}
+
+
 export interface InternshipDetailsUIProps {
     id: string;
     title: string;
@@ -48,6 +65,7 @@ export interface InternshipDetailsUIProps {
     company_id: string;
     company_info: string;
     pdf: string;
+    location_id: string;
 }
 
 export interface InternshipMappedProps extends Omit<InternshipUIProps, 'department' | 'id'> {

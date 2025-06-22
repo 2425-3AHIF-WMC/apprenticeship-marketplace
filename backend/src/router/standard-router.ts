@@ -1,11 +1,11 @@
-import express, {Router, Request, Response} from "express";
-import {IInternShipDuration, IStudent, isValidId, IWorktype} from "../model.js";
-import {Unit} from "../unit.js";
-import {StatusCodes} from "http-status-codes";
-import {AdminService} from "../services/admin-service.js";
-import {StudentService} from "../services/student-service";
-import {WorktypeService} from "../services/worktype-service.js";
-import {InternshipDurationService} from "../services/internship_duration-service.js";
+import express, { Router, Request, Response } from "express";
+import { IInternShipDuration, IStudent, isValidId, IWorktype } from "../model.js";
+import { Unit } from "../unit.js";
+import { StatusCodes } from "http-status-codes";
+import { AdminService } from "../services/admin-service.js";
+import { StudentService } from "../services/student-service";
+import { WorktypeService } from "../services/worktype-service.js";
+import { InternshipDurationService } from "../services/internship_duration-service.js";
 import { DepartmentService } from "../services/department-service.js";
 
 export const standardRouter: Router = express.Router();
@@ -18,7 +18,7 @@ standardRouter.get('/person/:id/isAdmin', async (req: Request, res: Response) =>
         if (isValidId(id)) {
             const service: AdminService = new AdminService(unit);
             const isAdmin: boolean = await service.existsAdmin(id);
-            res.status(StatusCodes.OK).json({isAdmin});
+            res.status(StatusCodes.OK).json({ isAdmin });
         } else {
             res.status(StatusCodes.NOT_FOUND).send("Id was not found");
         }
@@ -44,7 +44,7 @@ standardRouter.get('/worktypes', async (req: Request, res: Response) => {
     }
 })
 
-standardRouter.get('/internshipDuration', async (req : Request, res : Response) => {
+standardRouter.get('/internshipDuration', async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
         const service = new InternshipDurationService(unit);
@@ -60,12 +60,19 @@ standardRouter.get('/internshipDuration', async (req : Request, res : Response) 
 
 standardRouter.post('/departments/create/:internshipId', async (req: Request, res: Response) => {
     const internshipId: number = parseInt(req.params.internshipId);
-    const departments = req.body.departments;
-    console.log(departments);
+    const departmentsReq = req.body.departments;
     const unit: Unit = await Unit.create(true);
     try {
         const service = new DepartmentService(unit);
-        const department = await service.insertDepartments(internshipId, departments);
+        const existingDepartments = await service.getDepartments(internshipId);
+        if (existingDepartments.length > 0) {
+            const departmentDeleted = await service.deleteDepartments(internshipId);
+            if (!departmentDeleted) {
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).send("Department could not be deleted");
+                return;
+            }
+        }
+        const department = await service.insertDepartments(internshipId, departmentsReq);
         res.status(StatusCodes.OK).json(department);
     } catch (e) {
         console.log(e);

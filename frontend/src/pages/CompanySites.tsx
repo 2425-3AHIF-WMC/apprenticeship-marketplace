@@ -3,6 +3,10 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    DialogClose,
+    DialogHeader,
+    DialogDescription,
+    DialogFooter
 } from "@/components/ui/dialog";
 import {
     Form,
@@ -39,6 +43,8 @@ function CompanySites({ companyId }: Props) {
     const [loading, setLoading] = useState(false);
     const [editSite, setEditSite] = useState<ISite | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [siteToDelete, setSiteToDelete] = useState<ISite | null>(null);
 
     const form = useForm<SiteForm>({
         resolver: zodResolver(siteSchema),
@@ -114,11 +120,7 @@ function CompanySites({ companyId }: Props) {
         }
     }
 
-    async function deleteSite(id: number) {
-        if (!confirm("Standort wirklich löschen?")) {
-            return;
-        }
-
+    async function deleteSiteConfirmed(id: number) {
         try {
             const res = await fetch(`http://localhost:5000/api/company/site/${id}`, {
                 method: "DELETE"
@@ -130,6 +132,9 @@ function CompanySites({ companyId }: Props) {
             toast.success("Standort gelöscht");
         } catch (err) {
             toast.error((err as Error).message);
+        } finally {
+            setDeleteDialogOpen(false);
+            setSiteToDelete(null);
         }
     }
 
@@ -169,7 +174,10 @@ function CompanySites({ companyId }: Props) {
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    onClick={() => deleteSite(site.location_id!)}
+                                    onClick={() => {
+                                        setSiteToDelete(site);
+                                        setDeleteDialogOpen(true);
+                                    }}
                                 >
                                     Löschen
                                 </Button>
@@ -261,6 +269,32 @@ function CompanySites({ companyId }: Props) {
                             </div>
                         </form>
                     </Form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="text-center"
+                >
+                    <DialogHeader>
+                        <DialogTitle>Standort löschen</DialogTitle>
+                        <DialogDescription>
+                            Sind Sie sicher, dass Sie diesen Standort löschen möchten?
+                            Diese Aktion kann nicht rückgängig gemacht werden.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-center gap-4">
+                        <DialogClose asChild>
+                            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                                Abbrechen
+                            </Button>
+                        </DialogClose>
+                        <Button
+                            variant="destructive"
+                            onClick={() => siteToDelete && deleteSiteConfirmed(siteToDelete.location_id!)}
+                        >
+                            Löschen
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </section>

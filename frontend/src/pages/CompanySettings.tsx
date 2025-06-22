@@ -95,12 +95,20 @@ const CompanySettings = () => {
 
     useEffect(() => {
         if (!companyId) return;
+        // Firmenlogo laden
         fetch(`http://localhost:5000/api/media/company-logo/${companyId}`, { method: "HEAD" })
             .then(res => {
                 if (res.ok) setLogoUrl(`http://localhost:5000/api/media/company-logo/${companyId}?t=${Date.now()}`);
                 else setLogoUrl(null);
             })
             .catch(() => setLogoUrl(null));
+        // Unternehmensbeschreibung laden
+        fetch(`http://localhost:5000/api/company/${companyId}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.company_info) setCompanyInfo(data.company_info);
+            })
+            .catch(() => {});
     }, [companyId]);
 
 
@@ -302,17 +310,17 @@ const CompanySettings = () => {
                                 </Button>
                             </div>
                         </div>
-                        <div className="flex flex-col mt-12 gap-1">
+                        <div className="flex flex-col mt-12 gap-1 w-full max-w-xl">
                             <div>
-                                <h1 className="heading-md text-left">Passwort zurücksetzen</h1>
+                                <h1 className="heading-md text-left">Passwort ändern</h1>
                                 <p className="text-muted-foreground text-left">
-                                    Setzen Sie ihr derzeitiges Passwort zurück
+                                    Ändern Sie ihr derzeitiges Passwort
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-lg p-6 shadow-sm">
+                            <div className="bg-card rounded-lg shadow-sm p-0 mt-2">
                                 <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-0">
                                         <FormField
                                             control={form.control}
                                             name="oldPassword"

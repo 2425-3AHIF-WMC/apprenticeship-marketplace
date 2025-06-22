@@ -7,6 +7,7 @@ interface AuthContextType {
     studentUsername: string | null;
     studentName: string | null;
     studentId: number | null;
+    studentMail: string | null;
     login: () => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -18,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [studentToken, setStudentToken] = useState<string | null>(null);
     const [studentUsername, setStudentUsername] = useState<string | null>(null);
     const [studentName, setStudentName] = useState<string | null>(null);
+    const [studentMail, setStudentMail] = useState<string | null>(null);
     const [studentInitialized, setStudentInitialized] = useState(false);
     const [studentId, setStudentId] = useState<number | null>(null);
 
@@ -39,12 +41,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(keycloak.token || null);
                     const username = keycloak.tokenParsed?.preferred_username || null;
                     setStudentUsername(username);
+                    const mail = keycloak.tokenParsed?.email || null;
+                    setStudentMail(mail);
                     // Get the student's name from the token
                     const name = keycloak.tokenParsed?.name || null;
                     setStudentName(name);
-
-                    if (username) {
-                        await ensureStudentAndFetchId(username);
+                    console.log(keycloak.tokenParsed)
+                    if (username && mail) {
+                        await ensureStudentAndFetchId(username, mail);
                     } else {
                         setStudentId(null);
                     }
@@ -58,12 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                     console.log('Token refreshed successfully');
                                     setStudentToken(keycloak.token || null);
                                     setStudentName(keycloak.tokenParsed?.name || null);
+                                    setStudentMail(keycloak.tokenParsed?.email || null);
                                 } else {
                                     console.log('Token refresh failed');
                                     setStudentIsAuthenticated(false);
                                     setStudentToken(null);
                                     setStudentUsername(null);
                                     setStudentName(null);
+                                    setStudentMail(null);
                                     setStudentId(null);
                                 }
                             })
@@ -73,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 setStudentToken(null);
                                 setStudentUsername(null);
                                 setStudentName(null);
+                                setStudentMail(null);
                                 setStudentId(null);
                             });
                     };
@@ -82,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentMail(null);
                     setStudentId(null);
                 }
 
@@ -94,7 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(keycloak.token || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
-                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null);
+                    setStudentMail(keycloak.tokenParsed?.email || null);
+                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null, keycloak.tokenParsed?.email || null);
                 };
 
                 // Set up auth error callback
@@ -104,6 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentMail(null);
                     setStudentId(null);
                 };
 
@@ -113,8 +123,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentIsAuthenticated(true);
                     setStudentToken(keycloak.token || null);
                     setStudentName(keycloak.tokenParsed?.name || null);
+                    setStudentMail(keycloak.tokenParsed?.email || null);
                     setStudentUsername(keycloak.tokenParsed?.preferred_username || null);
-                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null);
+                    await ensureStudentAndFetchId(keycloak.tokenParsed?.preferred_username || null, keycloak.tokenParsed?.email || null);
                 };
 
                 // Set up auth refresh error callback
@@ -124,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setStudentToken(null);
                     setStudentUsername(null);
                     setStudentName(null);
+                    setStudentMail(null);
                     setStudentId(null);
                 };
 
@@ -153,14 +165,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setStudentToken(null);
             setStudentUsername(null);
             setStudentName(null);
+            setStudentMail(null);
             setStudentId(null);
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
-    const ensureStudentAndFetchId = async (username: string) => {
-        if (!username) {
+    const ensureStudentAndFetchId = async (username: string, mail : string) => {
+        if (!username || !mail) {
             setStudentId(null);
             return;
         }
@@ -169,7 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const createRes = await fetch('http://localhost:5000/api/student/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username }),
+                body: JSON.stringify({ username, mail }),
             });
             if (createRes.status !== 201 && createRes.status !== 409) {
                 alert('User creation unsuccessful!');
@@ -203,6 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             studentUsername,
             studentName,
             studentId,
+            studentMail,
             login, 
             logout 
         }}>

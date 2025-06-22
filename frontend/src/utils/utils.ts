@@ -69,6 +69,7 @@ export function mapBackendToInternshipDetailsProps(item: any): InternshipDetails
         company_id: item.company_id,
         company_info: item.company_info || '',
         pdf: item.pdf || '',
+        location_id: item.location_id || '',
     };
 }
 

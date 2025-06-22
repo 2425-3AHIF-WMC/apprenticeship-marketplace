@@ -16,4 +16,20 @@ export class DepartmentService extends ServiceBase {
         }
         return true;
     }
+
+    public async deleteDepartments(internshipId: number): Promise<boolean> {
+        const stmt = await this.unit.prepare(`DELETE FROM internship_department_map WHERE internship_id = $1`, [internshipId]);
+        const result = await stmt.rows[0];
+        console.log(result);
+        if(result?.internship_id === null) {
+            return false;
+        }
+        return true;
+    }
+
+    public async getDepartments(internshipId: number): Promise<number[]> {
+        const stmt = await this.unit.prepare(`SELECT department_id FROM internship_department_map WHERE internship_id = $1`, [internshipId]);
+        const result = await stmt.rows;
+        return result.map(row => row.department_id);
+    }
 }

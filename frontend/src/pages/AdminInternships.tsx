@@ -16,6 +16,9 @@ import { mapBackendToInternshipProps, filterInternships, InternshipFilterOptions
 import { getYearNumber } from '@/utils/filterUtils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminInternships = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,6 +31,11 @@ const AdminInternships = () => {
     const [internships, setInternships] = useState<InternshipUIProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const isMobile = useIsMobile();
+
+    // Dialog state
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -43,7 +51,6 @@ const AdminInternships = () => {
         selectedWorkMode !== 'Alle' ||
         selectedDuration !== 'Alle' ||
         selectedSchoolYear !== 'Alle Schulstufen';
-
 
     // Use shared filter utility
     const filterOptions: InternshipFilterOptions = {
@@ -192,7 +199,10 @@ const AdminInternships = () => {
                                                         }
                                                     >
                                                         <button
-                                                            onClick={() => handleDelete(internship.id)}
+                                                            onClick={() => {
+                                                                setPendingDeleteId(internship.id);
+                                                                setDeleteDialogOpen(true);
+                                                            }}
                                                             className="absolute top-3 right-3 z-10 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow-md dark:bg-black dark:hover:bg-black/40"
                                                             title="Praktikum löschen"
                                                         >
@@ -235,6 +245,39 @@ const AdminInternships = () => {
                             </CardContent>
                         </Card>
                     </FadeIn>
+                    <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                        <DialogContent className="text-center"
+                            style={!isMobile ? {
+                                left: 'calc(50% + 128px)',
+                                transform: 'translate(-50%, -50%)',
+                                position: 'fixed'
+                            } : undefined}>
+                            <DialogHeader>
+                                <DialogTitle>Praktikum löschen</DialogTitle>
+                                <DialogDescription>
+                                    Sind Sie sicher, dass Sie dieses Praktikum löschen möchten?
+                                    Diese Aktion kann nicht rückgängig gemacht werden.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="flex justify-center gap-4">
+                                <DialogClose asChild>
+                                    <Button variant="outline">Abbrechen</Button>
+                                </DialogClose>
+                                <Button
+                                    variant="destructive"
+                                    onClick={async () => {
+                                        if (pendingDeleteId) {
+                                            await handleDelete(pendingDeleteId);
+                                            setDeleteDialogOpen(false);
+                                            setPendingDeleteId(null);
+                                        }
+                                    }}
+                                >
+                                    Löschen
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </main>
             </div>
         </div>

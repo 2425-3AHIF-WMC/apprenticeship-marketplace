@@ -11,6 +11,7 @@ import { CompanyUIPropsAdmin } from '@/utils/interfaces';
 import { mapBackendToCompanyUIPropsAdmin, getCompanyStatus } from '@/utils/utils';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorIndicator from '@/components/ErrorIndicator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 const AdminCompanies = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,6 +19,8 @@ const AdminCompanies = () => {
     const [companies, setCompanies] = useState<CompanyUIPropsAdmin[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -39,38 +42,38 @@ const AdminCompanies = () => {
 
     const handleDelete = async (id: number) => {
         try {
-          const res = await fetch(`http://localhost:5000/api/company/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-              },
-          });
-          if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
-          setCompanies((prev) => prev.filter((i) => i.company_id !== id));
+            const res = await fetch(`http://localhost:5000/api/company/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!res.ok) throw new Error('Fehler beim Löschen des Unternehmens');
+            setCompanies((prev) => prev.filter((i) => i.company_id !== id));
         } catch (err) {
-          alert('Fehler beim Löschen des Unternehmens');
+            alert('Fehler beim Löschen des Unternehmens');
         }
-      };
+    };
     
-      const handleVerify = async (id: number) => {
+    const handleVerify = async (id: number) => {
         try {
-          const res = await fetch(`http://localhost:5000/api/company/${id}/verify_admin`, {
-            method: 'PATCH',
-            body: JSON.stringify({ admin_verified: 'true' }),
-            headers: {
-                'Content-Type': 'application/json',
-              },
-          });
-          if (!res.ok) throw new Error('Fehler beim Verifizieren des Unternehmens');
-          setCompanies((prev) =>
-            prev.map((c) =>
-              c.company_id === id ? { ...c, admin_verified: true } : c
-            )
-          );
+            const res = await fetch(`http://localhost:5000/api/company/${id}/verify_admin`, {
+                method: 'PATCH',
+                body: JSON.stringify({ admin_verified: 'true' }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!res.ok) throw new Error('Fehler beim Verifizieren des Unternehmens');
+            setCompanies((prev) =>
+                prev.map((c) =>
+                    c.company_id === id ? { ...c, admin_verified: true } : c
+                )
+            );
         } catch (err) {
-          alert('Fehler beim Verifizieren des Unternehmens');
+            alert('Fehler beim Verifizieren des Unternehmens');
         }
-      };
+    };
 
     let filteredCompanies = companies.filter((company) => {
         const term = searchTerm.toLowerCase();
@@ -160,7 +163,10 @@ const AdminCompanies = () => {
                                                     </Button>
                                                 ) : null}
                                                 <Button variant="destructive" size="sm"
-                                                    onClick={() => handleDelete(company.company_id)}
+                                                    onClick={() => {
+                                                        setPendingDeleteId(company.company_id);
+                                                        setDeleteDialogOpen(true);
+                                                    }}
                                                     title="Unternehmen löschen"
                                                 >
                                                     <X className="w-5 h-5" />
@@ -192,6 +198,34 @@ const AdminCompanies = () => {
                     </FadeIn>
                 </main>
             </div>
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="text-center">
+                    <DialogHeader>
+                        <DialogTitle>Unternehmen löschen</DialogTitle>
+                        <DialogDescription>
+                            Sind Sie sicher, dass Sie dieses Unternehmen löschen möchten?
+                            Diese Aktion kann nicht rückgängig gemacht werden.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-center gap-4">
+                        <DialogClose asChild>
+                            <Button variant="outline">Abbrechen</Button>
+                        </DialogClose>
+                        <Button
+                            variant="destructive"
+                            onClick={async () => {
+                                if (pendingDeleteId !== null) {
+                                    await handleDelete(pendingDeleteId);
+                                    setDeleteDialogOpen(false);
+                                    setPendingDeleteId(null);
+                                }
+                            }}
+                        >
+                            Löschen
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

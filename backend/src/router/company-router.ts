@@ -5,7 +5,7 @@ import {
     IInternshipUIProps,
     isValidId,
     isValidDate,
-    ISite, ICompanyPayload
+    ISite, ICompanyPayload, IStudent
 } from "../model.js";
 import {StatusCodes} from "http-status-codes";
 import jwt, {JwtPayload} from "jsonwebtoken";
@@ -22,6 +22,9 @@ import {CompanyService} from "../services/company-service.js";
 import {InternshipService} from "../services/internship-service.js";
 import {SiteService} from "../services/site-service.js";
 import {ViewedInternshipService} from "../services/viewed_internship-service.js";
+import {ClickedApplyInternshipService} from "../services/clicked_apply_internships-service.js";
+import {StudentService} from "../services/student-service.js";
+import {FavouriteService} from "../services/favourite-service.js";
 
 dotenv.config();
 
@@ -187,11 +190,11 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             return;
         }
 
-        const validWebsite: boolean = !/^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim())
+        const validWebsite: boolean = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(company.website.trim())
         const validEmail: boolean = company.email.includes('@');
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
-        if (validWebsite && validEmail && validVerifications && isValidCompanyNumber(company.company_number)) {
+        if (validWebsite && validEmail && validVerifications) {
             const companyPayload: ICompanyPayload = await service.insertAndReturn(company);
             await unit.complete(true);
 
@@ -203,7 +206,7 @@ companyRouter.post("/register", async (req: Request, res: Response) => {
             const token = generateEmailToken(payload);
             const verificationLink = `http://localhost:8081/verify-email/${token}`;
 
-            await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship marketplace',
+            await service.sendMail(company.email, 'E-Mail Bestätigung | Apprenticeship Marketplace',
                 `<p>Bitte bestätigen Sie Ihre E-Mail-Adresse, indem Sie <a href="${verificationLink}">hier</a> klicken.</p>`);
             res.status(StatusCodes.CREATED).json("Registrierung erfolgreich")
         } else {
@@ -407,7 +410,91 @@ companyRouter.get("/:id/viewed_internships/count", async (req: Request, res: Res
             if (viewedCount > 0) {
                 res.status(StatusCodes.OK).json(viewedCount);
             } else {
-                res.status(StatusCodes.OK).json(viewedCount);
+                res.status(StatusCodes.NOT_FOUND).json(viewedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:id/favourite_internships/count", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const favoriteService = new FavouriteService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const favCount: number = await favoriteService.getCountOfFavouriteByCompany(company_id);
+
+            if (favCount > 0) {
+                res.status(StatusCodes.OK).json(favCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(favCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:id/clicked_apply_internships/count/last_90_days", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const clickedService = new ClickedApplyInternshipService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const clickedCount: number = await clickedService.getCountOfInternshipsByCompanyLast90Days(company_id);
+
+            if (clickedCount > 0) {
+                res.status(StatusCodes.OK).json(clickedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(clickedCount);
+            }
+
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).send("invalid id");
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+    } finally {
+        await unit.complete();
+    }
+});
+
+companyRouter.get("/:id/clicked_apply_internships/count", async (req: Request, res: Response) => {
+    const company_id: number = parseInt(req.params.id);
+    const unit: Unit = await Unit.create(true);
+    const companyService = new CompanyService(unit);
+    const clickedService = new ClickedApplyInternshipService(unit);
+
+    try {
+        if (isValidId(company_id) && await companyService.companyExists(company_id)) {
+            const clickedCount: number = await clickedService.getCountOfInternshipsByCompany(company_id);
+
+            if (clickedCount > 0) {
+                res.status(StatusCodes.OK).json(clickedCount);
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json(clickedCount);
             }
 
         } else {
@@ -546,7 +633,6 @@ companyRouter.put("", async (req: Request, res: Response) => {
         const validVerifications: boolean = allowedBooleanStrings.includes(company.email_verified.toLowerCase()) && allowedBooleanStrings.includes(company.admin_verified.toLowerCase());
 
         if (validWebsite && validEmail && validVerifications
-        && isValidCompanyNumber(company.company_number)
         && isValidDate(company.company_registration_timestamp)
         && (company.email_verification_timestamp ? isValidDate(company.email_verification_timestamp) : true) && (company.admin_verification_timestamp ? isValidDate(company.admin_verification_timestamp) : true) // some complex validation, because these timestamps can be null
         && companyExists ? isValidId(company.company_id) : true) { // id is not valid/null if we insert
@@ -625,8 +711,13 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
 
         try {
             const service = new CompanyService(unit);
-
-            if (await service.companyExists(company_id)) {
+            const studentService = new StudentService(unit);
+            const company = await service.getById(company_id);
+            if (company != null) {
+                if (Boolean(company.email_verified)) {
+                    res.status(StatusCodes.OK).send("Email has already been verified.");
+                    return;
+                }
                 const success = await service.verifyEmail(company_id);
 
                 if (success) {
@@ -649,9 +740,27 @@ companyRouter.get("/verify-email/:token", async (req: Request, res: Response) =>
                         .header('Authorization', `Bearer ${newAccessToken}`)
                         .status(StatusCodes.OK)
                         .json({accessToken: newAccessToken});
+                    const admins: IStudent[] = await studentService.getAdmins();
+                    console.log(admins);
+                    for (const admin of admins) {
+                        const verifyCompaniesLink = `http://localhost:8081/admin/companies/verify`;
+                        await service.sendMail(
+                            admin.email,
+                            "Unternehmensbestätigung | Apprenticeship Marketplace",
+                            `
+                                <p>Hallo ${admin.username},</p>
+                                <p>Ein neues Unternehmen (<strong>${company.name}</strong>) hat sich angemeldet und wartet auf die Bestätigung zur öffentlichen Einsichtbarkeit seiner Praktika.</p>
+                                <p>
+                                  <a href="${verifyCompaniesLink}">
+                                    Unternehmen verifizieren
+                                  </a>
+                                </p>
+                                <p></p>`,);
+
+                    }
                 } else {
                     await unit.complete(false);
-                    res.status(StatusCodes.CONFLICT).send("E-Mail Konnte nicht geupadetet werden");
+                    res.status(StatusCodes.CONFLICT).send("E-Mail konnte nicht geupdatet werden");
                     return;
                 }
             } else {
@@ -834,7 +943,7 @@ companyRouter.put("/info/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(false);
     try {
         const company_id: number = parseInt(req.params.id);
-        const { company_info } = req.body;
+        const {company_info} = req.body;
 
         if (!isValidId(company_id) || typeof company_info !== "string") {
             res.sendStatus(StatusCodes.BAD_REQUEST);
@@ -867,11 +976,4 @@ companyRouter.put("/info/:id", async (req: Request, res: Response) => {
 
 
 // helper functions
-
-function isValidCompanyNumber(number: string): boolean {
-    const nums: number = parseInt(number.substring(0, 6));
-    const letter: number = parseInt(number.substring(6));
-
-    return !isNaN(nums) && isNaN(letter);
-}
 
