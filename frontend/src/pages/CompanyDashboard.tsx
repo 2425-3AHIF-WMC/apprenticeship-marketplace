@@ -200,8 +200,8 @@ const CompanyDashboard = () => {
                             <FadeIn delay={100}>
                                 <Card>
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-lg font-medium">Clicks</CardTitle>
-                                        <CardDescription>Clicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
+                                        <CardTitle className="text-lg font-medium">Applications</CardTitle>
+                                        <CardDescription>Bewerbungsbutton-klicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex items-center">
