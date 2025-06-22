@@ -49,7 +49,6 @@ import LoadingIndicator from '@/components/LoadingIndicator';
 import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import { InternshipMappedProps, InternshipUIProps } from "@/utils/interfaces.ts";
 import { cn } from '@/utils/utils';
-import { useIsMobile } from "@/hooks/use-mobile";
 
 
 const CompanyInternships = () => {
@@ -58,7 +57,6 @@ const CompanyInternships = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [companyId, setCompanyId] = useState<number | null>(null);
-    const isMobile = useIsMobile();
     const departmentIncludesSearchTerm = (category: string | string[], term: string): boolean => {
         if (Array.isArray(category)) {
             return category.some(cat => cat.toLowerCase().includes(term.toLowerCase()));
@@ -322,12 +320,7 @@ const CompanyInternships = () => {
                                                                             <span>Löschen</span>
                                                                         </DropdownMenuItem>
                                                                     </DialogTrigger>
-                                                                    <DialogContent className="text-center"
-                                                                        style={!isMobile ? {
-                                                                            left: 'calc(50% + 128px)',
-                                                                            transform: 'translate(-50%, -50%)',
-                                                                            position: 'fixed'
-                                                                        } : undefined}>
+                                                                    <DialogContent className="text-center">
                                                                         <DialogHeader>
                                                                             <DialogTitle>Praktikum löschen</DialogTitle>
                                                                             <DialogDescription>

@@ -61,6 +61,26 @@ studentRouter.get("/favourites_detailed/:id", async (req: Request, res: Response
     }
 })
 
+studentRouter.get("/favourites/internship/:internshipid", async (req: Request, res: Response) => {
+    const unit: Unit = await Unit.create(true);
+    const internshipId: number = parseInt(req.params.internshipid);
+
+    if (!Number.isInteger(internshipId) || internshipId < 0 || internshipId === null) {
+        res.status(StatusCodes.BAD_REQUEST).send("Internship id was not valid");
+        return;
+    }
+
+    try {
+        const service = new StudentService(unit);
+        const count = await service.getFavouriteCount(internshipId);
+        res.status(StatusCodes.OK).json(count);
+    } catch (e) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(e);
+    } finally {
+        await unit.complete();
+    }
+})
+
 studentRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
     try {
