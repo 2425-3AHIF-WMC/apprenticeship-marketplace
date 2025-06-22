@@ -183,27 +183,27 @@ const CompanyDashboard = () => {
                     <div className="space-y-8 mt-8">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <FadeIn delay={100}>
-                                <Card>
+                                <Card className="flex flex-col h-full">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Views</CardTitle>
                                         <CardDescription>Views in den letzten 30 Tagen auf Ihre Praktika</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="mt-auto">
                                         <div className="flex items-center">
                                             <Eye className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{viewsCount ?? 0}</div>
                                         </div>
                                     </CardContent>
                                 </Card>
-
                             </FadeIn>
+
                             <FadeIn delay={100}>
-                                <Card>
+                                <Card className="flex flex-col h-full">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Applications</CardTitle>
                                         <CardDescription>Bewerbungsbutton-klicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="mt-auto">
                                         <div className="flex items-center">
                                             <Eye className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{clickCount ?? 0}</div>
@@ -211,13 +211,14 @@ const CompanyDashboard = () => {
                                     </CardContent>
                                 </Card>
                             </FadeIn>
+
                             <FadeIn delay={100}>
-                                <Card>
+                                <Card className="flex flex-col h-full">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Favorites</CardTitle>
                                         <CardDescription>Favoriten auf alle Ihre Praktika</CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="mt-auto">
                                         <div className="flex items-center">
                                             <Eye className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{favCount ?? 0}</div>
