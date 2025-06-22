@@ -304,9 +304,9 @@ const CompanySettings = () => {
                         </div>
                         <div className="flex flex-col mt-12 gap-1">
                             <div>
-                                <h1 className="heading-md text-left">Passwort zurücksetzen</h1>
+                                <h1 className="heading-md text-left">Passwort ändern</h1>
                                 <p className="text-muted-foreground text-left">
-                                    Setzen Sie ihr derzeitiges Passwort zurück
+                                    Ändern Sie ihr derzeitiges Passwort
                                 </p>
                             </div>
 
