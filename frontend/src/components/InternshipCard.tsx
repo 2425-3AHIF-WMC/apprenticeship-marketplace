@@ -155,7 +155,19 @@ const InternshipCard = ({ internship, className, isFavourite = false, onToggleFa
                     Details ansehen
                 </Link>
             </Button>
-            <Button asChild size="sm">
+            <Button size="sm" onClick={async () => {
+                if (!studentId || !internship?.id) return;
+
+                try {
+                    await fetch(`http://localhost:5000/api/clicked_apply_internship/`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId: studentId, internshipId: internship.id }),
+                    });
+                } catch (error) {
+                    console.error('Fehler beim Loggen des Klicks:', error);
+                }
+            }}>
                 <Link
                     to={internship.internship_link}
                     target={internship.internship_link ? "_blank" : undefined}
