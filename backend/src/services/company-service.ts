@@ -308,12 +308,13 @@ export class CompanyService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async updateCompanyInfo(company_id: number, company_info: string): Promise<boolean> {
+    public async updateCompanyDetails(company_id: number, name : string, company_number: string, company_info : string, website : string, email : string, phone_number : string): Promise<boolean> {
         const result = await this.unit.prepare(
-            `UPDATE company
-             SET company_info = $1
-             WHERE company_id = $2`,
-            [company_info, company_id]
+            `UPDATE COMPANY
+            SET name = $1, company_number = $2, company_info = $3, 
+                website = $4, email = $5, phone_number = $6
+                WHERE company_id = $7`,
+            [name, company_number, company_info, website, email, phone_number, company_id]
         );
         return result.rowCount != null ? result.rowCount > 0 : false
 
