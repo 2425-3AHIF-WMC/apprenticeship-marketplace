@@ -3,6 +3,7 @@ import {Unit} from "../unit.js";
 import {ICompany, ICompanyPayload, ICompanySmall} from "../model.js";
 import * as nodemailer from "nodemailer"
 import jwt from "jsonwebtoken";
+import { getAbsoluteURL } from '../router/company-router.js';
 
 export class CompanyService extends ServiceBase {
     constructor(unit: Unit) {
@@ -105,6 +106,7 @@ export class CompanyService extends ServiceBase {
     }
 
     public async update(company: ICompany): Promise<boolean> {
+        company.website = getAbsoluteURL(company.website);
         const stmt = await this.unit.prepare(`update company
                                               set name=$1,
                                                   company_number=$2,
@@ -192,6 +194,7 @@ export class CompanyService extends ServiceBase {
     }
 
     public async insert(company: ICompany): Promise<boolean> {
+        company.website = getAbsoluteURL(company.website);
         const stmt = await this.unit.prepare(`INSERT INTO Company (name, company_number, company_info, website, email,
                                                                    phone_number, password, email_verified,
                                                                    admin_verified, company_registration_timestamp,
@@ -217,6 +220,7 @@ export class CompanyService extends ServiceBase {
     }
 
     public async insertAndReturn(company: ICompany): Promise<ICompanyPayload> {
+        company.website = getAbsoluteURL(company.website);
         const stmt = await this.unit.prepare(`INSERT INTO COMPANY(name, company_number, company_info, website, email,
                                                                   phone_number,
                                                                   password, email_verified,
@@ -309,6 +313,7 @@ export class CompanyService extends ServiceBase {
     }
 
     public async updateDetails(company_id: number, name : string, company_number: string, company_info : string, website : string, email : string, phone_number : string): Promise<boolean> {
+        website = getAbsoluteURL(website);
         const result = await this.unit.prepare(
             `UPDATE COMPANY
             SET name = $1, company_number = $2, company_info = $3, 

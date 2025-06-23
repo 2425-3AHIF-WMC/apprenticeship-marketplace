@@ -33,6 +33,13 @@ const allowedBooleanStrings: string[] = ['true', 't', 'y', 'yes', '1', 'false', 
 const allowedBooleanTrueStrings: string[] = ['true', 't', 'y', 'yes', '1'];
 const allowedBooleanFalseStrings: string[] = ['false', 'f', 'n', 'no', '0'];
 
+export function getAbsoluteURL(url: string): string {
+    if (/^https?:\/\//i.test(url)) {
+        return url;
+    }
+    return `https://${url}`;
+}
+
 companyRouter.get("/", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(true);
 

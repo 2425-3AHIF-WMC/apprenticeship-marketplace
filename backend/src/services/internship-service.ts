@@ -1,5 +1,6 @@
 import { ServiceBase } from "./service-base.js";
 import { Unit } from '../unit.js';
+import { getAbsoluteURL } from '../router/company-router.js';
 
 import { IInternship, IInternshipDetailsUIProps, IInternshipId, IInternshipUIProps } from "../model";
 import { QueryResult } from "pg";
@@ -163,6 +164,7 @@ export class InternshipService extends ServiceBase {
     }
 
     public async newInternship(i: IInternship): Promise<number> {
+        i.internship_application_link = getAbsoluteURL(i.internship_application_link);
         const stmt = await this.unit.prepare(`INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, worktype_id, internship_duration_id, internship_application_link) 
                                                                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
                                                                    RETURNING internship_id;`
@@ -173,6 +175,7 @@ export class InternshipService extends ServiceBase {
     }
 
     public async updateInternship(i: IInternship, id: number): Promise<number> {
+        i.internship_application_link = getAbsoluteURL(i.internship_application_link);
         const stmt = await this.unit.prepare(`UPDATE internship 
                                                                     SET 
                                                                         title = $1,
