@@ -21,6 +21,10 @@ interface SidebarItemProps {
     active?: boolean;
 }
 
+interface CompanyDashboardSidebarProps {
+    companyName?: string | null;
+}
+
 const SidebarItem = ({ icon: Icon, label, to, active }: SidebarItemProps) => (
     <Link to={to} className="w-full">
         <div
@@ -37,14 +41,13 @@ const SidebarItem = ({ icon: Icon, label, to, active }: SidebarItemProps) => (
     </Link>
 );
 
-const CompanyDashboardSidebar = () => {
+const CompanyDashboardSidebar = ({ companyName: companyNameProp }: CompanyDashboardSidebarProps) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const path = window.location.pathname;
-    const [companyName, setCompanyName] = useState<string|null>(null)
-    const [loading, setLoading] = useState(true);
+    const [companyName, setCompanyName] = useState<string | null>(companyNameProp ?? null);
+    const [loading, setLoading] = useState(companyNameProp === undefined);
 
     const navigate = useNavigate();
-
 
     const handleLogout = async () => {
         try {
@@ -56,17 +59,23 @@ const CompanyDashboardSidebar = () => {
     };
 
     useEffect(() => {
+        if (companyNameProp !== undefined) {
+            setCompanyName(companyNameProp);
+            setLoading(false);
+            return;
+        }
         const loadData = async () => {
             const data = await fetchCompanyProfile();
             setCompanyName(data ? data.name : null);
             setLoading(false);
         };
-
         loadData();
-    }, []);
-    if(loading) {
+    }, [companyNameProp]);
+
+    if (loading) {
         return null;
     }
+
     return (
         <>
             {/* Mobile Menu Button */}

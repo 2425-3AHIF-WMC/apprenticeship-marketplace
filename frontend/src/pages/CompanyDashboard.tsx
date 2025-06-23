@@ -2,7 +2,7 @@ import CompanyDashboardSidebar from "@/components/CompanyDashboardSidebar.tsx";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { ICompanyPayload, InternshipMappedProps, InternshipUIProps } from "@/utils/interfaces.ts";
-import { BookmarkIcon, Eye, Plus, Files, Settings } from "lucide-react";
+import { BookmarkIcon, Eye, Plus, Files, Settings, Star, MousePointerClick } from "lucide-react";
 import FadeIn from "@/components/FadeIn";
 import { fetchCompanyProfile } from "@/lib/authUtils.ts";
 import { toast } from "sonner";
@@ -124,7 +124,7 @@ const CompanyDashboard = () => {
             setLoadingViews(true);
             try{
                 const res = await fetch(`http://localhost:5000/api/company/${companyId}/clicked_apply_internships/count/last_90_days`);
-                if(!res.ok){
+                if(!res.ok && res.status !== 404){
                     throw new Error("Fehler beim Laden der Click-Anzahl");
                 }
                 const data = await res.json();
@@ -149,7 +149,7 @@ const CompanyDashboard = () => {
 
             try{
                 const res = await fetch(`http://localhost:5000/api/company/${companyId}/favourite_internships/count`);
-                if(!res.ok){
+                if(!res.ok && res.status !== 404){
                     throw new Error("Fehler beim Laden der Favorite-Anzahl");
                 }
                 const data = await res.json();
@@ -184,7 +184,7 @@ const CompanyDashboard = () => {
                 <main className="w-full max-w-7xl p-8">
                     {!adminVerified && (
                         <div className="rounded-md bg-yellow-200 border border-yellow-600 text-yellow-900 py-4 px-6 max-w-3xl mx-auto">
-                            Ihre Praktika sind derzeit nicht Ã¶ffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
+                            Ihre Praktika sind derzeit nicht öffentlich sichtbar, da Ihr Unternehmen noch nicht von einem Administrator verifiziert wurde.
                         </div>
                     )}
 
@@ -213,11 +213,11 @@ const CompanyDashboard = () => {
                                 <Card className="flex flex-col h-full">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">Applications</CardTitle>
-                                        <CardDescription>Bewerbungsbutton-klicks in den letzten 90 Tagen auf Ihre Praktika</CardDescription>
+                                        <CardDescription> Klicks auf den Bewerben-Button in den letzten 90 Tagen</CardDescription>
                                     </CardHeader>
                                     <CardContent className="mt-auto">
                                         <div className="flex items-center">
-                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <MousePointerClick className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{clickCount ?? 0}</div>
                                         </div>
                                     </CardContent>
@@ -232,7 +232,7 @@ const CompanyDashboard = () => {
                                     </CardHeader>
                                     <CardContent className="mt-auto">
                                         <div className="flex items-center">
-                                            <Eye className="h-8 w-8 text-primary mr-3" />
+                                            <Star className="h-8 w-8 text-primary mr-3" />
                                             <div className="text-3xl font-semibold">{favCount ?? 0}</div>
                                         </div>
                                     </CardContent>
@@ -306,7 +306,7 @@ const CompanyDashboard = () => {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Schnellzugriff</CardTitle>
-                                            <CardDescription>HÃ¤ufig verwendete Aktionen</CardDescription>
+                                            <CardDescription>Häufig verwendete Aktionen</CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             {quickLinks.map((link) => (
