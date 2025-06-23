@@ -266,7 +266,7 @@ const CompanySettings = () => {
                                     <div>
                                         <h1 className="heading-md text-left">Passwort ändern</h1>
                                         <p className="text-muted-foreground text-left">
-                                            Ändern Sie ihr derzeitiges Passwort
+                                            Ändern Sie Ihr derzeitiges Passwort
                                         </p>
                                     </div>
                                     <div className="bg-card rounded-lg shadow-sm p-6 mt-2">
