@@ -308,7 +308,7 @@ export class CompanyService extends ServiceBase {
         return stmt.rowCount !== null ? stmt.rowCount > 0 : false;
     }
 
-    public async updateCompanyDetails(company_id: number, name : string, company_number: string, company_info : string, website : string, email : string, phone_number : string): Promise<boolean> {
+    public async updateDetails(company_id: number, name : string, company_number: string, company_info : string, website : string, email : string, phone_number : string): Promise<boolean> {
         const result = await this.unit.prepare(
             `UPDATE COMPANY
             SET name = $1, company_number = $2, company_info = $3, 

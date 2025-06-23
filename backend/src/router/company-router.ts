@@ -949,32 +949,41 @@ companyRouter.patch("/reset-password/:token", async (req: Request, res: Response
     });
 });
 
-companyRouter.put("/info/:id", async (req: Request, res: Response) => {
+companyRouter.patch("/details/:id", async (req: Request, res: Response) => {
     const unit: Unit = await Unit.create(false);
     try {
         const company_id: number = parseInt(req.params.id);
-        const { company_info } = req.body;
-
-        if (!isValidId(company_id) || typeof company_info !== "string") {
-            res.sendStatus(StatusCodes.BAD_REQUEST);
-            return;
-        }
-
+        const { name, company_number, company_info, website, email, phone_number } = req.body;
         const service = new CompanyService(unit);
-        const exists = await service.companyExists(company_id);
-
-        if (!exists) {
-            res.status(StatusCodes.NOT_FOUND).send("Firma nicht gefunden");
+        const companyExists: boolean = await service.companyExists(company_id);
+        const validWebsite: boolean = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+$/i.test(website.trim())
+        const validEmail: boolean = email.includes('@');
+        if (!companyExists) {
+            res.status(StatusCodes.NOT_FOUND).send(`Company with id ${company_id} does not exist.`);
             return;
         }
 
-        const updated = await service.updateCompanyInfo(company_id, company_info);
-        if (updated) {
+        if (!validWebsite || !validEmail || typeof name != "string"
+            || typeof company_number != "string" || typeof company_info != "string" || typeof phone_number != "string") {
+            res.status(StatusCodes.BAD_REQUEST).send("Invalid data.");
+            return;
+        }
+
+        const success = await service.updateDetails(company_id,
+            name,
+            company_number,
+            company_info,
+            website,
+            email,
+            phone_number
+        );
+
+        if (success) {
             await unit.complete(true);
-            res.status(StatusCodes.OK).send("Unternehmensbeschreibung aktualisiert");
+            res.status(StatusCodes.OK).send("Company details updated.");
         } else {
             await unit.complete(false);
-            res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
+            res.status(StatusCodes.BAD_REQUEST).send("Could not update company details.");
         }
     } catch (e) {
         console.error(e);
