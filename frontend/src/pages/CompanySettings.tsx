@@ -32,7 +32,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import {Building, Upload, MapPin, Globe, Mail, Phone, Lock} from "lucide-react";
+import {Building, Upload, Globe, Mail, Phone, Lock} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea.tsx";
 
 // --- Validation Schemas ---
