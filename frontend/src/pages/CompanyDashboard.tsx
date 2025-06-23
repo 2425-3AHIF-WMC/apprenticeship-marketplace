@@ -306,7 +306,7 @@ const CompanyDashboard = () => {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Schnellzugriff</CardTitle>
-                                            <CardDescription>HÃ¤ufig verwendete Aktionen</CardDescription>
+                                            <CardDescription>Häufig verwendete Aktionen</CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             {quickLinks.map((link) => (
