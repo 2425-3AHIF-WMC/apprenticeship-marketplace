@@ -124,7 +124,7 @@ const CompanyDashboard = () => {
             setLoadingViews(true);
             try{
                 const res = await fetch(`http://localhost:5000/api/company/${companyId}/clicked_apply_internships/count/last_90_days`);
-                if(!res.ok){
+                if(!res.ok && res.status !== 404){
                     throw new Error("Fehler beim Laden der Click-Anzahl");
                 }
                 const data = await res.json();
@@ -149,7 +149,7 @@ const CompanyDashboard = () => {
 
             try{
                 const res = await fetch(`http://localhost:5000/api/company/${companyId}/favourite_internships/count`);
-                if(!res.ok){
+                if(!res.ok && res.status !== 404){
                     throw new Error("Fehler beim Laden der Favorite-Anzahl");
                 }
                 const data = await res.json();
