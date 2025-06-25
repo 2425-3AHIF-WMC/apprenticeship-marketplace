@@ -44,7 +44,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
-    "html2pdf.js": "^0.9.3",
+    "html2pdf.js": "^0.10.3",
     "input-otp": "^1.2.4",
     "jwt-decode": "^4.0.0",
     "keycloak-js": "^26.2.0",
