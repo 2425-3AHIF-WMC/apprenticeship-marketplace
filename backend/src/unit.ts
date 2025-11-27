@@ -287,26 +287,26 @@ export async function insertSampleData(unit: Unit): Promise<void> {
 
             -- Praktika
             INSERT INTO internship (title, pdf_path, min_year, internship_creation_timestamp, salary, application_end, location_id, worktype_id, internship_duration_id, internship_application_link)
-            VALUES ('Softwareentwickler Praktikum', 'job-postings/2.pdf', 2, NOW(), '800.00', '2025-06-30', 1, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
-                   ('Frontend Entwickler', 'job-postings/2pdf', 3, NOW(), '850.00', '2025-07-15', 2, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
-                   ('Data Analyst Praktikum', 'job-postings/2.pdf', 2, NOW(), '900.00', '2025-06-10', 7, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
-                   ('Marketing Assistant', 'job-postings/2.pdf', 1, NOW(), '750.00', '2025-06-01', 4, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
-                   ('Health App Tester', 'job-postings/2.pdf', 3, NOW(), '700.00', '2025-06-20', 3, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
-                   ('E-Learning Content Creator', 'job-postings/2.pdf', 2, NOW(), '800.00', '2025-07-01', 4, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
-                   ('Fahrzeugsimulation Praktikum', 'job-postings/2.pdf', 4, NOW(), '1000.00', '2025-07-10', 5, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
-                   ('Smart Building Testing', 'job-postings/2.pdf', 2, NOW(), '850.00', '2025-07-05', 6, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
-                   ('Machine Learning Assistant', 'job-postings/2.pdf', 3, NOW(), '950.00', '2025-08-01', 7, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
-                   ('Webdesign Praktikum', 'job-postings/2.pdf', 1, NOW(), '700.00', '2025-06-25', 2, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
-                   ('Backoffice Assistant', 'job-postings/2.pdf', 2, NOW(), '650.00', '2025-06-15', 1, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
-                   ('UX Research Praktikum', 'job-postings/2.pdf', 3, NOW(), '800.00', '2025-07-20', 3, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
-                   ('Energieoptimierung Praktikum', 'job-postings/2.pdf', 2, NOW(), '850.00', '2025-07-30', 2, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
-                   ('Cloud Infrastruktur Praktikum', 'job-postings/2.pdf', 3, NOW(), '1000.00', '2025-08-10', 7, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
-                   ('Technischer Redakteur', 'job-postings/2.pdf', 1, NOW(), '700.00', '2025-06-22', 6, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
-                   ('App-Entwicklung iOS', 'job-postings/2.pdf', 3, NOW(), '900.00', '2025-07-05', 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
-                   ('DevOps Intern', 'job-postings/2.pdf', 4, NOW(), '950.00', '2025-08-15', 5, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
-                   ('CRM Kampagnen', 'job-postings/2.pdf', 2, NOW(), '800.00', '2025-06-18', 4, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
-                   ('Security Audit Support', 'job-postings/2.pdf', 3, NOW(), '950.00', '2025-07-28', 1, 1, 1, 'https://technova.at/jobs/security-audit-support'),
-                   ('SEO Praktikum', 'job-postings/2.pdf', 1, NOW(), '750.00', '2025-06-30', 2, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
+            VALUES ('Softwareentwickler Praktikum', 'job-postings/2.pdf', 2, NOW(), '800.00', NOW() + INTERVAL '30 days', 1, 1, 1, 'https://technova.at/karriere/softwareentwickler-praktikum'),
+                   ('Frontend Entwickler', 'job-postings/2pdf', 3, NOW(), '850.00', NOW() + INTERVAL '30 days', 2, 2, 2, 'https://greenfuture.at/jobs/frontend-entwickler'),
+                   ('Data Analyst Praktikum', 'job-postings/2.pdf', 2, NOW(), '900.00', NOW() + INTERVAL '30 days', 7, 1, 1, 'https://medicare.at/praktikum/data-analyst'),
+                   ('Marketing Assistant', 'job-postings/2.pdf', 1, NOW(), '750.00', NOW() + INTERVAL '30 days', 4, 2, 3, 'https://edulearn.at/jobs/marketing-assistant'),
+                   ('Health App Tester', 'job-postings/2.pdf', 3, NOW(), '700.00', NOW() + INTERVAL '30 days', 3, 1, 1, 'https://autodrive.at/karriere/health-app-tester'),
+                   ('E-Learning Content Creator', 'job-postings/2.pdf', 2, NOW(), '800.00', NOW() + INTERVAL '30 days', 4, 2, 2, 'https://buildtech.at/jobs/e-learning-content-creator'),
+                   ('Fahrzeugsimulation Praktikum', 'job-postings/2.pdf', 4, NOW(), '1000.00', NOW() + INTERVAL '30 days', 5, 1, 2, 'https://dataocean.at/praktikum/fahrzeugsimulation'),
+                   ('Smart Building Testing', 'job-postings/2.pdf', 2, NOW(), '850.00', NOW() + INTERVAL '30 days', 6, 2, 3, 'https://technova.at/jobs/smart-building-testing'),
+                   ('Machine Learning Assistant', 'job-postings/2.pdf', 3, NOW(), '950.00', NOW() + INTERVAL '30 days', 7, 1, 1, 'https://greenfuture.at/karriere/machine-learning-assistant'),
+                   ('Webdesign Praktikum', 'job-postings/2.pdf', 1, NOW(), '700.00', NOW() + INTERVAL '30 days', 2, 2, 2, 'https://medicare.at/jobs/webdesign-praktikum'),
+                   ('Backoffice Assistant', 'job-postings/2.pdf', 2, NOW(), '650.00', NOW() + INTERVAL '30 days', 1, 1, 3, 'https://technova.at/jobs/backoffice-assistant'),
+                   ('UX Research Praktikum', 'job-postings/2.pdf', 3, NOW(), '800.00', NOW() + INTERVAL '30 days', 3, 1, 2, 'https://greenfuture.at/karriere/ux-research'),
+                   ('Energieoptimierung Praktikum', 'job-postings/2.pdf', 2, NOW(), '850.00', NOW() + INTERVAL '30 days', 2, 2, 1, 'https://medicare.at/praktikum/energieoptimierung'),
+                   ('Cloud Infrastruktur Praktikum', 'job-postings/2.pdf', 3, NOW(), '1000.00', NOW() + INTERVAL '30 days', 7, 1, 3, 'https://edulearn.at/jobs/cloud-infrastruktur-praktikum'),
+                   ('Technischer Redakteur', 'job-postings/2.pdf', 1, NOW(), '700.00', NOW() + INTERVAL '30 days', 6, 2, 2, 'https://autodrive.at/karriere/technischer-redakteur'),
+                   ('App-Entwicklung iOS', 'job-postings/2.pdf', 3, NOW(), '900.00', NOW() + INTERVAL '30 days', 3, 1, 1, 'https://buildtech.at/jobs/app-entwicklung-ios'),
+                   ('DevOps Intern', 'job-postings/2.pdf', 4, NOW(), '950.00', NOW() + INTERVAL '30 days', 5, 1, 2, 'https://dataocean.at/jobs/devops-intern'),
+                   ('CRM Kampagnen', 'job-postings/2.pdf', 2, NOW(), '800.00', NOW() + INTERVAL '30 days', 4, 2, 2, 'https://edulearn.at/karriere/crm-kampagnen'),
+                   ('Security Audit Support', 'job-postings/2.pdf', 3, NOW(), NOW() + INTERVAL '30 days', '2025-07-28', 1, 1, 1, 'https://technova.at/jobs/security-audit-support'),
+                   ('SEO Praktikum', 'job-postings/2.pdf', 1, NOW(), '750.00', NOW() + INTERVAL '30 days', 2, 2, 3, 'https://greenfuture.at/jobs/seo-praktikum');
 
             -- Abteilungen zu Praktika
             INSERT INTO internship_department_map (internship_id, department_id)
