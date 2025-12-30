@@ -1,0 +1,93 @@
+= Besprechungsprotokoll 04.12.2025
+firstname lastname
+1.0, {docdate}: Some notes
+ifndef::imagesdir[:imagesdir: images]
+:icons: font
+//:sectnums:    // Nummerierung der Überschriften / section numbering
+//:toc: left
+
+
+
+
+.Teilnehmer
+|===
+|anwesend (Vorname Nachname)
+
+|Melanie Bauer
+
+|Flora Dallinger
+
+|Katharina Einzenberger
+|===
+
+.Ort und Zeit
+[cols=2*]
+|===
+|Ort
+|Online Meeting
+
+|von-bis
+|Di. 30.12.2025
+|Dauer
+|50 min
+|===
+
+
+
+== Besprochene Themen (Allgemein)
+
+* Deployment der Anwendung mit *Kubernetes*
+* Aufbau einer *automatisierten Build- und Deployment-Pipeline* über *GitHub*
+
+== Backend
+
+Folgende Punkte wurden für das Backend besprochen bzw. festgelegt:
+
+* Absicherung der Routen
+* Vereinheitlichung der Routenstruktur
+* Überarbeitung des Uploads von *PDFs und Bildern*
+* Einführung bzw. Optimierung von *Middleware*
+* Einführung einer *API-Versionierung*
+* Stärkere Integration von *Keycloak* ins Backend
+* Automatisches Handling von *Praktika*:
+** Automatisches Löschen nach *2 Wochen Inaktivität*
+** Einsatz eines Crawlers für Praktikumsangebote
+*** Wenn kein Angebot mehr gefunden wird, wird das Praktikum auf *inaktiv* gesetzt
+*** Inaktive Praktika sind *wieder aktivierbar*
+*** Nach weiteren *2 Wochen Inaktivität* erfolgt die endgültige Löschung
+* Verbesserung der *E-Mail-Versendung*
+* Zusätzliche Benachrichtigungs-E-Mails:
+** Bei Kontoaktivierung
+** Bei Inaktivsetzung von Praktika
+* Serverseitiges Laden des *Paginators*
+* Evaluierung eines Wechsels von *Express (Node.js)* zu *C#*
+
+== Frontend
+
+Für das Frontend wurden folgende Punkte definiert:
+
+* Austausch bzw. Anpassung der Routen
+* Umsetzung einer Übersichtsseite für *Unternehmen* mit automatischer Rotation  
+  (z. B. Anzeige auf einem Fernseher in der Schule)
+* Erweiterung der Plattform für weitere Angebotsarten:
+** Lehren
+** Universitäten
+** Jobs
+** Weitere Bildungs- und Karrieremöglichkeiten
+* Implementierung eines *Paginators für Praktika*
+
+== Nächste Schritte / Offene Punkte
+
+* Priorisierung der Backend- und Frontend-Aufgaben
+* Entscheidung zum Technologiewechsel auf *C#*
+* Klärung der Infrastruktur für *Kubernetes* und *CI/CD*
+* Definition der Anforderungen für *Crawler* und *E-Mail-Logik*
+
+== Vereinbarungen und Entscheidungen
+
+.Was wurde vereinbart?
+[%autowidth]
+|===
+|wer |macht was |bis wann
+
+|===
